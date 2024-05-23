@@ -135,11 +135,11 @@ module hciDependencies 'dependencies.bicep' = {
   }
 }
 
-module cluster '../../main.bicep' = {
+module cluster_validate '../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
-  name: 'cluster'
+  name: 'cluster_validate'
   scope: resourceGroup
   params: {
     name: 'hciCluster${uniqueString(deployment().name)}'
@@ -149,6 +149,41 @@ module cluster '../../main.bicep' = {
     clusterName: clusterName
     clusterNodeNames: clusterNodeNames
     defaultGateway: defaultGateway
+    deploymentMode: 'Validate'
+    deploymentPrefix: deploymentPrefix
+    deploymentUserPassword: deploymentUserPassword
+    deploymentUsername: deploymentUsername
+    dnsServers: dnsServers
+    domainFqdn: domainFqdn
+    domainOUPath: domainOUPath
+    endingIPAddress: endingIPAddress
+    enableStorageAutoIp: enableStorageAutoIp
+    hciResourceProviderObjectId: hciResourceProviderObjectId
+    localAdminPassword: localAdminPassword
+    localAdminUsername: localAdminUsername
+    networkIntents: networkIntents
+    startingIPAddress: startingIPAddress
+    storageConnectivitySwitchless: storageConnectivitySwitchless
+    storageNetworks: storageNetworks
+    subnetMask: subnetMask
+  }
+}
+
+module cluster_deploy '../../main.bicep' = {
+  dependsOn: [
+    hciDependencies
+  ]
+  name: 'cluster_deploy'
+  scope: resourceGroup
+  params: {
+    name: 'hciCluster${uniqueString(deployment().name)}'
+    arbDeploymentAppId: arbDeploymentAppId
+    arbDeploymentSPObjectId: arbDeploymentSPObjectId
+    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
+    clusterName: clusterName
+    clusterNodeNames: clusterNodeNames
+    defaultGateway: defaultGateway
+    deploymentMode: 'Deploy'
     deploymentPrefix: deploymentPrefix
     deploymentUserPassword: deploymentUserPassword
     deploymentUsername: deploymentUsername

@@ -137,7 +137,7 @@ param storageNetworks storageNetworksArrayType
 
 var clusterWitnessStorageAccountName = '${deploymentPrefix}witness'
 
-var keyVaultName = '${deploymentPrefix}-hcikv'
+var keyVaultName = 'hcikv-${deploymentPrefix}'
 
 var customLocationName = '${deploymentPrefix}_cl'
 
