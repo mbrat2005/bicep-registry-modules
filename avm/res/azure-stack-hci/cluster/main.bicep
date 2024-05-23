@@ -11,11 +11,10 @@ param location string = resourceGroup().location
 @sys.description('Optional. Tags of the resource.')
 param tags object?
 
-@description('First must pass with this parameter set to Validate prior running with it set to Deploy. If either Validation or Deployment phases fail, fix the issue, then resubmit the template with the same deploymentMode to retry. Use LocksOnly if the deployment was not completed by executing this template (for example, if the Re-run Deployment option from the Portal was used instead).')
+@description('First must pass with this parameter set to Validate prior running with it set to Deploy. If either Validation or Deployment phases fail, fix the issue, then resubmit the template with the same deploymentMode to retry.')
 @allowed([
   'Validate'
   'Deploy'
-  'LocksOnly'
 ])
 param deploymentMode string = 'Validate'
 
@@ -75,20 +74,6 @@ param softDeleteRetentionDays int = 30
 @maxValue(365)
 param logsRetentionInDays int = 30
 
-// cluster security configuration settings
-type securityConfigurationType = {
-  hvciProtection: bool
-  drtmProtection: bool
-  driftControlEnforced: bool
-  credentialGuardEnforced: bool
-  smbSigningEnforced: bool
-  smbClusterEncryption: bool
-  sideChannelMitigationEnforced: bool
-  bitlockerBootVolume: bool
-  bitlockerDataVolumes: bool
-  wdacEnforced: bool
-}
-
 @description('Security configuration settings object')
 param securityConfiguration securityConfigurationType = {
   hvciProtection: true
@@ -138,6 +123,8 @@ param endingIPAddress string
 @description('The DNS servers for deploying a HCI cluster')
 param dnsServers array
 
+param networkIntents networkIntent[]
+
 // define network intent for the cluster
 @description('The storage connectivity switchless value for deploying a HCI cluster (less common)')
 param storageConnectivitySwitchless bool
@@ -145,47 +132,14 @@ param storageConnectivitySwitchless bool
 @description('The enable storage auto IP value for deploying a HCI cluster - this should be true for most deployments except when deploying a three-node switchless cluster, in which case storage IPs should be configured before deployment and this value set to false')
 param enableStorageAutoIp bool = true
 
-// define custom type for storage adapter IP info for 3-node switchless deployments
-type storageAdapterIPInfoType = {
-  physicalNode: string
-  ipv4Address: string
-  subnetMask: string
-}
-
-// define custom type for storage network objects
-type storageNetworksType = {
-  adapterName: string
-  vlan: string
-  storageAdapterIPInfo: storageAdapterIPInfoType[]? // optional for non-switchless deployments
-}
-type storageNetworksArrayType = storageNetworksType[]
-
 @description('An array of JSON objects that define the storage network configuration for the cluster. Each object should contain the adapterName and vlan properties.')
 param storageNetworks storageNetworksArrayType
-
-@description('An array of Network Adapter names present on every cluster node intended for compute traffic')
-param computeIntentAdapterNames array
-
-@description('An array of Network Adapter names present on every cluster node intended for management traffic')
-param managementIntentAdapterNames array
 
 var clusterWitnessStorageAccountName = '${deploymentPrefix}witness'
 
 var keyVaultName = '${deploymentPrefix}-hcikv'
+
 var customLocationName = '${deploymentPrefix}_cl'
-
-var storageNetworkList = [
-  for (storageAdapter, index) in storageNetworks: {
-    name: 'StorageNetwork${index + 1}'
-    networkAdapterName: storageAdapter.adapterName
-    vlanId: storageAdapter.vlan
-    storageAdapterIPInfo: storageAdapter.?storageAdapterIPInfo
-  }
-]
-
-var arcNodeResourceIds = [
-  for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
-]
 
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
@@ -218,7 +172,85 @@ resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' = if (dep
   }
   location: location
   properties: {}
-  dependsOn: [
-    ashciPreReqResources
-  ]
+}
+
+module deploymentSetting 'deployment-settings/main.bicep' = {
+  name: 'deploymentSettings'
+  params: {
+    clusterName: clusterName
+    clusterNodeNames: clusterNodeNames
+    clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
+    customLocationName: customLocationName
+    defaultGateway: defaultGateway
+    deploymentMode: deploymentMode
+    deploymentPrefix: deploymentPrefix
+    dnsServers: dnsServers
+    domainFqdn: domainFqdn
+    domainOUPath: domainOUPath
+    enableStorageAutoIp: enableStorageAutoIp
+    endingIPAddress: endingIPAddress
+    episodicDataUpload: episodicDataUpload
+    isEuropeanUnionLocation: isEuropeanUnionLocation
+    keyVaultName: keyVaultName
+    networkIntents: networkIntents
+    securityConfiguration: securityConfiguration
+    startingIPAddress: startingIPAddress
+    storageConfigurationMode: storageConfigurationMode
+    storageConnectivitySwitchless: storageConnectivitySwitchless
+    storageNetworks: storageNetworks
+    streamingDataClient: streamingDataClient
+    subnetMask: subnetMask
+  }
+}
+
+type networkIntent = {
+  adapter: string[]
+  name: string
+  overrideAdapterProperty: bool
+  adapterPropertyOverrides: {
+    jumboPacket: string
+    networkDirect: string
+    networkDirectTechnology: string
+  }
+  overrideQosPolicy: bool
+  qosPolicyOverrides: {
+    bandwidthPercentage_SMB: string
+    priorityValue8021Action_Cluster: string
+    priorityValue8021Action_SMB: string
+  }
+  overrideVirtualSwitchConfiguration: bool
+  virtualSwitchConfigurationOverrides: {
+    enableIov: string
+    loadBalancingAlgorithm: string
+  }
+  trafficType: string[]
+}
+
+// define custom type for storage adapter IP info for 3-node switchless deployments
+type storageAdapterIPInfoType = {
+  physicalNode: string
+  ipv4Address: string
+  subnetMask: string
+}
+
+// define custom type for storage network objects
+type storageNetworksType = {
+  adapterName: string
+  vlan: string
+  storageAdapterIPInfo: storageAdapterIPInfoType[]? // optional for non-switchless deployments
+}
+type storageNetworksArrayType = storageNetworksType[]
+
+// cluster security configuration settings
+type securityConfigurationType = {
+  hvciProtection: bool
+  drtmProtection: bool
+  driftControlEnforced: bool
+  credentialGuardEnforced: bool
+  smbSigningEnforced: bool
+  smbClusterEncryption: bool
+  sideChannelMitigationEnforced: bool
+  bitlockerBootVolume: bool
+  bitlockerDataVolumes: bool
+  wdacEnforced: bool
 }

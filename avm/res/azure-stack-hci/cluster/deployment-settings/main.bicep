@@ -1,17 +1,43 @@
 param deploymentMode string
-param arcNodeResourceIds array = []
-param cluster object
+param clusterName string
 param securityConfiguration object
-param streamingDataClient string
+param streamingDataClient bool
 param isEuropeanUnionLocation bool
 param episodicDataUpload bool
-param clusterName string
 param clusterWitnessStorageAccountName string
 param storageConfigurationMode string
 param deploymentPrefix string
 param domainFqdn string
 param subnetMask string
 param defaultGateway string
+param clusterNodeNames array
+param startingIPAddress string
+param endingIPAddress string
+param dnsServers array
+param storageNetworks array
+param storageConnectivitySwitchless bool
+param enableStorageAutoIp bool
+param domainOUPath string
+param keyVaultName string
+param customLocationName string
+param networkIntents array
+
+var arcNodeResourceIds = [
+  for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
+]
+
+var storageNetworkList = [
+  for (storageAdapter, index) in storageNetworks: {
+    name: 'StorageNetwork${index + 1}'
+    networkAdapterName: storageAdapter.adapterName
+    vlanId: storageAdapter.vlan
+    storageAdapterIPInfo: storageAdapter.?storageAdapterIPInfo
+  }
+]
+
+resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' existing = {
+  name: clusterName
+}
 
 resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings@2024-02-15-preview' = if (deploymentMode != 'LocksOnly') {
   name: 'default'
@@ -76,85 +102,12 @@ resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings
                 // the management NIC in parameter file to 'vManagement(managment)'
                 ipv4Address: (filter(
                   reference('${hciNode}/providers/microsoft.azurestackhci/edgeDevices/default', '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails,
-                  nic => nic.adapterName == managementIntentAdapterNames[0]
+                  nic => nic.defaultGateway != null
                 ))[0].ip4Address
               }
             ]
             hostNetwork: {
-              intents: [
-                {
-                  adapter: managementIntentAdapterNames
-                  name: 'managment'
-                  overrideAdapterProperty: false
-                  adapterPropertyOverrides: {
-                    jumboPacket: '9014'
-                    networkDirect: 'Enabled'
-                    networkDirectTechnology: 'RoCEv2'
-                  }
-                  overrideQosPolicy: false
-                  qosPolicyOverrides: {
-                    bandwidthPercentage_SMB: '50'
-                    priorityValue8021Action_Cluster: '7'
-                    priorityValue8021Action_SMB: '3'
-                  }
-                  overrideVirtualSwitchConfiguration: false
-                  virtualSwitchConfigurationOverrides: {
-                    enableIov: ''
-                    loadBalancingAlgorithm: ''
-                  }
-                  trafficType: [
-                    'Management'
-                  ]
-                }
-                {
-                  adapter: computeIntentAdapterNames
-                  name: 'compute'
-                  overrideAdapterProperty: false
-                  adapterPropertyOverrides: {
-                    jumboPacket: '9014'
-                    networkDirect: 'Enabled'
-                    networkDirectTechnology: 'RoCEv2'
-                  }
-                  overrideQosPolicy: false
-                  qosPolicyOverrides: {
-                    bandwidthPercentage_SMB: '50'
-                    priorityValue8021Action_Cluster: '7'
-                    priorityValue8021Action_SMB: '3'
-                  }
-                  overrideVirtualSwitchConfiguration: false
-                  virtualSwitchConfigurationOverrides: {
-                    enableIov: ''
-                    loadBalancingAlgorithm: 'Dynamic'
-                  }
-                  trafficType: [
-                    'Compute'
-                  ]
-                }
-                {
-                  adapter: [for storageNetwork in storageNetworks: storageNetwork.adapterName]
-                  name: 'storage'
-                  overrideAdapterProperty: false
-                  adapterPropertyOverrides: {
-                    jumboPacket: '9014'
-                    networkDirect: 'Enabled'
-                    networkDirectTechnology: 'RoCEv2'
-                  }
-                  overrideQosPolicy: false
-                  qosPolicyOverrides: {
-                    bandwidthPercentage_SMB: '50'
-                    priorityValue8021Action_Cluster: '7'
-                    priorityValue8021Action_SMB: '3'
-                  }
-                  overrideVirtualSwitchConfiguration: false
-                  virtualSwitchConfigurationOverrides: {
-                    enableIov: ''
-                    loadBalancingAlgorithm: ''
-                  }
-                  trafficType: [
-                    'Storage'
-                  ]
-                }
-              ]
+              intents: networkIntents
               storageConnectivitySwitchless: storageConnectivitySwitchless
               storageNetworks: storageNetworkList
               enableStorageAutoIp: enableStorageAutoIp
