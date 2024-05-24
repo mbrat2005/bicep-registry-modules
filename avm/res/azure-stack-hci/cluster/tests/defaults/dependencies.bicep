@@ -5,6 +5,9 @@ param deploymentPrefix string
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
 
+@secure()
+param deploymentUserPassword string
+
 param localAdminUsername string = 'admin-hci'
 
 @secure()
@@ -65,7 +68,7 @@ module hciClusterPreqs '../modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep'
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
-    deploymentUserPassword: deploymentUsername
+    deploymentUserPassword: deploymentUserPassword
     hciResourceProviderObjectId: hciResourceProviderObjectId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword

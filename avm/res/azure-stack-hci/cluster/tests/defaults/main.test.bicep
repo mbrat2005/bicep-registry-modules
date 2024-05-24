@@ -131,6 +131,7 @@ module hciDependencies 'dependencies.bicep' = {
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     deploymentPrefix: deploymentPrefix
+    deploymentUserPassword: deploymentUserPassword
     hciResourceProviderObjectId: hciResourceProviderObjectId
     localAdminPassword: localAdminPassword
   }
