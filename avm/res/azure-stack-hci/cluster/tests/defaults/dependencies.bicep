@@ -3,12 +3,12 @@
 param deploymentPrefix string
 
 // credentials for the deployment and ongoing lifecycle management
-param deploymentUsername string = 'deployUser'
+param deploymentUsername string
 
 @secure()
 param deploymentUserPassword string
 
-param localAdminUsername string = 'admin-hci'
+param localAdminUsername string
 
 @secure()
 param localAdminPassword string

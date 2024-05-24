@@ -4,10 +4,10 @@ param name string = 'hcicluster'
 @maxLength(8)
 param deploymentPrefix string = take(uniqueString(deployment().name), 8)
 // credentials for the deployment and ongoing lifecycle management
-param deploymentUsername string = 'deployUser'
+param deploymentUsername string
 @secure()
 param deploymentUserPassword string
-param localAdminUsername string = 'admin-hci'
+param localAdminUsername string
 @secure()
 param localAdminPassword string
 param arbDeploymentAppId string
@@ -127,6 +127,8 @@ module hciDependencies 'dependencies.bicep' = {
   scope: resourceGroup
   params: {
     adminPassword: adminPassword
+    localAdminUsername: localAdminUsername
+    deploymentUsername: deploymentUsername
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
