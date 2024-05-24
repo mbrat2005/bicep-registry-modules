@@ -65,7 +65,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
   }
 }
 
-// Azure Stack HCI Host VM - 
+// Azure Stack HCI Host VM -
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
@@ -177,7 +177,7 @@ resource wait1 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   properties: {
     azPowerShellVersion: '3.0'
     scriptContent: 'Start-Sleep -Seconds 90'
-    retentionInterval: 'PT60M'
+    retentionInterval: 'PT6H'
   }
   dependsOn: [runCommand2]
 }
@@ -226,7 +226,7 @@ resource wait2 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   properties: {
     azPowerShellVersion: '3.0'
     scriptContent: 'Start-Sleep -Seconds 300 #enough time for AD start-up'
-    retentionInterval: 'PT60M'
+    retentionInterval: 'PT6H'
   }
   dependsOn: [runCommand4]
 }

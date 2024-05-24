@@ -2,7 +2,7 @@ targetScope = 'subscription'
 param name string = 'hcicluster'
 @minLength(4)
 @maxLength(8)
-param deploymentPrefix string = take(uniqueString(utcNow()), 8)
+param deploymentPrefix string = take(uniqueString(deployment().name), 8)
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
 @secure()
@@ -36,15 +36,15 @@ param networkIntents networkIntent[] = [
     name: 'management'
     overrideAdapterProperty: false
     adapterPropertyOverrides: {
-      jumboPacket: '9216'
-      networkDirect: 'RDMA'
+      jumboPacket: '9014'
+      networkDirect: 'Enabled'
       networkDirectTechnology: 'RoCEv2'
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
       bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '3'
-      priorityValue8021Action_SMB: '4'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -58,15 +58,15 @@ param networkIntents networkIntent[] = [
     name: 'compute'
     overrideAdapterProperty: false
     adapterPropertyOverrides: {
-      jumboPacket: '9216'
-      networkDirect: 'RDMA'
+      jumboPacket: '9014'
+      networkDirect: 'Enabled'
       networkDirectTechnology: 'RoCEv2'
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
       bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '3'
-      priorityValue8021Action_SMB: '4'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -80,15 +80,15 @@ param networkIntents networkIntent[] = [
     name: 'storage'
     overrideAdapterProperty: true
     adapterPropertyOverrides: {
-      jumboPacket: '9216'
-      networkDirect: 'RDMA'
+      jumboPacket: '9014'
+      networkDirect: 'Enabled'
       networkDirectTechnology: 'RoCEv2'
     }
     overrideQosPolicy: true
     qosPolicyOverrides: {
       bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '3'
-      priorityValue8021Action_SMB: '4'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -118,7 +118,7 @@ param storageNetworks storageNetworksArrayType = [
 param adminPassword string
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: 'rg-hcipipe${uniqueString(deployment().name)}'
+  name: 'rg-hcipipe${deploymentPrefix}'
   location: 'eastus'
 }
 
@@ -130,6 +130,7 @@ module hciDependencies 'dependencies.bicep' = {
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
+    deploymentPrefix: deploymentPrefix
     hciResourceProviderObjectId: hciResourceProviderObjectId
     localAdminPassword: localAdminPassword
   }
@@ -172,6 +173,7 @@ module cluster_validate '../../main.bicep' = {
 module cluster_deploy '../../main.bicep' = {
   dependsOn: [
     hciDependencies
+    cluster_validate
   ]
   name: 'cluster_deploy'
   scope: resourceGroup

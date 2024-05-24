@@ -102,7 +102,7 @@ resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings
                 // the management NIC in parameter file to 'vManagement(managment)'
                 ipv4Address: (filter(
                   reference('${hciNode}/providers/microsoft.azurestackhci/edgeDevices/default', '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails,
-                  nic => nic.defaultGateway != null
+                  nic => nic.?defaultGateway != null
                 ))[0].ip4Address
               }
             ]

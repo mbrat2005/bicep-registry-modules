@@ -138,7 +138,7 @@ resource SPConnectedMachineResourceManagerRolePermissions 'Microsoft.Authorizati
 
 resource NodeAzureConnectedMachineResourceManagerRolePermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for hciNode in arcNodeResourceIds: {
-    name: guid(hciNode, azureConnectedMachineResourceManagerRoleID)
+    name: guid(resourceGroup().id, hciNode, azureConnectedMachineResourceManagerRoleID)
     properties: {
       roleDefinitionId: azureConnectedMachineResourceManagerRoleID
       principalId: reference(hciNode, '2023-10-03-preview', 'Full').identity.principalId
@@ -149,7 +149,7 @@ resource NodeAzureConnectedMachineResourceManagerRolePermissions 'Microsoft.Auth
 ]
 resource NodeazureStackHCIDeviceManagementRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for hciNode in arcNodeResourceIds: {
-    name: guid(hciNode, azureStackHCIDeviceManagementRole)
+    name: guid(resourceGroup().id, hciNode, azureStackHCIDeviceManagementRole)
     properties: {
       roleDefinitionId: azureStackHCIDeviceManagementRole
       principalId: reference(hciNode, '2023-10-03-preview', 'Full').identity.principalId
@@ -161,7 +161,7 @@ resource NodeazureStackHCIDeviceManagementRole 'Microsoft.Authorization/roleAssi
 
 resource NodereaderRoleIDPermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for hciNode in arcNodeResourceIds: {
-    name: guid(hciNode, readerRoleID)
+    name: guid(resourceGroup().id, hciNode, readerRoleID)
     properties: {
       roleDefinitionId: readerRoleID
       principalId: reference(hciNode, '2023-10-03-preview', 'Full').identity.principalId
@@ -173,7 +173,7 @@ resource NodereaderRoleIDPermissions 'Microsoft.Authorization/roleAssignments@20
 
 resource KeyVaultSecretsUserPermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for hciNode in arcNodeResourceIds: {
-    name: guid(hciNode, keyVaultSecretUserRoleID)
+    name: guid(resourceGroup().id, hciNode, keyVaultSecretUserRoleID)
     scope: keyVault
     properties: {
       roleDefinitionId: keyVaultSecretUserRoleID

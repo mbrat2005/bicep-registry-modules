@@ -1,6 +1,6 @@
 @minLength(4)
 @maxLength(8)
-param deploymentPrefix string = take(uniqueString(utcNow()), 8)
+param deploymentPrefix string
 
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
@@ -40,7 +40,7 @@ var arcNodeResourceIds = [
 
 var clusterWitnessStorageAccountName = '${deploymentPrefix}witness'
 
-var keyVaultName = '${deploymentPrefix}-hcikv'
+var keyVaultName = 'kvhci-${deploymentPrefix}'
 var tenantId = subscription().tenantId
 
 module hciHostDeployment '../modules/azureStackHCIHost/hciHostDeployment.bicep' = {
