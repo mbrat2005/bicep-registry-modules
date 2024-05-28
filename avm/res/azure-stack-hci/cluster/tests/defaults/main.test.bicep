@@ -146,25 +146,16 @@ module cluster_validate '../../main.bicep' = {
   name: 'cluster_validate'
   scope: resourceGroup
   params: {
-    name: 'hciCluster${uniqueString(deployment().name)}'
-    arbDeploymentAppId: arbDeploymentAppId
-    arbDeploymentSPObjectId: arbDeploymentSPObjectId
-    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
-    clusterName: clusterName
+    name: clusterName
     clusterNodeNames: clusterNodeNames
     defaultGateway: defaultGateway
     deploymentMode: 'Validate'
     deploymentPrefix: deploymentPrefix
-    deploymentUserPassword: deploymentUserPassword
-    deploymentUsername: deploymentUsername
     dnsServers: dnsServers
     domainFqdn: domainFqdn
     domainOUPath: domainOUPath
     endingIPAddress: endingIPAddress
     enableStorageAutoIp: enableStorageAutoIp
-    hciResourceProviderObjectId: hciResourceProviderObjectId
-    localAdminPassword: localAdminPassword
-    localAdminUsername: localAdminUsername
     networkIntents: networkIntents
     startingIPAddress: startingIPAddress
     storageConnectivitySwitchless: storageConnectivitySwitchless
@@ -181,25 +172,16 @@ module cluster_deploy '../../main.bicep' = {
   name: 'cluster_deploy'
   scope: resourceGroup
   params: {
-    name: 'hciCluster${uniqueString(deployment().name)}'
-    arbDeploymentAppId: arbDeploymentAppId
-    arbDeploymentSPObjectId: arbDeploymentSPObjectId
-    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
-    clusterName: clusterName
+    name: clusterName
     clusterNodeNames: clusterNodeNames
     defaultGateway: defaultGateway
     deploymentMode: 'Deploy'
     deploymentPrefix: deploymentPrefix
-    deploymentUserPassword: deploymentUserPassword
-    deploymentUsername: deploymentUsername
     dnsServers: dnsServers
     domainFqdn: domainFqdn
     domainOUPath: domainOUPath
     endingIPAddress: endingIPAddress
     enableStorageAutoIp: enableStorageAutoIp
-    hciResourceProviderObjectId: hciResourceProviderObjectId
-    localAdminPassword: localAdminPassword
-    localAdminUsername: localAdminUsername
     networkIntents: networkIntents
     startingIPAddress: startingIPAddress
     storageConnectivitySwitchless: storageConnectivitySwitchless

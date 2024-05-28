@@ -1,26 +1,26 @@
-param deploymentMode string
 param clusterName string
-param securityConfiguration object
-param streamingDataClient bool
-param isEuropeanUnionLocation bool
-param episodicDataUpload bool
-param clusterWitnessStorageAccountName string
-param storageConfigurationMode string
-param deploymentPrefix string
-param domainFqdn string
-param subnetMask string
-param defaultGateway string
 param clusterNodeNames array
-param startingIPAddress string
-param endingIPAddress string
-param dnsServers array
-param storageNetworks array
-param storageConnectivitySwitchless bool
-param enableStorageAutoIp bool
-param domainOUPath string
-param keyVaultName string
+param clusterWitnessStorageAccountName string
 param customLocationName string
+param defaultGateway string
+param deploymentMode string
+param deploymentPrefix string
+param dnsServers array
+param domainFqdn string
+param domainOUPath string
+param enableStorageAutoIp bool
+param endingIPAddress string
+param episodicDataUpload bool
+param isEuropeanUnionLocation bool
+param keyVaultName string
 param networkIntents array
+param securityConfiguration object
+param startingIPAddress string
+param storageConfigurationMode string
+param storageConnectivitySwitchless bool
+param storageNetworks array
+param streamingDataClient bool
+param subnetMask string
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)

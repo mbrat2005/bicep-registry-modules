@@ -1,4 +1,4 @@
-param location string = 'westus3' // all resource except HCI Arc Nodes + HCI resources, which will be in eastus
+param location string // all resource except HCI Arc Nodes + HCI resources, which will be in eastus
 param vnetSubnetID string = '' // use to connect the HCI Azure Host VM to an existing VNET in the same region
 param useSpotVM bool = false // change to false to use regular priority VM
 param hostVMSize string = 'Standard_E32bds_v5' // Azure VM size for the HCI Host VM - must support nested virtualization and have sufficient capacity for the HCI node VMs!
@@ -12,9 +12,6 @@ param adminPassword string
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
   location: location
   name: 'hciHost01Identity'
-  properties: {
-    tenantId: subscription().tenantId
-  }
 }
 
 // grant identity owner permissions on the subscription
