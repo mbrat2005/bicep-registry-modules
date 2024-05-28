@@ -1,5 +1,5 @@
 targetScope = 'subscription'
-param name string = 'hcicluster'
+param name string
 @minLength(4)
 @maxLength(8)
 param deploymentPrefix string = take(uniqueString(deployment().name), 8)
@@ -18,11 +18,7 @@ param hciResourceProviderObjectId string
 // cluster and active directory settings
 @maxLength(15)
 @minLength(4)
-param clusterName string = name
-param clusterNodeNames array = [
-  'hciNode1'
-  'hciNode2'
-]
+param clusterNodeNames array
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
 param subnetMask string = '255.255.255.0'
@@ -127,15 +123,16 @@ module hciDependencies 'dependencies.bicep' = {
   scope: resourceGroup
   params: {
     adminPassword: adminPassword
-    localAdminUsername: localAdminUsername
-    deploymentUsername: deploymentUsername
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
+    clusterNodeNames: clusterNodeNames
     deploymentPrefix: deploymentPrefix
+    deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
     hciResourceProviderObjectId: hciResourceProviderObjectId
     localAdminPassword: localAdminPassword
+    localAdminUsername: localAdminUsername
   }
 }
 
@@ -146,7 +143,7 @@ module cluster_validate '../../main.bicep' = {
   name: 'cluster_validate'
   scope: resourceGroup
   params: {
-    name: clusterName
+    name: name
     clusterNodeNames: clusterNodeNames
     defaultGateway: defaultGateway
     deploymentMode: 'Validate'
@@ -172,7 +169,7 @@ module cluster_deploy '../../main.bicep' = {
   name: 'cluster_deploy'
   scope: resourceGroup
   params: {
-    name: clusterName
+    name: name
     clusterNodeNames: clusterNodeNames
     defaultGateway: defaultGateway
     deploymentMode: 'Deploy'

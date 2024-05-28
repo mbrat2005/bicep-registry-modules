@@ -17,7 +17,7 @@ Function log {
     If (!(Test-Path -Path C:\temp)) {
         New-Item -Path C:\temp -ItemType Directory
     }
-    
+
     Write-Host $message
     Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
 }
@@ -42,9 +42,10 @@ While (($arcMachines = Get-AzConnectedMachine -ResourceGroupName $resourceGroupN
     Start-Sleep -Seconds 30
 }
 
-log "Waiting for HCI Arc Machine extensions to be installed..."
+log "Waiting up to one hour for HCI Arc Machine extensions to be installed..."
+$timer = [System.Diagnostics.Stopwatch]::StartNew()
 $allExtensionsReady = $false
-while (!$allExtensionsReady) {
+while (!$allExtensionsReady -and $timer.Elapsed.TotalMinutes -lt 60) {
     $allExtensionsReadyCheck = $true
     foreach ($arcMachine in $arcMachines) {
         $extensions = Get-AzConnectedMachineExtension -ResourceGroupName $resourceGroupName -MachineName $arcMachine.Name
