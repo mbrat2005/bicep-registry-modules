@@ -15,9 +15,6 @@ param arbDeploymentSPObjectId string
 @secure()
 param arbDeploymentServicePrincipalSecret string
 param hciResourceProviderObjectId string
-// cluster and active directory settings
-@maxLength(15)
-@minLength(4)
 param clusterNodeNames array
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
