@@ -30,7 +30,7 @@ var clusterWitnessStorageAccountName = '${deploymentPrefix}witness'
 var keyVaultName = 'kvhci-${deploymentPrefix}'
 var tenantId = subscription().tenantId
 
-module hciHostDeployment '../modules/azureStackHCIHost/hciHostDeployment.bicep' = {
+module hciHostDeployment '../../modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: 'hciHostDeployment'
   params: {
     location: 'eastus'
@@ -38,7 +38,7 @@ module hciHostDeployment '../modules/azureStackHCIHost/hciHostDeployment.bicep' 
   }
 }
 
-module hciClusterPreqs '../modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
+module hciClusterPreqs '../../modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
   dependsOn: [
     hciHostDeployment
   ]

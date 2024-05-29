@@ -115,7 +115,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   location: 'eastus'
 }
 
-module hciDependencies 'dependencies.bicep' = {
+module hciDependencies './dependencies.bicep' = {
   name: 'hciDependencies'
   scope: resourceGroup
   params: {
@@ -133,7 +133,7 @@ module hciDependencies 'dependencies.bicep' = {
   }
 }
 
-module cluster_validate '../../main.bicep' = {
+module cluster_validate '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
@@ -158,7 +158,7 @@ module cluster_validate '../../main.bicep' = {
   }
 }
 
-module cluster_deploy '../../main.bicep' = {
+module cluster_deploy '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
     cluster_validate
