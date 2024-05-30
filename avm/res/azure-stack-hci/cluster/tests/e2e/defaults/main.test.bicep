@@ -4,10 +4,10 @@ param name string
 @maxLength(8)
 param deploymentPrefix string = take(uniqueString(deployment().name), 8)
 // credentials for the deployment and ongoing lifecycle management
-param deploymentUsername string
+param deploymentUsername string = 'deployUser'
 @secure()
 param deploymentUserPassword string
-param localAdminUsername string
+param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
 param arbDeploymentAppId string
@@ -15,7 +15,7 @@ param arbDeploymentSPObjectId string
 @secure()
 param arbDeploymentServicePrincipalSecret string
 param hciResourceProviderObjectId string
-param clusterNodeNames array
+param clusterNodeNames array = ['hcinode1', 'hcinode2']
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
 param subnetMask string = '255.255.255.0'
@@ -92,11 +92,8 @@ param networkIntents networkIntent[] = [
   }
 ]
 
-// define network intent for the cluster
 param storageConnectivitySwitchless bool = false
-
 param enableStorageAutoIp bool = true
-
 param storageNetworks storageNetworksArrayType = [
   {
     adapterName: 'smb0'
@@ -107,8 +104,6 @@ param storageNetworks storageNetworksArrayType = [
     vlan: '712'
   }
 ]
-@secure()
-param adminPassword string
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: 'rg-hcipipe${deploymentPrefix}'
@@ -119,7 +114,6 @@ module hciDependencies './dependencies.bicep' = {
   name: 'hciDependencies'
   scope: resourceGroup
   params: {
-    adminPassword: adminPassword
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId

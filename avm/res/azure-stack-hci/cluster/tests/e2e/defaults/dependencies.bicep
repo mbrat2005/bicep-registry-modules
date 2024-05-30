@@ -1,7 +1,6 @@
 @minLength(4)
 @maxLength(8)
 param deploymentPrefix string
-// credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string
 @secure()
 param deploymentUserPassword string
@@ -14,13 +13,10 @@ param arbDeploymentSPObjectId string
 param arbDeploymentServicePrincipalSecret string
 param hciResourceProviderObjectId string
 param clusterNodeNames array
-// retention policy for the Azure Key Vault and Key Vault diagnostics
 param softDeleteRetentionDays int = 30
 @minValue(0)
 @maxValue(365)
 param logsRetentionInDays int = 30
-@secure()
-param adminPassword string
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -34,7 +30,7 @@ module hciHostDeployment '../../modules/azureStackHCIHost/hciHostDeployment.bice
   name: 'hciHostDeployment'
   params: {
     location: 'eastus'
-    adminPassword: adminPassword
+    localAdminPassword: localAdminPassword
   }
 }
 

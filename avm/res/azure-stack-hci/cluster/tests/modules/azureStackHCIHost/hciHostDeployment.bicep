@@ -4,9 +4,9 @@ param useSpotVM bool = false // change to false to use regular priority VM
 param hostVMSize string = 'Standard_E32bds_v5' // Azure VM size for the HCI Host VM - must support nested virtualization and have sufficient capacity for the HCI node VMs!
 param hciNodeCount int = 2 // number of Azure Stack HCI nodes to deploy
 param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
-param adminUsername string = 'admin-hci'
+param localAdminUsername string = 'admin-hci'
 @secure()
-param adminPassword string
+param localAdminPassword string
 
 // vm managed identity used for HCI Arc onboarding
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
@@ -117,8 +117,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
       diskControllerType: 'SCSI'
     }
     osProfile: {
-      adminPassword: adminPassword
-      adminUsername: adminUsername
+      adminPassword: localAdminPassword
+      adminUsername: localAdminUsername
       computerName: 'hciHost01'
       windowsConfiguration: {
         provisionVMAgent: true
@@ -240,11 +240,11 @@ resource runCommand5 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
     parameters: [
       {
         name: 'adminUsername'
-        value: adminUsername
+        value: localAdminUsername
       }
       {
         name: 'adminPw'
-        value: adminPassword
+        value: localAdminPassword
       }
       {
         name: 'hciNodeCount'
@@ -287,11 +287,11 @@ resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       }
       {
         name: 'adminUsername'
-        value: adminUsername
+        value: localAdminPassword
       }
       {
         name: 'adminPw'
-        value: adminPassword
+        value: localAdminPassword
       }
     ]
   }
