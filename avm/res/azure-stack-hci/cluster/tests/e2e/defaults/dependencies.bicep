@@ -1,3 +1,4 @@
+param arbDeploymentAppCredEnd string = dateTimeAdd(utcNow(), 'P7D', 'yyyy-MM-ddTHH:mm:ssZ')
 @minLength(4)
 @maxLength(8)
 param deploymentPrefix string
@@ -7,6 +8,11 @@ param deploymentUserPassword string
 param localAdminUsername string
 @secure()
 param localAdminPassword string
+param arbDeploymentAppId string
+param arbDeploymentSPObjectId string
+@secure()
+param arbDeploymentServicePrincipalSecret string
+param location string
 param clusterNodeNames array
 param softDeleteRetentionDays int = 30
 @minValue(0)
@@ -21,7 +27,7 @@ var clusterWitnessStorageAccountName = '${deploymentPrefix}witness'
 var keyVaultName = 'kvhci-${deploymentPrefix}'
 var tenantId = subscription().tenantId
 
-module hciHostDeployment '../../modules/azureStackHCIHost/hciHostDeployment.bicep' = {
+module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: 'hciHostDeployment'
   params: {
     location: 'eastus'
@@ -29,21 +35,24 @@ module hciHostDeployment '../../modules/azureStackHCIHost/hciHostDeployment.bice
   }
 }
 
-module microsoftGraphResources '../../modules/microsoftGraphResources/main.bicep' = {
+module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = {
   name: 'arbAppRegistration'
-  params: {}
+  params: {
+    arbDeploymentAppCredEnd: arbDeploymentAppCredEnd
+    location: location
+  }
 }
 
-module hciClusterPreqs '../../modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
+module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
   dependsOn: [
     hciHostDeployment
   ]
   name: 'hciClusterPreqs'
   params: {
     location: 'eastus'
-    arbDeploymentAppId: microsoftGraphResources.outputs.servicePrincipalAppId
-    arbDeploymentServicePrincipalSecret: microsoftGraphResources.outputs.servicePrincipalSecret
-    arbDeploymentSPObjectId: microsoftGraphResources.outputs.servicePrincipalId
+    arbDeploymentAppId: arbDeploymentAppId
+    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
+    arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arcNodeResourceIds: arcNodeResourceIds
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     deploymentPrefix: deploymentPrefix

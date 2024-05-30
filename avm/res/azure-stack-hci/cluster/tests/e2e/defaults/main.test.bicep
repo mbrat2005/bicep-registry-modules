@@ -16,6 +16,10 @@ param deploymentUserPassword string = newGuid()
 param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string = newGuid()
+param arbDeploymentAppId string
+param arbDeploymentSPObjectId string
+@secure()
+param arbDeploymentServicePrincipalSecret string
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
@@ -121,6 +125,10 @@ module hciDependencies './dependencies.bicep' = {
     deploymentUserPassword: deploymentUserPassword
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername
+    location: location
+    arbDeploymentAppId: arbDeploymentAppId
+    arbDeploymentSPObjectId: arbDeploymentSPObjectId
+    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
   }
 }
 
