@@ -8,7 +8,8 @@ param name string = 'hcicluster'
 param location string = 'eastus'
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 param serviceShort string = 'ashcdef'
-param deploymentPrefix string = take(uniqueString(deployment().name), 8)
+param namePrefix string = '#_namePrefix_#'
+param deploymentPrefix string = take(namePrefix, 8)
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
 @secure()
