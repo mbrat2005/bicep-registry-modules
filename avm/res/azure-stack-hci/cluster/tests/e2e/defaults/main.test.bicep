@@ -2,7 +2,7 @@ metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched 
 metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
 
 targetScope = 'subscription'
-param name string
+param name string = 'hcicluster'
 @minLength(4)
 @maxLength(8)
 param location string = 'eastus'
@@ -12,15 +12,10 @@ param deploymentPrefix string = take(uniqueString(deployment().name), 8)
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
 @secure()
-param deploymentUserPassword string
+param deploymentUserPassword string = newGuid()
 param localAdminUsername string = 'admin-hci'
 @secure()
-param localAdminPassword string
-param arbDeploymentAppId string
-param arbDeploymentSPObjectId string
-@secure()
-param arbDeploymentServicePrincipalSecret string
-param hciResourceProviderObjectId string
+param localAdminPassword string = newGuid()
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
@@ -120,14 +115,10 @@ module hciDependencies './dependencies.bicep' = {
   name: 'hciDependencies'
   scope: resourceGroup
   params: {
-    arbDeploymentAppId: arbDeploymentAppId
-    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
-    arbDeploymentSPObjectId: arbDeploymentSPObjectId
     clusterNodeNames: clusterNodeNames
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername
   }

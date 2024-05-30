@@ -7,11 +7,6 @@ param deploymentUserPassword string
 param localAdminUsername string
 @secure()
 param localAdminPassword string
-param arbDeploymentAppId string
-param arbDeploymentSPObjectId string
-@secure()
-param arbDeploymentServicePrincipalSecret string
-param hciResourceProviderObjectId string
 param clusterNodeNames array
 param softDeleteRetentionDays int = 30
 @minValue(0)
@@ -34,6 +29,11 @@ module hciHostDeployment '../../modules/azureStackHCIHost/hciHostDeployment.bice
   }
 }
 
+module microsoftGraphResources '../../modules/microsoftGraphResources/main.bicep' = {
+  name: 'arbAppRegistration'
+  params: {}
+}
+
 module hciClusterPreqs '../../modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
   dependsOn: [
     hciHostDeployment
@@ -41,15 +41,15 @@ module hciClusterPreqs '../../modules/azureStackHCIClusterPreqs/ashciPrereqs.bic
   name: 'hciClusterPreqs'
   params: {
     location: 'eastus'
-    arbDeploymentAppId: arbDeploymentAppId
-    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
-    arbDeploymentSPObjectId: arbDeploymentSPObjectId
+    arbDeploymentAppId: microsoftGraphResources.outputs.servicePrincipalAppId
+    arbDeploymentServicePrincipalSecret: microsoftGraphResources.outputs.servicePrincipalSecret
+    arbDeploymentSPObjectId: microsoftGraphResources.outputs.servicePrincipalId
     arcNodeResourceIds: arcNodeResourceIds
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId
+    hciResourceProviderObjectId: microsoftGraphResources.outputs.hciRPServicePrincipalId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername
