@@ -37,7 +37,7 @@ on:
       - "!*/**/README.md"
 
 env:
-  modulePath: "avm/res/api-management/service"
+  modulePath: "avm/res/azure-stack-hci/cluster"
   workflowPath: ".github/workflows/avm.res.azure-stack-hci.cluster.yml"
 
 concurrency:
