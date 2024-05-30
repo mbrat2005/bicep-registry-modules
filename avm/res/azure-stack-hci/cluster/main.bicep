@@ -168,6 +168,10 @@ module deploymentSetting 'deployment-settings/main.bicep' = {
   }
 }
 
+output name string = cluster.name
+output resourceId string = cluster.id
+output systemAssignedMIPrincipalId string = cluster.identity.principalId
+
 type networkIntent = {
   @description('Required. The names of the network adapters to include in the intent.')
   adapter: string[]

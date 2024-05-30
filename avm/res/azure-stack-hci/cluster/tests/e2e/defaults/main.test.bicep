@@ -1,7 +1,13 @@
+metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration'
+metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
+
 targetScope = 'subscription'
 param name string
 @minLength(4)
 @maxLength(8)
+param location string = 'eastus'
+param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
+param serviceShort string = 'ashcdef'
 param deploymentPrefix string = take(uniqueString(deployment().name), 8)
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
@@ -106,8 +112,8 @@ param storageNetworks storageNetworksArrayType = [
 ]
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: 'rg-hcipipe${deploymentPrefix}'
-  location: 'eastus'
+  name: resourceGroupName
+  location: location
 }
 
 module hciDependencies './dependencies.bicep' = {
@@ -131,7 +137,7 @@ module cluster_validate '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
-  name: 'cluster_validate'
+  name: '${uniqueString(deployment().name, location)}-test_clustervalidate-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
@@ -152,12 +158,12 @@ module cluster_validate '../../../main.bicep' = {
   }
 }
 
-module cluster_deploy '../../../main.bicep' = {
+module testDeployment '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
     cluster_validate
   ]
-  name: 'cluster_deploy'
+  name: '${uniqueString(deployment().name, location)}-test_clusterdeploy-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
