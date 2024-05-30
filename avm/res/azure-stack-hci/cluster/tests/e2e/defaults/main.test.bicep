@@ -16,10 +16,11 @@ param deploymentUserPassword string = newGuid()
 param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string = newGuid()
-param arbDeploymentAppId string
-param arbDeploymentSPObjectId string
+param arbDeploymentAppId string = '\${{secrets.AZURESTACKHCI_azureStackHCIAppId}}'
+param arbDeploymentSPObjectId string = '\${{secrets.AZURESTACKHCI_azureStackHCISpObjectId}}'
 @secure()
-param arbDeploymentServicePrincipalSecret string
+#disable-next-line secure-parameter-default
+param arbDeploymentServicePrincipalSecret string = '\${{secrets.AZURESTACKHCI_azureStackHCISpSecret}}'
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
