@@ -138,7 +138,7 @@ module cluster_validate '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
-  name: '${uniqueString(deployment().name, location)}-test_clustervalidate-${serviceShort}'
+  name: '${uniqueString(deployment().name, location)}-test-clustervalidate-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
@@ -164,7 +164,7 @@ module testDeployment '../../../main.bicep' = {
     hciDependencies
     cluster_validate
   ]
-  name: '${uniqueString(deployment().name, location)}-test_clusterdeploy-${serviceShort}'
+  name: '${uniqueString(deployment().name, location)}-test-clusterdeploy-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
