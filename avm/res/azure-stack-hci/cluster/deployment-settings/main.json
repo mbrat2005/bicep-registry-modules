@@ -1,11 +1,12 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "8842098890129608853"
+      "templateHash": "11209467006569124850"
     },
     "name": "Azure Stack HCI Cluster Deployment Settings",
     "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -18,6 +19,20 @@
       "maxLength": 15,
       "metadata": {
         "description": "Required. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Optional. Location for all resources."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "nullable": true,
+      "metadata": {
+        "description": "Optional. Tags of the resource."
       }
     },
     "deploymentMode": {
@@ -35,29 +50,41 @@
       "minLength": 4,
       "maxLength": 8,
       "metadata": {
-        "description": "Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$"
+        "description": "Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$."
       }
     },
     "clusterNodeNames": {
       "type": "array",
       "metadata": {
-        "description": "Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]"
+        "description": "Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]."
       }
     },
     "domainFqdn": {
       "type": "string",
       "metadata": {
-        "description": "Required. The domain name of the Active Directory Domain Services. Example: \"contoso.com\""
+        "description": "Required. The domain name of the Active Directory Domain Services. Example: \"contoso.com\"."
       }
     },
     "domainOUPath": {
       "type": "string",
       "metadata": {
-        "description": "Required. The ADDS OU path - ex \"OU=HCI,DC=contoso,DC=com\""
+        "description": "Required. The ADDS OU path - ex \"OU=HCI,DC=contoso,DC=com\"."
       }
     },
     "securityConfiguration": {
       "type": "object",
+      "defaultValue": {
+        "hvciProtection": true,
+        "drtmProtection": true,
+        "driftControlEnforced": true,
+        "credentialGuardEnforced": true,
+        "smbSigningEnforced": true,
+        "smbClusterEncryption": true,
+        "sideChannelMitigationEnforced": true,
+        "bitlockerBootVolume": true,
+        "bitlockerDataVolumes": true,
+        "wdacEnforced": true
+      },
       "metadata": {
         "description": "Optional. Security configuration settings object; defaults to most secure posture."
       }
@@ -66,21 +93,21 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Optional. The metrics data for deploying a HCI cluster"
+        "description": "Optional. The metrics data for deploying a HCI cluster."
       }
     },
     "isEuropeanUnionLocation": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Optional. The location data for deploying a HCI cluster"
+        "description": "Optional. The location data for deploying a HCI cluster."
       }
     },
     "episodicDataUpload": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Optional. The diagnostic data for deploying a HCI cluster"
+        "description": "Optional. The diagnostic data for deploying a HCI cluster."
       }
     },
     "storageConfigurationMode": {
@@ -98,31 +125,31 @@
     "subnetMask": {
       "type": "string",
       "metadata": {
-        "description": "Required. The subnet mask pf the Management Network for the HCI cluster - ex: 255.255.252.0"
+        "description": "Required. The subnet mask pf the Management Network for the HCI cluster - ex: 255.255.252.0."
       }
     },
     "defaultGateway": {
       "type": "string",
       "metadata": {
-        "description": "Required. The default gateway of the Management Network. Exameple: 192.168.0.1"
+        "description": "Required. The default gateway of the Management Network. Exameple: 192.168.0.1."
       }
     },
     "startingIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "Required. The starting IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs"
+        "description": "Required. The starting IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs."
       }
     },
     "endingIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "Required. The ending IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs"
+        "description": "Required. The ending IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs."
       }
     },
     "dnsServers": {
       "type": "array",
       "metadata": {
-        "description": "Required. The DNS servers accessible from the Management Network for the HCI cluster"
+        "description": "Required. The DNS servers accessible from the Management Network for the HCI cluster."
       }
     },
     "networkIntents": {
@@ -141,7 +168,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Required. Enable storage auto IP assignment. This should be true for most deployments except when deploying a three-node switchless cluster, in which case storage IPs should be configured before deployment and this value set to false"
+        "description": "Required. Enable storage auto IP assignment. This should be true for most deployments except when deploying a three-node switchless cluster, in which case storage IPs should be configured before deployment and this value set to false."
       }
     },
     "storageNetworks": {
@@ -154,7 +181,7 @@
       "type": "string",
       "defaultValue": "[format('{0}_cl', parameters('deploymentPrefix'))]",
       "metadata": {
-        "description": "Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01"
+        "description": "Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01."
       }
     },
     "clusterWitnessStorageAccountName": {
@@ -191,8 +218,14 @@
       }
     ]
   },
-  "resources": [
-    {
+  "resources": {
+    "cluster": {
+      "existing": true,
+      "type": "Microsoft.AzureStackHCI/clusters",
+      "apiVersion": "2024-02-15-preview",
+      "name": "[parameters('clusterName')]"
+    },
+    "deploymentSettings": {
       "condition": "[not(equals(parameters('deploymentMode'), 'LocksOnly'))]",
       "type": "Microsoft.AzureStackHCI/clusters/deploymentSettings",
       "apiVersion": "2024-02-15-preview",
@@ -272,9 +305,12 @@
             }
           ]
         }
-      }
+      },
+      "dependsOn": [
+        "cluster"
+      ]
     }
-  ],
+  },
   "outputs": {
     "name": {
       "type": "string",

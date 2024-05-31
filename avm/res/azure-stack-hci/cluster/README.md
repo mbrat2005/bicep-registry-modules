@@ -273,7 +273,7 @@ An array of Network ATC Network Intent objects that define the Compute, Manageme
 | [`overrideQosPolicy`](#parameter-networkintentsoverrideqospolicy) | bool | Specify whether to override the qosPolicy property. Use false by default. |
 | [`overrideVirtualSwitchConfiguration`](#parameter-networkintentsoverridevirtualswitchconfiguration) | bool | Specify whether to override the virtualSwitchConfiguration property. Use false by default. |
 | [`qosPolicyOverrides`](#parameter-networkintentsqospolicyoverrides) | object | The qosPolicy overrides for the network intent. |
-| [`trafficType`](#parameter-networkintentstraffictype) | array | The traffic types for the network intent. Allowed values: "Compute", "Management", "Storage" |
+| [`trafficType`](#parameter-networkintentstraffictype) | array | The traffic types for the network intent. Allowed values: "Compute", "Management", "Storage". |
 | [`virtualSwitchConfigurationOverrides`](#parameter-networkintentsvirtualswitchconfigurationoverrides) | object | The virtualSwitchConfiguration overrides for the network intent. |
 
 ### Parameter: `networkIntents.adapter`
@@ -295,8 +295,8 @@ The adapter property overrides for the network intent.
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`jumboPacket`](#parameter-networkintentsadapterpropertyoverridesjumbopacket) | string | The jumboPacket configuration for the network adapters. |
-| [`networkDirect`](#parameter-networkintentsadapterpropertyoverridesnetworkdirect) | string | The networkDirect configuration for the network adapters. Allowed values: "Enabled", "Disabled" |
-| [`networkDirectTechnology`](#parameter-networkintentsadapterpropertyoverridesnetworkdirecttechnology) | string | The networkDirectTechnology configuration for the network adapters. Allowed values: "RoCEv2", "iWARP" |
+| [`networkDirect`](#parameter-networkintentsadapterpropertyoverridesnetworkdirect) | string | The networkDirect configuration for the network adapters. Allowed values: "Enabled", "Disabled". |
+| [`networkDirectTechnology`](#parameter-networkintentsadapterpropertyoverridesnetworkdirecttechnology) | string | The networkDirectTechnology configuration for the network adapters. Allowed values: "RoCEv2", "iWARP". |
 
 ### Parameter: `networkIntents.adapterPropertyOverrides.jumboPacket`
 
@@ -307,14 +307,14 @@ The jumboPacket configuration for the network adapters.
 
 ### Parameter: `networkIntents.adapterPropertyOverrides.networkDirect`
 
-The networkDirect configuration for the network adapters. Allowed values: "Enabled", "Disabled"
+The networkDirect configuration for the network adapters. Allowed values: "Enabled", "Disabled".
 
 - Required: Yes
 - Type: string
 
 ### Parameter: `networkIntents.adapterPropertyOverrides.networkDirectTechnology`
 
-The networkDirectTechnology configuration for the network adapters. Allowed values: "RoCEv2", "iWARP"
+The networkDirectTechnology configuration for the network adapters. Allowed values: "RoCEv2", "iWARP".
 
 - Required: Yes
 - Type: string
@@ -358,25 +358,25 @@ The qosPolicy overrides for the network intent.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`bandwidthPercentage_SMB`](#parameter-networkintentsqospolicyoverridesbandwidthpercentage_smb) | string | The bandwidthPercentage for the network intent. Recommend 50. |
-| [`priorityValue8021Action_Cluster`](#parameter-networkintentsqospolicyoverridespriorityvalue8021action_cluster) | string | Recommend 7 |
-| [`priorityValue8021Action_SMB`](#parameter-networkintentsqospolicyoverridespriorityvalue8021action_smb) | string | Recommend 3 |
+| [`bandwidthPercentageSMB`](#parameter-networkintentsqospolicyoverridesbandwidthpercentagesmb) | string | The bandwidthPercentage for the network intent. Recommend 50. |
+| [`priorityValue8021ActionCluster`](#parameter-networkintentsqospolicyoverridespriorityvalue8021actioncluster) | string | Recommend 7 |
+| [`priorityValue8021ActionSMB`](#parameter-networkintentsqospolicyoverridespriorityvalue8021actionsmb) | string | Recommend 3 |
 
-### Parameter: `networkIntents.qosPolicyOverrides.bandwidthPercentage_SMB`
+### Parameter: `networkIntents.qosPolicyOverrides.bandwidthPercentageSMB`
 
 The bandwidthPercentage for the network intent. Recommend 50.
 
 - Required: Yes
 - Type: string
 
-### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021Action_Cluster`
+### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021ActionCluster`
 
 Recommend 7
 
 - Required: Yes
 - Type: string
 
-### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021Action_SMB`
+### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021ActionSMB`
 
 Recommend 3
 
@@ -385,7 +385,7 @@ Recommend 3
 
 ### Parameter: `networkIntents.trafficType`
 
-The traffic types for the network intent. Allowed values: "Compute", "Management", "Storage"
+The traffic types for the network intent. Allowed values: "Compute", "Management", "Storage".
 
 - Required: Yes
 - Type: array
@@ -401,19 +401,19 @@ The virtualSwitchConfiguration overrides for the network intent.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`enableIov`](#parameter-networkintentsvirtualswitchconfigurationoverridesenableiov) | string | The enableIov configuration for the network intent. Allowed values: "True", "False" |
-| [`loadBalancingAlgorithm`](#parameter-networkintentsvirtualswitchconfigurationoverridesloadbalancingalgorithm) | string | The loadBalancingAlgorithm configuration for the network intent. Allowed values: "Dynamic", "HyperVPort", "IPHash" |
+| [`enableIov`](#parameter-networkintentsvirtualswitchconfigurationoverridesenableiov) | string | The enableIov configuration for the network intent. Allowed values: "True", "False". |
+| [`loadBalancingAlgorithm`](#parameter-networkintentsvirtualswitchconfigurationoverridesloadbalancingalgorithm) | string | The loadBalancingAlgorithm configuration for the network intent. Allowed values: "Dynamic", "HyperVPort", "IPHash". |
 
 ### Parameter: `networkIntents.virtualSwitchConfigurationOverrides.enableIov`
 
-The enableIov configuration for the network intent. Allowed values: "True", "False"
+The enableIov configuration for the network intent. Allowed values: "True", "False".
 
 - Required: Yes
 - Type: string
 
 ### Parameter: `networkIntents.virtualSwitchConfigurationOverrides.loadBalancingAlgorithm`
 
-The loadBalancingAlgorithm configuration for the network intent. Allowed values: "Dynamic", "HyperVPort", "IPHash"
+The loadBalancingAlgorithm configuration for the network intent. Allowed values: "Dynamic", "HyperVPort", "IPHash".
 
 - Required: Yes
 - Type: string
