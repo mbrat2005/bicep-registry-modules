@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "8226794049166571756"
+      "templateHash": "4195585763993828171"
     },
     "name": "Azure Stack HCI Cluster",
     "description": "This module deploys an Azure Stack HCI Cluster.",
@@ -58,6 +58,9 @@
                 "description": "Required. The networkDirectTechnology configuration for the network adapters. Allowed values: \"RoCEv2\", \"iWARP\""
               }
             }
+          },
+          "metadata": {
+            "description": "Required. The adapter property overrides for the network intent."
           }
         },
         "overrideQosPolicy": {
@@ -87,6 +90,9 @@
                 "description": "Required. Recommend 3"
               }
             }
+          },
+          "metadata": {
+            "description": "Required. The qosPolicy overrides for the network intent."
           }
         },
         "overrideVirtualSwitchConfiguration": {
@@ -110,6 +116,9 @@
                 "description": "Required. The loadBalancingAlgorithm configuration for the network intent. Allowed values: \"Dynamic\", \"HyperVPort\", \"IPHash\""
               }
             }
+          },
+          "metadata": {
+            "description": "Required. The virtualSwitchConfiguration overrides for the network intent."
           }
         },
         "trafficType": {
@@ -183,34 +192,64 @@
       "type": "object",
       "properties": {
         "hvciProtection": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable HVCI protection."
+          }
         },
         "drtmProtection": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable DRTM protection."
+          }
         },
         "driftControlEnforced": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable Drift Control enforcement."
+          }
         },
         "credentialGuardEnforced": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable Credential Guard enforcement."
+          }
         },
         "smbSigningEnforced": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable SMB signing enforcement."
+          }
         },
         "smbClusterEncryption": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable SMB cluster encryption."
+          }
         },
         "sideChannelMitigationEnforced": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable Side Channel Mitigation enforcement."
+          }
         },
         "bitlockerBootVolume": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable BitLocker protection for boot volume."
+          }
         },
         "bitlockerDataVolumes": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable BitLocker protection for data volumes."
+          }
         },
         "wdacEnforced": {
-          "type": "bool"
+          "type": "bool",
+          "metadata": {
+            "description": "Required. Enable/Disable WDAC enforcement."
+          }
         }
       }
     },
@@ -319,25 +358,25 @@
       "minLength": 4,
       "maxLength": 8,
       "metadata": {
-        "description": "Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$"
+        "description": "Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$."
       }
     },
     "clusterNodeNames": {
       "type": "array",
       "metadata": {
-        "description": "Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]"
+        "description": "Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]."
       }
     },
     "domainFqdn": {
       "type": "string",
       "metadata": {
-        "description": "Required. The domain name of the Active Directory Domain Services. Example: \"contoso.com\""
+        "description": "Required. The domain name of the Active Directory Domain Services. Example: \"contoso.com\"."
       }
     },
     "domainOUPath": {
       "type": "string",
       "metadata": {
-        "description": "Required. The ADDS OU path - ex \"OU=HCI,DC=contoso,DC=com\""
+        "description": "Required. The ADDS OU path - ex \"OU=HCI,DC=contoso,DC=com\"."
       }
     },
     "securityConfiguration": {
@@ -362,21 +401,21 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Optional. The metrics data for deploying a HCI cluster"
+        "description": "Optional. The metrics data for deploying a HCI cluster."
       }
     },
     "isEuropeanUnionLocation": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Optional. The location data for deploying a HCI cluster"
+        "description": "Optional. The location data for deploying a HCI cluster."
       }
     },
     "episodicDataUpload": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Optional. The diagnostic data for deploying a HCI cluster"
+        "description": "Optional. The diagnostic data for deploying a HCI cluster."
       }
     },
     "storageConfigurationMode": {
@@ -394,31 +433,31 @@
     "subnetMask": {
       "type": "string",
       "metadata": {
-        "description": "Required. The subnet mask pf the Management Network for the HCI cluster - ex: 255.255.252.0"
+        "description": "Required. The subnet mask pf the Management Network for the HCI cluster - ex: 255.255.252.0."
       }
     },
     "defaultGateway": {
       "type": "string",
       "metadata": {
-        "description": "Required. The default gateway of the Management Network. Exameple: 192.168.0.1"
+        "description": "Required. The default gateway of the Management Network. Exameple: 192.168.0.1."
       }
     },
     "startingIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "Required. The starting IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs"
+        "description": "Required. The starting IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs."
       }
     },
     "endingIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "Required. The ending IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs"
+        "description": "Required. The ending IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs."
       }
     },
     "dnsServers": {
       "type": "array",
       "metadata": {
-        "description": "Required. The DNS servers accessible from the Management Network for the HCI cluster"
+        "description": "Required. The DNS servers accessible from the Management Network for the HCI cluster."
       }
     },
     "networkIntents": {
@@ -440,7 +479,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Required. Enable storage auto IP assignment. This should be true for most deployments except when deploying a three-node switchless cluster, in which case storage IPs should be configured before deployment and this value set to false"
+        "description": "Required. Enable storage auto IP assignment. This should be true for most deployments except when deploying a three-node switchless cluster, in which case storage IPs should be configured before deployment and this value set to false."
       }
     },
     "storageNetworks": {
@@ -453,7 +492,7 @@
       "type": "string",
       "defaultValue": "[format('{0}_cl', parameters('deploymentPrefix'))]",
       "metadata": {
-        "description": "Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01"
+        "description": "Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01."
       }
     },
     "enableTelemetry": {
@@ -635,7 +674,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.27.1.19265",
-              "templateHash": "4120452966354121905"
+              "templateHash": "8842098890129608853"
             },
             "name": "Azure Stack HCI Cluster Deployment Settings",
             "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -904,7 +943,30 @@
                 }
               }
             }
-          ]
+          ],
+          "outputs": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the cluster deployment settings."
+              },
+              "value": "default"
+            },
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "The ID of the cluster deployment settings."
+              },
+              "value": "[resourceId('Microsoft.AzureStackHCI/clusters/deploymentSettings', parameters('clusterName'), 'default')]"
+            },
+            "resourceGroupName": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource group of the cluster deployment settings."
+              },
+              "value": "[resourceGroup().name]"
+            }
+          }
         }
       }
     }
@@ -912,15 +974,38 @@
   "outputs": {
     "name": {
       "type": "string",
+      "metadata": {
+        "description": "The name of the cluster."
+      },
       "value": "[parameters('name')]"
     },
     "resourceId": {
       "type": "string",
+      "metadata": {
+        "description": "The ID of the cluster."
+      },
       "value": "[resourceId('Microsoft.AzureStackHCI/clusters', parameters('name'))]"
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource group of the cluster."
+      },
+      "value": "[resourceGroup().name]"
     },
     "systemAssignedMIPrincipalId": {
       "type": "string",
+      "metadata": {
+        "description": "The managed identity of the cluster."
+      },
       "value": "[reference('cluster', '2024-02-15-preview', 'full').identity.principalId]"
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The location of the cluster."
+      },
+      "value": "[reference('cluster', '2024-02-15-preview', 'full').location]"
     }
   }
 }

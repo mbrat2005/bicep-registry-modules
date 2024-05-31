@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "4120452966354121905"
+      "templateHash": "8842098890129608853"
     },
     "name": "Azure Stack HCI Cluster Deployment Settings",
     "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -274,5 +274,28 @@
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the cluster deployment settings."
+      },
+      "value": "default"
+    },
+    "resourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the cluster deployment settings."
+      },
+      "value": "[resourceId('Microsoft.AzureStackHCI/clusters/deploymentSettings', parameters('clusterName'), 'default')]"
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource group of the cluster deployment settings."
+      },
+      "value": "[resourceGroup().name]"
+    }
+  }
 }
