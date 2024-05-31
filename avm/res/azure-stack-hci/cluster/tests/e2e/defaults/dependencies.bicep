@@ -18,7 +18,7 @@ param softDeleteRetentionDays int = 30
 @minValue(0)
 @maxValue(365)
 param logsRetentionInDays int = 30
-param serviceShort string = 'ashcdef'
+param serviceShort string = 'ashcmin'
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)

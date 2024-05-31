@@ -228,9 +228,9 @@ type networkIntent = {
   adapterPropertyOverrides: {
     @description('Required. The jumboPacket configuration for the network adapters.')
     jumboPacket: string
-    @description('Required. The networkDirect configuration for the network adapters. Allowed values: "Enabled", "Disabled"')
+    @description('Required. The networkDirect configuration for the network adapters. Allowed values: "Enabled", "Disabled".')
     networkDirect: string
-    @description('Required. The networkDirectTechnology configuration for the network adapters. Allowed values: "RoCEv2", "iWARP"')
+    @description('Required. The networkDirectTechnology configuration for the network adapters. Allowed values: "RoCEv2", "iWARP".')
     networkDirectTechnology: string
   }
   @description('Required. Specify whether to override the qosPolicy property. Use false by default.')
@@ -238,22 +238,22 @@ type networkIntent = {
   @description('Required. The qosPolicy overrides for the network intent.')
   qosPolicyOverrides: {
     @description('Required. The bandwidthPercentage for the network intent. Recommend 50.')
-    bandwidthPercentage_SMB: string
+    bandwidthPercentageSMB: string
     @description('Required. Recommend 7')
-    priorityValue8021Action_Cluster: string
+    priorityValue8021ActionCluster: string
     @description('Required. Recommend 3')
-    priorityValue8021Action_SMB: string
+    priorityValue8021ActionSMB: string
   }
   @description('Required. Specify whether to override the virtualSwitchConfiguration property. Use false by default.')
   overrideVirtualSwitchConfiguration: bool
   @description('Required. The virtualSwitchConfiguration overrides for the network intent.')
   virtualSwitchConfigurationOverrides: {
-    @description('Required. The enableIov configuration for the network intent. Allowed values: "True", "False"')
+    @description('Required. The enableIov configuration for the network intent. Allowed values: "True", "False".')
     enableIov: string
-    @description('Required. The loadBalancingAlgorithm configuration for the network intent. Allowed values: "Dynamic", "HyperVPort", "IPHash"')
+    @description('Required. The loadBalancingAlgorithm configuration for the network intent. Allowed values: "Dynamic", "HyperVPort", "IPHash".')
     loadBalancingAlgorithm: string
   }
-  @description('Required. The traffic types for the network intent. Allowed values: "Compute", "Management", "Storage"')
+  @description('Required. The traffic types for the network intent. Allowed values: "Compute", "Management", "Storage".')
   trafficType: string[]
 }
 

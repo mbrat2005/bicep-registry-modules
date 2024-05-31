@@ -7,7 +7,7 @@ param name string = 'hcicluster'
 @maxLength(8)
 param location string = 'eastus'
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
-param serviceShort string = 'ashcdef'
+param serviceShort string = 'ashcmin'
 param namePrefix string = '#_namePrefix_#'
 param deploymentPrefix string = take(namePrefix, 8)
 // credentials for the deployment and ongoing lifecycle management
@@ -42,9 +42,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '7'
-      priorityValue8021Action_SMB: '3'
+      bandwidthPercentageSMB: '50'
+      priorityValue8021ActionCluster: '7'
+      priorityValue8021ActionSMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -64,9 +64,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '7'
-      priorityValue8021Action_SMB: '3'
+      bandwidthPercentageSMB: '50'
+      priorityValue8021ActionCluster: '7'
+      priorityValue8021ActionSMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -86,9 +86,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: true
     qosPolicyOverrides: {
-      bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '7'
-      priorityValue8021Action_SMB: '3'
+      bandwidthPercentageSMB: '50'
+      priorityValue8021ActionCluster: '7'
+      priorityValue8021ActionSMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -196,9 +196,9 @@ type networkIntent = {
   }
   overrideQosPolicy: bool
   qosPolicyOverrides: {
-    bandwidthPercentage_SMB: string
-    priorityValue8021Action_Cluster: string
-    priorityValue8021Action_SMB: string
+    bandwidthPercentageSMB: string
+    priorityValue8021ActionCluster: string
+    priorityValue8021ActionSMB: string
   }
   overrideVirtualSwitchConfiguration: bool
   virtualSwitchConfigurationOverrides: {

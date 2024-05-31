@@ -3,7 +3,7 @@ param vnetSubnetID string = '' // use to connect the HCI Azure Host VM to an exi
 param useSpotVM bool = false // change to false to use regular priority VM
 param hostVMSize string = 'Standard_E32bds_v5' // Azure VM size for the HCI Host VM - must support nested virtualization and have sufficient capacity for the HCI node VMs!
 param hciNodeCount int = 2 // number of Azure Stack HCI nodes to deploy
-param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
+param hciVHDXDownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2405.0.3018/AZURESTACKHCI.25398.469.LCM_2405.0.3018.x64.en-us.iso'
 param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
