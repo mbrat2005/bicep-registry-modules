@@ -18,6 +18,7 @@ param arbDeploymentAppId string
 param arbDeploymentSPObjectId string
 @secure()
 param arbDeploymentServicePrincipalSecret string
+param vnetSubnetId string
 
 // secret names for the Azure Key Vault - these cannot be changed
 var localAdminSecretName = 'LocalAdminCredential'
@@ -68,6 +69,14 @@ resource diagnosticStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01'
   kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      ipRules: []
+      virtualNetworkRules: []
+    }
   }
 }
 
@@ -80,6 +89,18 @@ resource witnessStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = 
   kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      ipRules: []
+      virtualNetworkRules: [
+        {
+          id: vnetSubnetId
+        }
+      ]
+    }
   }
 }
 
@@ -93,12 +114,22 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableSoftDelete: true
     softDeleteRetentionInDays: softDeleteRetentionDays
     enableRbacAuthorization: true
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
     accessPolicies: []
     tenantId: tenantId
     sku: {
       name: 'standard'
       family: 'A'
+    }
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      ipRules: []
+      virtualNetworkRules: [
+        {
+          id: vnetSubnetId
+        }
+      ]
     }
   }
   dependsOn: [

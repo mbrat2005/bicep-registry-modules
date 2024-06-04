@@ -30,6 +30,7 @@ param defaultGateway string = '172.20.0.1'
 param startingIPAddress string = '172.20.0.2'
 param endingIPAddress string = '172.20.0.7'
 param dnsServers array = ['172.20.0.1']
+param vnetSubnetId string = ''
 param networkIntents networkIntent[] = [
   {
     adapter: ['mgmt']
@@ -42,9 +43,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentageSMB: '50'
-      priorityValue8021ActionCluster: '7'
-      priorityValue8021ActionSMB: '3'
+      bandwidthPercentage_SMB: '50'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -64,9 +65,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentageSMB: '50'
-      priorityValue8021ActionCluster: '7'
-      priorityValue8021ActionSMB: '3'
+      bandwidthPercentage_SMB: '50'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -86,9 +87,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: true
     qosPolicyOverrides: {
-      bandwidthPercentageSMB: '50'
-      priorityValue8021ActionCluster: '7'
-      priorityValue8021ActionSMB: '3'
+      bandwidthPercentage_SMB: '50'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -131,6 +132,7 @@ module hciDependencies './dependencies.bicep' = {
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
+    vnetSubnetId: vnetSubnetId
   }
 }
 
@@ -196,9 +198,9 @@ type networkIntent = {
   }
   overrideQosPolicy: bool
   qosPolicyOverrides: {
-    bandwidthPercentageSMB: string
-    priorityValue8021ActionCluster: string
-    priorityValue8021ActionSMB: string
+    bandwidthPercentage_SMB: string
+    priorityValue8021Action_Cluster: string
+    priorityValue8021Action_SMB: string
   }
   overrideVirtualSwitchConfiguration: bool
   virtualSwitchConfigurationOverrides: {

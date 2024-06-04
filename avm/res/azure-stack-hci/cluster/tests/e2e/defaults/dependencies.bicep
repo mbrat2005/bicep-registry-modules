@@ -18,6 +18,7 @@ param softDeleteRetentionDays int = 30
 @minValue(0)
 @maxValue(365)
 param logsRetentionInDays int = 30
+param vnetSubnetId string
 param serviceShort string = 'ashcmin'
 
 var arcNodeResourceIds = [
@@ -33,6 +34,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   params: {
     location: 'eastus'
     localAdminPassword: localAdminPassword
+    vnetSubnetID: vnetSubnetId
   }
 }
 
