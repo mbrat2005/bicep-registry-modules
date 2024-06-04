@@ -68,5 +68,6 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     logsRetentionInDays: logsRetentionInDays
     softDeleteRetentionDays: softDeleteRetentionDays
     tenantId: tenantId
+    vnetSubnetId: vnetSubnetId
   }
 }
