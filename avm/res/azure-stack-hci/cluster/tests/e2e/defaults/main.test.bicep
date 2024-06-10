@@ -3,7 +3,7 @@ metadata description = 'This test deploys an Azure VM to host a 2 node switched 
 
 targetScope = 'subscription'
 param name string = 'hcicluster'
-param location string
+param location string = 'eastus'
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 param serviceShort string = 'ashcmin'
 param namePrefix string = '#_namePrefix_#'
