@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.28.1.47646",
-      "templateHash": "8495481049044627621"
+      "templateHash": "17311208416381766215"
     },
     "name": "Azure Stack HCI Cluster",
     "description": "This module deploys an Azure Stack HCI Cluster.",
@@ -547,7 +547,7 @@
           "outputs": {
             "telemetry": {
               "type": "String",
-              "value": "For more information, see https://aka.ms/#_namePrefix_#/TelemetryInfo"
+              "value": "For more information, see https://aka.ms/avm/TelemetryInfo"
             }
           }
         }
