@@ -40,23 +40,13 @@ Function Test-ADConnection {
 
 $ErrorActionPreference = 'Stop'
 
-# export or re-import local administrator credential
-If (!(Test-Path -Path 'C:\temp\hciHostDeployAdminCred.xml')) {
-  log 'Exporting local administrator credential (for re-use if script is re-run)...'
-  $adminCred = [pscredential]::new($adminUsername, (ConvertTo-SecureString -AsPlainText -Force $adminPw))
-  $adminCred | Export-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
-} Else {
-  log 'Re-importing local administrator credential...'
-  $adminCred = Import-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
-}
-
 # create hyperv switches
 log 'Creating Hyper-V switches...'
 $existingSwitches = Get-VMSwitch
 If ($existingSwitches.Name -notcontains 'external' ) { New-VMSwitch -Name external -AllowManagementOS:$true -NetAdapterName Ethernet }
-If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal }
-If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal }
-If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivate' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private }
+If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal -EnableIov $true }
+If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal -EnableIov $true }
+If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivate' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
 
 # add IPs for host
 log 'Adding IPs for host...'
@@ -139,8 +129,22 @@ log 'Setting VM processor count to 16 and enabling virtualization extensions...'
 Get-VM | Set-VMProcessor -ExposeVirtualizationExtensions $true -Count 16
 
 log 'Setting VM key protector and enabling TPM...'
-Get-VM | Set-VMKeyProtector -NewLocalKeyProtector
-Get-VM | Enable-VMTPM
+Get-VM | ForEach-Object {
+  If (($_ | Get-VMKeyProtector).Length -eq 4) {
+    log "Adding key protector for VM '$($_.Name)'"
+    $_ | Set-VMKeyProtector -NewLocalKeyProtector
+  } Else {
+    log "Key protector already exists for VM '$($_.Name)'"
+  }
+
+  If (($_ | Get-VMSecurity).TpmEnabled -eq $false) {
+    log "Enabling TPM for VM '$($_.Name)'"
+    $_ | Enable-VMTPM
+  } Else {
+    log "TPM already enabled for VM '$($_.Name)'"
+  }
+}
+
 
 # rename nic to mgmt
 log 'Renaming first network adapter on HCI nodes...'
@@ -163,15 +167,17 @@ Foreach ($vm in (Get-VM)) {
     (1..4) | ForEach-Object {
     $diskPath = "C:\diskMounts\$($vm.Name)\hciNodeDisk$($_).vhdx"
     If (!(Test-Path -Path $diskPath)) {
-      New-VHD -Path $diskPath -SizeBytes 1TB -Dynamic
+      log "Creating disk: $diskPath"
+      New-VHD -Path $diskPath -SizeBytes 1TB -Dynamic | Out-Null
     }
     If ($VM.HardDrives.Path -notcontains $diskPath) {
-      Add-VMHardDiskDrive -VMName $vm.Name -ControllerType SCSI -ControllerNumber 0 -ControllerLocation $_ -Path $diskPath
+      log "Adding disk: $diskPath to VM: $($vm.Name)"
+      Add-VMHardDiskDrive -VMName $vm.Name -ControllerType SCSI -ControllerNumber 0 -ControllerLocation $_ -Path $diskPath | Out-Null
     }
   }
 }
 
-# eanble mac soofing on HCI node VMs
+# enable mac soofing on HCI node VMs
 log 'Enabling MAC spoofing on HCI node VMs...'
 Get-VM | Get-VMNetworkAdapter | Set-VMNetworkAdapter -MacAddressSpoofing On
 
@@ -250,6 +256,18 @@ $unattendSource = @'
                     <Value>$adminPw</Value>
                     <PlainText>True</PlainText>
                 </AdministratorPassword>
+                <LocalAccounts>
+                <LocalAccount wcm:action="add">
+                   <Password>
+                      <Value>$adminPw</Value>
+                      <PlainText>true</PlainText>
+                   </Password>
+                   <Description>HCI Admin User</Description>
+                   <DisplayName>$adminUsername</DisplayName>
+                   <Group>Administrators;Power Users</Group>
+                   <Name>$adminUsername</Name>
+                </LocalAccount>
+                </LocalAccounts>
             </UserAccounts>
         </component>
         <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

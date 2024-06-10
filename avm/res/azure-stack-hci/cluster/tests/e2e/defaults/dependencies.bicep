@@ -20,6 +20,8 @@ param softDeleteRetentionDays int = 30
 param logsRetentionInDays int = 30
 param vnetSubnetId string
 param serviceShort string = 'ashcmin'
+param hciVHDXDownloadURL string
+param hciISODownloadURL string
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -30,16 +32,18 @@ var keyVaultName = 'kvhci-${deploymentPrefix}'
 var tenantId = subscription().tenantId
 
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
-  name: 'hciHostDeployment'
+  name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
-    location: 'eastus'
+    location: location
     localAdminPassword: localAdminPassword
     vnetSubnetID: vnetSubnetId
+    hciVHDXDownloadURL: hciVHDXDownloadURL
+    hciISODownloadURL: hciISODownloadURL
   }
 }
 
 module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = {
-  name: 'arbAppRegistration'
+  name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
   params: {
     arbDeploymentAppCredEnd: arbDeploymentAppCredEnd
     location: location
@@ -50,9 +54,9 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
   dependsOn: [
     hciHostDeployment
   ]
-  name: 'hciClusterPreqs'
+  name: '${uniqueString(deployment().name, location)}-test-hciclusterreqs-${serviceShort}'
   params: {
-    location: 'eastus'
+    location: location
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
@@ -68,6 +72,6 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     logsRetentionInDays: logsRetentionInDays
     softDeleteRetentionDays: softDeleteRetentionDays
     tenantId: tenantId
-    vnetSubnetId: vnetSubnetId
+    vnetSubnetId: hciHostDeployment.outputs.vnetSubnetId
   }
 }

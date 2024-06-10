@@ -1,4 +1,4 @@
-param location string // all resource except HCI Arc Nodes + HCI resources, which will be in eastus
+param location string // all resource except HCI Arc Nodes + HCI resources
 param vnetSubnetID string = '' // use to connect the HCI Azure Host VM to an existing VNET in the same region
 param useSpotVM bool = false // change to false to use regular priority VM
 param hostVMSize string = 'Standard_E32bds_v5' // Azure VM size for the HCI Host VM - must support nested virtualization and have sufficient capacity for the HCI node VMs!
@@ -263,12 +263,14 @@ resource runCommand5 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
         value: localAdminUsername
       }
       {
-        name: 'adminPw'
-        value: localAdminPassword
-      }
-      {
         name: 'hciNodeCount'
         value: string(hciNodeCount)
+      }
+    ]
+    protectedParameters: [
+      {
+        name: 'adminPw'
+        value: localAdminPassword
       }
     ]
     treatFailureAsDeploymentFailure: true
@@ -310,6 +312,8 @@ resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
         name: 'adminUsername'
         value: localAdminUsername
       }
+    ]
+    protectedParameters: [
       {
         name: 'adminPw'
         value: localAdminPassword
@@ -343,3 +347,5 @@ resource runCommand7 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
   }
   dependsOn: [runCommand6]
 }
+
+output vnetSubnetId string = vnetSubnetID == '' ? vnet.properties.subnets[0].id : vnetSubnetID

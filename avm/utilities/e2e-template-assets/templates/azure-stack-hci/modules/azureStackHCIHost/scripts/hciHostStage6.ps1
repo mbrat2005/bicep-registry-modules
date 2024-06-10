@@ -14,7 +14,7 @@ param (
 
   [Parameter()]
   [String]
-  $location = 'eastus',
+  $location,
 
   [Parameter()]
   [String]
@@ -46,13 +46,22 @@ Function log {
 $ErrorActionPreference = 'Stop'
 
 # export or re-import local administrator credential
+# we do this to support re-run of the template. If deployed, the HCI node password will be set to the password provided in the template, but future re-runs will generate a new password.
 If (!(Test-Path -Path 'C:\temp\hciHostDeployAdminCred.xml')) {
-  log 'Exporting local administrator credential (for re-use if script is re-run)...'
+  log "Exporting local '$($adminUsername)' credential (for re-use if script is re-run)..."
   $adminCred = [pscredential]::new($adminUsername, (ConvertTo-SecureString -AsPlainText -Force $adminPw))
   $adminCred | Export-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
 } Else {
-  log 'Re-importing local administrator credential...'
-  $adminCred = Import-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
+  log "Re-importing local '$($adminUsername)' credential..."
+  $adminCredOld = Import-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
+
+  $newCredFileName = 'hciHostDeployAdminCred_{0}.xml' -f (Get-Date -Format 'yyyyMMddHHmmss')
+  log "Renaming the old credential file to '$newCredFileName' prevent overwriting..."
+  Rename-Item -Path 'C:\temp\hciHostDeployAdminCred.xml' -NewName $newCredFileName
+
+  log "Exporting local '$($adminUsername)' credential (for re-use if script is re-run)..."
+  $adminCred = [pscredential]::new($adminUsername, (ConvertTo-SecureString -AsPlainText -Force $adminPw))
+  $adminCred | Export-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
 }
 
 # get an access token for the VM MSI, which has been granted rights and will be used for the HCI Arc Initialization
@@ -72,9 +81,12 @@ Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Install-Module AsHciADArtifactsPreCreationTool
 New-HciAdObjectsPreCreation -AzureStackLCMUserCredential $deployUserCred -AsHciOUName 'ou=hci,dc=hci,dc=local'
 
+## set the LCM deployUser password to the adminPw value - this aligns the password with the KeyVault during re-runs
+log 'Setting deployUser password...'
+Set-AdAccountPassword -Identity 'deployUser' -NewPassword (ConvertTo-SecureString -AsPlainText -Force $adminPw) -Reset -Confirm:$false
+
 # initialize arc on hci nodes
 log 'Initializing Azure Arc on HCI nodes...'
-$cred = [pscredential]::new('administrator', (ConvertTo-SecureString -AsPlainText -Force $adminPw))
 
 # wait for VMs to reach 'Running' state
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -91,7 +103,14 @@ If ($stopwatch.Elapsed.TotalMinutes -ge 15) {
 
 log "Creating PSSessions to HCI nodes [$((Get-VM).Name -join ',')]..."
 try {
-  $sessions = New-PSSession -VMName (Get-VM).Name -Credential $cred -ErrorAction Stop
+  If ($adminCredOld) {
+    log 'Using old local administrator credential from exported CliXML...'
+    $localAdminCred = $adminCredOld
+  } Else {
+    log 'Using new local administrator credential from parameter input...'
+    $localAdminCred = $adminCred
+  }
+  $sessions = New-PSSession -VMName (Get-VM).Name -Credential $localAdminCred -ErrorAction Stop
 
   if ($sessions.Count -eq 2 -and $sessions.State -eq 'Opened') {
     log "PSSessions to HCI nodes [$((Get-VM).Name -join ',')] created successfully."
@@ -106,35 +125,65 @@ try {
   Exit 1
 }
 
-# name net adapters
+# update local admin password to match the adminPw value
+If ($adminCredOld) {
+  log 'Updating local administrator password to match the adminPw value...'
+  Invoke-Command -VMName (Get-VM).Name -Credential $adminCredOld {
+    $ErrorActionPreference = 'Stop'
+
+    $adminPw = $args[0]
+    $adminUsername = $args[1]
+
+    Write-Host "$($env:computerName):Setting local administrator password to match the adminPw value..."
+    $adminCred = [pscredential]::new($adminUsername, (ConvertTo-SecureString -AsPlainText -Force $adminPw))
+    Set-LocalUser -Name $adminUsername -Password $adminCred.Password -Confirm:$false
+  } -ArgumentList $adminPw, $adminUsername
+} Else {
+  log "Password for '$($adminUsername)' should already match the adminPw value..."
+}
+
+# name net adapters - seems to be required on 2405
 log 'Renaming network adapters on HCI nodes...'
-Invoke-Command $sessions {
+$vmNicLocalNamingOut = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
   $ErrorActionPreference = 'Stop'
 
-  Get-NetAdapter | Where-Object { $_.Name -like 'Ethernet*' } | ForEach-Object {
+  Get-NetAdapter | ForEach-Object {
     $adapter = $_
-    $newAdapterName = Get-NetAdapterAdvancedProperty -RegistryKeyword HyperVNetworkAdapterName -Name $adapter.Name | Select-Object -ExpandProperty DisplayValue
+
+    try {
+      Write-Output "Getting Hyper-V network adapter name for '$($adapter.Name)' on VM '$($env:COMPUTERNAME)'..."
+      $newAdapterName = Get-NetAdapterAdvancedProperty -RegistryKeyword HyperVNetworkAdapterName -Name $adapter.Name | Select-Object -ExpandProperty DisplayValue
+    } catch {
+      Write-Output "Failed to get Hyper-V network adapter name for '$($adapter.Name)' on VM '$($env:COMPUTERNAME)'. Ensure DeviceNaming is turned on for the VM Network Adapter! $_ Exiting..."
+      Write-Error "Failed to get Hyper-V network adapter name for '$($adapter.Name)'  on VM '$($env:COMPUTERNAME)'. Ensure DeviceNaming is turned on for the VM Network Adapter! $_ Exiting..." -ErrorAction Stop
+      Exit 1
+    }
 
     If ($adapter.InterfaceAlias -ne $newAdapterName) {
-      Write-Host "Renaming network adapter '$adapter.InterfaceAlias' to '$newAdapterName'..."
+      Write-Output "Renaming network adapter '$($adapter.InterfaceAlias)' to '$newAdapterName'  on VM '$($env:COMPUTERNAME)'..."
       Rename-NetAdapter -Name $adapter.Name -NewName $newAdapterName
+    } Else {
+      Write-Output "Network adapter '$($adapter.InterfaceAlias)' is already named correctly on VM '$($env:COMPUTERNAME)'..."
     }
   }
 }
 
+log "VM NIC local naming output: $vmNicLocalNamingOut"
+
 ## test node internet connection - required for Azure Arc initialization
-$testNodeInternetConnection = Invoke-Command $sessions[0] {
+$firstVM = Get-VM | Select-Object -First 1
+$testNodeInternetConnection = Invoke-Command -VMName $firstVM.Name -Credential $adminCred {
   [bool](Invoke-RestMethod ipinfo.io -UseBasicParsing)
 }
 
 If (!$testNodeInternetConnection) {
-  log "Node '$($sessions[0].ComputerName)' does not have internet connection. Check RRAS NAT configuration. Exiting..."
-  Write-Error "Node '$($sessions[0].ComputerName)' does not have internet connection. Check RRAS NAT configuration. Exiting..."
+  log "Node '$($firstVM.name)' does not have internet connection. Check RRAS NAT configuration. Exiting..."
+  Write-Error "Node '$($firstVM.name)' does not have internet connection. Check RRAS NAT configuration. Exiting..."
   Exit 1
 }
 
 ## create jobs for each node to initialize Azure Arc
-$arcInitializationJobs = Invoke-Command $sessions {
+$arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
   $ErrorActionPreference = 'Stop'
 
   $t = $args[0]

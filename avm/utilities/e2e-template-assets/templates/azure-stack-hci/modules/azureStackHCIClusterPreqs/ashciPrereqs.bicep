@@ -54,7 +54,7 @@ var keyVaultSecretUserRoleID = subscriptionResourceId(
 
 module ARBDeploymentSPNSubscriptionRoleAssignmnent 'ashciARBSPRoleAssignment.bicep' = {
   scope: subscription()
-  name: 'ashciARBSPRoleAssignment'
+  name: '${uniqueString(deployment().name, location)}-test-arbroleassignment'
   params: {
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
   }
@@ -114,7 +114,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableSoftDelete: true
     softDeleteRetentionInDays: softDeleteRetentionDays
     enableRbacAuthorization: true
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
     accessPolicies: []
     tenantId: tenantId
     sku: {

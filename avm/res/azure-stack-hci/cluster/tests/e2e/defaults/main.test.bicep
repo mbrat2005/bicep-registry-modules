@@ -3,20 +3,16 @@ metadata description = 'This test deploys an Azure VM to host a 2 node switched 
 
 targetScope = 'subscription'
 param name string = 'hcicluster'
-@minLength(4)
-@maxLength(8)
-param location string = 'eastus'
+param location string
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 param serviceShort string = 'ashcmin'
-param namePrefix string = '#_namePrefix_#'
+param namePrefix string = 'avm'
 param deploymentPrefix string = take(namePrefix, 8)
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
 @secure()
-param deploymentUserPassword string = newGuid()
+param localAdminAndDeploymentUserPass string = newGuid()
 param localAdminUsername string = 'admin-hci'
-@secure()
-param localAdminPassword string = newGuid()
 param arbDeploymentAppId string = '\${{secrets.AZURESTACKHCI_azureStackHCIAppId}}'
 param arbDeploymentSPObjectId string = '\${{secrets.AZURESTACKHCI_azureStackHCISpObjectId}}'
 @secure()
@@ -31,21 +27,24 @@ param startingIPAddress string = '172.20.0.2'
 param endingIPAddress string = '172.20.0.7'
 param dnsServers array = ['172.20.0.1']
 param vnetSubnetId string = ''
+param hciISODownloadURL string = ''
+param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
+
 param networkIntents networkIntent[] = [
   {
     adapter: ['mgmt']
     name: 'management'
-    overrideAdapterProperty: false
+    overrideAdapterProperty: true
     adapterPropertyOverrides: {
       jumboPacket: '9014'
-      networkDirect: 'Enabled'
-      networkDirectTechnology: 'RoCEv2'
+      networkDirect: 'Disabled'
+      networkDirectTechnology: 'iWARP'
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '7'
-      priorityValue8021Action_SMB: '3'
+      bandwidthPercentageSMB: '50'
+      priorityValue8021ActionCluster: '7'
+      priorityValue8021ActionSMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -57,17 +56,17 @@ param networkIntents networkIntent[] = [
   {
     adapter: ['comp0', 'comp1']
     name: 'compute'
-    overrideAdapterProperty: false
+    overrideAdapterProperty: true
     adapterPropertyOverrides: {
       jumboPacket: '9014'
-      networkDirect: 'Enabled'
-      networkDirectTechnology: 'RoCEv2'
+      networkDirect: 'Disabled'
+      networkDirectTechnology: 'iWARP'
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '7'
-      priorityValue8021Action_SMB: '3'
+      bandwidthPercentageSMB: '50'
+      priorityValue8021ActionCluster: '7'
+      priorityValue8021ActionSMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -82,14 +81,14 @@ param networkIntents networkIntent[] = [
     overrideAdapterProperty: true
     adapterPropertyOverrides: {
       jumboPacket: '9014'
-      networkDirect: 'Enabled'
-      networkDirectTechnology: 'RoCEv2'
+      networkDirect: 'Disabled'
+      networkDirectTechnology: 'iWARP'
     }
     overrideQosPolicy: true
     qosPolicyOverrides: {
-      bandwidthPercentage_SMB: '50'
-      priorityValue8021Action_Cluster: '7'
-      priorityValue8021Action_SMB: '3'
+      bandwidthPercentageSMB: '50'
+      priorityValue8021ActionCluster: '7'
+      priorityValue8021ActionSMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -110,6 +109,25 @@ param storageNetworks storageNetworksArrayType = [
   {
     adapterName: 'smb1'
     vlan: '712'
+
+// adds underscores to the qosPolicyOverrides property names as expected by the API, but not permitted by the AVM automation
+var networkIntentsTransforms = [
+  for networkIntent in networkIntents: {
+    adapter: networkIntent.adapter
+    name: networkIntent.name
+    overrideAdapterProperty: networkIntent.overrideAdapterProperty
+    adapterPropertyOverrides: networkIntent.adapterPropertyOverrides
+    overrideQosPolicy: networkIntent.overrideQosPolicy
+    qosPolicyOverrides: {
+      bandwidthPercentage_SMB: networkIntent.qosPolicyOverrides.bandwidthPercentageSMB
+      priorityValue8021Action_Cluster: networkIntent.qosPolicyOverrides.priorityValue8021ActionCluster
+      priorityValue8021Action_SMB: networkIntent.qosPolicyOverrides.priorityValue8021ActionSMB
+    }
+    overrideVirtualSwitchConfiguration: networkIntent.overrideVirtualSwitchConfiguration
+    virtualSwitchConfigurationOverrides: networkIntent.virtualSwitchConfigurationOverrides
+    trafficType: networkIntent.trafficType
+  }
+]
   }
 ]
 
@@ -119,20 +137,22 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 module hciDependencies './dependencies.bicep' = {
-  name: 'hciDependencies'
+  name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
     clusterNodeNames: clusterNodeNames
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
-    deploymentUserPassword: deploymentUserPassword
-    localAdminPassword: localAdminPassword
+    deploymentUserPassword: localAdminAndDeploymentUserPass
+    localAdminPassword: localAdminAndDeploymentUserPass
     localAdminUsername: localAdminUsername
     location: location
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     vnetSubnetId: vnetSubnetId
+    hciISODownloadURL: hciISODownloadURL
+    hciVHDXDownloadURL: hciVHDXDownloadURL
   }
 }
 
@@ -158,7 +178,7 @@ module cluster_validate '../../../main.bicep' = {
     storageConnectivitySwitchless: storageConnectivitySwitchless
     storageNetworks: storageNetworks
     subnetMask: subnetMask
-  }
+    networkIntents: networkIntentsTransforms
 }
 
 module testDeployment '../../../main.bicep' = {

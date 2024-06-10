@@ -184,6 +184,9 @@ module deploymentSetting 'deployment-settings/main.bicep' = {
     streamingDataClient: streamingDataClient
     subnetMask: subnetMask
   }
+  dependsOn: [
+    cluster
+  ]
 }
 
 resource cluster_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
