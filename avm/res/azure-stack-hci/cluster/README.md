@@ -358,25 +358,25 @@ The qosPolicy overrides for the network intent.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`bandwidthPercentageSMB`](#parameter-networkintentsqospolicyoverridesbandwidthpercentagesmb) | string | The bandwidthPercentage for the network intent. Recommend 50. |
-| [`priorityValue8021ActionCluster`](#parameter-networkintentsqospolicyoverridespriorityvalue8021actioncluster) | string | Recommend 7. |
-| [`priorityValue8021ActionSMB`](#parameter-networkintentsqospolicyoverridespriorityvalue8021actionsmb) | string | Recommend 3. |
+| [`bandwidthPercentage_SMB`](#parameter-networkintentsqospolicyoverridesbandwidthpercentage_smb) | string | The bandwidthPercentage for the network intent. Recommend 50. |
+| [`priorityValue8021Action_Cluster`](#parameter-networkintentsqospolicyoverridespriorityvalue8021action_cluster) | string | Recommend 7. |
+| [`priorityValue8021Action_SMB`](#parameter-networkintentsqospolicyoverridespriorityvalue8021action_smb) | string | Recommend 3. |
 
-### Parameter: `networkIntents.qosPolicyOverrides.bandwidthPercentageSMB`
+### Parameter: `networkIntents.qosPolicyOverrides.bandwidthPercentage_SMB`
 
 The bandwidthPercentage for the network intent. Recommend 50.
 
 - Required: Yes
 - Type: string
 
-### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021ActionCluster`
+### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021Action_Cluster`
 
 Recommend 7.
 
 - Required: Yes
 - Type: string
 
-### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021ActionSMB`
+### Parameter: `networkIntents.qosPolicyOverrides.priorityValue8021Action_SMB`
 
 Recommend 3.
 

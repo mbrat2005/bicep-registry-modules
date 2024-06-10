@@ -140,7 +140,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
       outputs: {
         telemetry: {
           type: 'String'
-          value: 'For more information, see https://aka.ms/avm/TelemetryInfo'
+          value: 'For more information, see https://aka.ms/#_namePrefix_#/TelemetryInfo'
         }
       }
     }
@@ -155,6 +155,10 @@ resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' = if (dep
   location: location
   properties: {}
   tags: tags
+}
+
+resource clusterExisting 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' existing = if (deploymentMode != 'Validate') {
+  name: name
 }
 
 module deploymentSetting 'deployment-settings/main.bicep' = {
@@ -216,7 +220,9 @@ output resourceId string = cluster.id
 @description('The resource group of the cluster.')
 output resourceGroupName string = resourceGroup().name
 @description('The managed identity of the cluster.')
-output systemAssignedMIPrincipalId string = cluster.identity.principalId
+output systemAssignedMIPrincipalId string = deploymentMode == 'Validate'
+  ? cluster.identity.principalId
+  : clusterExisting.identity.principalId
 @description('The location of the cluster.')
 output location string = cluster.location
 

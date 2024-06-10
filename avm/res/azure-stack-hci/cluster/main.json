@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.27.1.19265",
-      "templateHash": "13951587445573458963"
+      "version": "0.28.1.47646",
+      "templateHash": "8495481049044627621"
     },
     "name": "Azure Stack HCI Cluster",
     "description": "This module deploys an Azure Stack HCI Cluster.",
@@ -72,19 +72,19 @@
         "qosPolicyOverrides": {
           "type": "object",
           "properties": {
-            "bandwidthPercentageSMB": {
+            "bandwidthPercentage_SMB": {
               "type": "string",
               "metadata": {
                 "description": "Required. The bandwidthPercentage for the network intent. Recommend 50."
               }
             },
-            "priorityValue8021ActionCluster": {
+            "priorityValue8021Action_Cluster": {
               "type": "string",
               "metadata": {
                 "description": "Required. Recommend 7."
               }
             },
-            "priorityValue8021ActionSMB": {
+            "priorityValue8021Action_SMB": {
               "type": "string",
               "metadata": {
                 "description": "Required. Recommend 3."
@@ -547,7 +547,7 @@
           "outputs": {
             "telemetry": {
               "type": "String",
-              "value": "For more information, see https://aka.ms/avm/TelemetryInfo"
+              "value": "For more information, see https://aka.ms/#_namePrefix_#/TelemetryInfo"
             }
           }
         }
@@ -564,6 +564,13 @@
       "location": "[parameters('location')]",
       "properties": {},
       "tags": "[parameters('tags')]"
+    },
+    "clusterExisting": {
+      "condition": "[not(equals(parameters('deploymentMode'), 'Validate'))]",
+      "existing": true,
+      "type": "Microsoft.AzureStackHCI/clusters",
+      "apiVersion": "2024-02-15-preview",
+      "name": "[parameters('name')]"
     },
     "cluster_roleAssignments": {
       "copy": {
@@ -674,8 +681,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.27.1.19265",
-              "templateHash": "11209467006569124850"
+              "version": "0.28.1.47646",
+              "templateHash": "4037257705874137895"
             },
             "name": "Azure Stack HCI Cluster Deployment Settings",
             "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -1004,7 +1011,10 @@
             }
           }
         }
-      }
+      },
+      "dependsOn": [
+        "cluster"
+      ]
     }
   },
   "outputs": {
@@ -1034,7 +1044,7 @@
       "metadata": {
         "description": "The managed identity of the cluster."
       },
-      "value": "[reference('cluster', '2024-02-15-preview', 'full').identity.principalId]"
+      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-02-15-preview', 'full').identity.principalId, reference('clusterExisting', '2024-02-15-preview', 'full').identity.principalId)]"
     },
     "location": {
       "type": "string",

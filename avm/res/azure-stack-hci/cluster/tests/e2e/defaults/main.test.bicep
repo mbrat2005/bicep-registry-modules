@@ -6,7 +6,7 @@ param name string = 'hcicluster'
 param location string
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 param serviceShort string = 'ashcmin'
-param namePrefix string = 'avm'
+param namePrefix string = '#_namePrefix_#'
 param deploymentPrefix string = take(namePrefix, 8)
 // credentials for the deployment and ongoing lifecycle management
 param deploymentUsername string = 'deployUser'
@@ -17,7 +17,7 @@ param arbDeploymentAppId string = '\${{secrets.AZURESTACKHCI_azureStackHCIAppId}
 param arbDeploymentSPObjectId string = '\${{secrets.AZURESTACKHCI_azureStackHCISpObjectId}}'
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string = '\${{secrets.AZURESTACKHCI_azureStackHCISpSecret}}'
+param arbDeploymentServicePrincipalSecret string = '\${{secrets.arbDeploymentServicePrincipalSecret}}'
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
@@ -42,9 +42,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentageSMB: '50'
-      priorityValue8021ActionCluster: '7'
-      priorityValue8021ActionSMB: '3'
+      bandwidthPercentage_SMB: '50'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -64,9 +64,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: false
     qosPolicyOverrides: {
-      bandwidthPercentageSMB: '50'
-      priorityValue8021ActionCluster: '7'
-      priorityValue8021ActionSMB: '3'
+      bandwidthPercentage_SMB: '50'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -86,9 +86,9 @@ param networkIntents networkIntent[] = [
     }
     overrideQosPolicy: true
     qosPolicyOverrides: {
-      bandwidthPercentageSMB: '50'
-      priorityValue8021ActionCluster: '7'
-      priorityValue8021ActionSMB: '3'
+      bandwidthPercentage_SMB: '50'
+      priorityValue8021Action_Cluster: '7'
+      priorityValue8021Action_SMB: '3'
     }
     overrideVirtualSwitchConfiguration: false
     virtualSwitchConfigurationOverrides: {
@@ -109,25 +109,6 @@ param storageNetworks storageNetworksArrayType = [
   {
     adapterName: 'smb1'
     vlan: '712'
-
-// adds underscores to the qosPolicyOverrides property names as expected by the API, but not permitted by the AVM automation
-var networkIntentsTransforms = [
-  for networkIntent in networkIntents: {
-    adapter: networkIntent.adapter
-    name: networkIntent.name
-    overrideAdapterProperty: networkIntent.overrideAdapterProperty
-    adapterPropertyOverrides: networkIntent.adapterPropertyOverrides
-    overrideQosPolicy: networkIntent.overrideQosPolicy
-    qosPolicyOverrides: {
-      bandwidthPercentage_SMB: networkIntent.qosPolicyOverrides.bandwidthPercentageSMB
-      priorityValue8021Action_Cluster: networkIntent.qosPolicyOverrides.priorityValue8021ActionCluster
-      priorityValue8021Action_SMB: networkIntent.qosPolicyOverrides.priorityValue8021ActionSMB
-    }
-    overrideVirtualSwitchConfiguration: networkIntent.overrideVirtualSwitchConfiguration
-    virtualSwitchConfigurationOverrides: networkIntent.virtualSwitchConfigurationOverrides
-    trafficType: networkIntent.trafficType
-  }
-]
   }
 ]
 
@@ -178,7 +159,7 @@ module cluster_validate '../../../main.bicep' = {
     storageConnectivitySwitchless: storageConnectivitySwitchless
     storageNetworks: storageNetworks
     subnetMask: subnetMask
-    networkIntents: networkIntentsTransforms
+  }
 }
 
 module testDeployment '../../../main.bicep' = {
