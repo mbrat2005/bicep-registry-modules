@@ -77,8 +77,40 @@ while (!$allExtensionsReady -and $timer.Elapsed.TotalMinutes -lt 120) {
 }
 
 If (!$allExtensionsReady) {
-  log 'Extensions did not install within the one hour timeout period'
+  log 'Extensions did not install within the two hour timeout period'
   Exit 1
 } Else {
   log 'All extensions are installed and ready on all HCI Arc Machines'
 }
+
+# import local administrator credential (exported in stage 6)
+log "Re-importing local '$($adminUsername)' credential..."
+$adminCred = Import-Clixml -Path 'C:\temp\hciHostDeployAdminCred.xml'
+
+# name net adapters - seems to be required on 2405
+log 'Renaming network adapters on HCI nodes...'
+$vmNicLocalNamingOut = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
+  $ErrorActionPreference = 'Stop'
+
+  Get-NetAdapter | ForEach-Object {
+    $adapter = $_
+
+    try {
+      Write-Output "Getting Hyper-V network adapter name for '$($adapter.Name)' on VM '$($env:COMPUTERNAME)'..."
+      $newAdapterName = Get-NetAdapterAdvancedProperty -RegistryKeyword HyperVNetworkAdapterName -Name $adapter.Name | Select-Object -ExpandProperty DisplayValue
+    } catch {
+      Write-Output "Failed to get Hyper-V network adapter name for '$($adapter.Name)' on VM '$($env:COMPUTERNAME)'. Ensure DeviceNaming is turned on for the VM Network Adapter! $_ Exiting..."
+      Write-Error "Failed to get Hyper-V network adapter name for '$($adapter.Name)'  on VM '$($env:COMPUTERNAME)'. Ensure DeviceNaming is turned on for the VM Network Adapter! $_ Exiting..." -ErrorAction Stop
+      Exit 1
+    }
+
+    If ($adapter.InterfaceAlias -ne $newAdapterName) {
+      Write-Output "Renaming network adapter '$($adapter.InterfaceAlias)' to '$newAdapterName'  on VM '$($env:COMPUTERNAME)'..."
+      Rename-NetAdapter -Name $adapter.Name -NewName $newAdapterName
+    } Else {
+      Write-Output "Network adapter '$($adapter.InterfaceAlias)' is already named correctly on VM '$($env:COMPUTERNAME)'..."
+    }
+  }
+}
+
+log "VM NIC local naming output: $vmNicLocalNamingOut"
