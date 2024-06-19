@@ -10,7 +10,11 @@ param (
 
   [Parameter()]
   [int]
-  $hciNodeCount
+  $hciNodeCount,
+
+  [Parameter()]
+  [boolean]
+  $switchlessStorageConfig = $false
 )
 
 Function log {
@@ -43,10 +47,28 @@ $ErrorActionPreference = 'Stop'
 # create hyperv switches
 log 'Creating Hyper-V switches...'
 $existingSwitches = Get-VMSwitch
-If ($existingSwitches.Name -notcontains 'external' ) { New-VMSwitch -Name external -AllowManagementOS:$true -NetAdapterName Ethernet }
-If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal -EnableIov $true }
-If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal -EnableIov $true }
-If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivate' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
+
+If (!$switchlessStorageConfig) {
+  log 'Creating Hyper-V switches for switched storage configuration...'
+  If ($existingSwitches.Name -notcontains 'external' ) { New-VMSwitch -Name external -AllowManagementOS:$true -NetAdapterName Ethernet }
+  If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivate' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
+} Else {
+  If ($hciNodeCount -gt 3) {
+    log -message 'ERROR: Switchless storage configuration is only supported for 3 or fewer HCI nodes. Exiting script...'
+    Write-Error 'ERROR: Switchless storage configuration is only supported for 3 or fewer HCI nodes. Exiting script...'
+    exit 1
+  }
+
+  log 'Creating Hyper-V switches for switchless storage configuration...'
+  If ($existingSwitches.Name -notcontains 'external' ) { New-VMSwitch -Name external -AllowManagementOS:$true -NetAdapterName Ethernet }
+  If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateA' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateB' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateC' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
+}
 
 # add IPs for host
 log 'Adding IPs for host...'
@@ -157,8 +179,30 @@ ForEach ($existingVM in (Get-VM)) {
   $existingNICs = Get-VMNetworkAdapter -VM $existingVM
   If ($existingNICs.name -notcontains 'comp0') { $existingVM | Add-VMNetworkAdapter -Name comp0 -SwitchName hciNodeCompInternal -DeviceNaming On }
   If ($existingNICs.name -notcontains 'comp1') { $existingVM | Add-VMNetworkAdapter -Name comp1 -SwitchName hciNodeCompInternal -DeviceNaming On }
-  If ($existingNICs.name -notcontains 'smb0') { $existingVM | Add-VMNetworkAdapter -Name smb0 -SwitchName hciNodeStoragePrivate -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '711' -NativeVlanId 0 }
-  If ($existingNICs.name -notcontains 'smb1') { $existingVM | Add-VMNetworkAdapter -Name smb1 -SwitchName hciNodeStoragePrivate -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '712' -NativeVlanId 0 }
+
+  If (!$switchlessStorageConfig) {
+    log "Adding NICs to VM '$($existingVM.name)' for switched storage configuration..."
+    If ($existingNICs.name -notcontains 'smb0') { $existingVM | Add-VMNetworkAdapter -Name smb0 -SwitchName hciNodeStoragePrivate -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '711' -NativeVlanId 0 }
+    If ($existingNICs.name -notcontains 'smb1') { $existingVM | Add-VMNetworkAdapter -Name smb1 -SwitchName hciNodeStoragePrivate -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '712' -NativeVlanId 0 }
+  } Else {
+    log "Adding NICs to VM '$($existingVM.name)' for switchless storage configuration..."
+
+    switch ($existingVM.Name[-1]) {
+      1 {
+        If ($existingNICs.name -notcontains 'smb0') { $existingVM | Add-VMNetworkAdapter -Name smb0 -SwitchName hciNodeStoragePrivateA -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '711' -NativeVlanId 0 }
+        If ($existingNICs.name -notcontains 'smb1') { $existingVM | Add-VMNetworkAdapter -Name smb1 -SwitchName hciNodeStoragePrivateB -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '712' -NativeVlanId 0 }
+      }
+      2 {
+        If ($existingNICs.name -notcontains 'smb0') { $existingVM | Add-VMNetworkAdapter -Name smb0 -SwitchName hciNodeStoragePrivateA -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '711' -NativeVlanId 0 }
+        If ($existingNICs.name -notcontains 'smb1') { $existingVM | Add-VMNetworkAdapter -Name smb1 -SwitchName hciNodeStoragePrivateC -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '712' -NativeVlanId 0 }
+      }
+      3 {
+        If ($existingNICs.name -notcontains 'smb0') { $existingVM | Add-VMNetworkAdapter -Name smb0 -SwitchName hciNodeStoragePrivateB -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '711' -NativeVlanId 0 }
+        If ($existingNICs.name -notcontains 'smb1') { $existingVM | Add-VMNetworkAdapter -Name smb1 -SwitchName hciNodeStoragePrivateC -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '712' -NativeVlanId 0 }
+      }
+      Default {}
+    }
+  }
 }
 
 # add disks to HCI node VMs

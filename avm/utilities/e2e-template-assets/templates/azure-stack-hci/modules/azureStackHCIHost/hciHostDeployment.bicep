@@ -3,6 +3,7 @@ param vnetSubnetID string = '' // use to connect the HCI Azure Host VM to an exi
 param useSpotVM bool = false // change to false to use regular priority VM
 param hostVMSize string = 'Standard_E32bds_v5' // Azure VM size for the HCI Host VM - must support nested virtualization and have sufficient capacity for the HCI node VMs!
 param hciNodeCount int = 2 // number of Azure Stack HCI nodes to deploy
+param switchlessStorageConfig bool = false // set to true to configure switchless storage
 // specify either a VHDX or ISO download URL; if both are specified, the VHDX download URL will be used
 param hciVHDXDownloadURL string = ''
 param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2405.0.3018/AZURESTACKHCI.25398.469.LCM_2405.0.3018.x64.en-us.iso'
@@ -265,6 +266,10 @@ resource runCommand5 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       {
         name: 'hciNodeCount'
         value: string(hciNodeCount)
+      }
+      {
+        name: 'switchlessStorageConfig'
+        value: switchlessStorageConfig
       }
     ]
     protectedParameters: [
