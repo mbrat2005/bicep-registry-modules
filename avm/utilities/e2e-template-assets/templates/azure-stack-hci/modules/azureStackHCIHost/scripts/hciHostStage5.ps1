@@ -13,8 +13,8 @@ param (
   $hciNodeCount,
 
   [Parameter()]
-  [boolean]
-  $switchlessStorageConfig = $false
+  [string]
+  $switchlessStorageConfig = 'switched'
 )
 
 Function log {
@@ -48,13 +48,13 @@ $ErrorActionPreference = 'Stop'
 log 'Creating Hyper-V switches...'
 $existingSwitches = Get-VMSwitch
 
-If (!$switchlessStorageConfig) {
+If ($switchlessStorageConfig -eq 'switched') {
   log 'Creating Hyper-V switches for switched storage configuration...'
   If ($existingSwitches.Name -notcontains 'external' ) { New-VMSwitch -Name external -AllowManagementOS:$true -NetAdapterName Ethernet }
   If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal -EnableIov $true }
   If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal -EnableIov $true }
   If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivate' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
-} Else {
+} ElseIf ($switchlessStorageConfig -eq 'switchless') {
   If ($hciNodeCount -gt 3) {
     log -message 'ERROR: Switchless storage configuration is only supported for 3 or fewer HCI nodes. Exiting script...'
     Write-Error 'ERROR: Switchless storage configuration is only supported for 3 or fewer HCI nodes. Exiting script...'
@@ -65,9 +65,9 @@ If (!$switchlessStorageConfig) {
   If ($existingSwitches.Name -notcontains 'external' ) { New-VMSwitch -Name external -AllowManagementOS:$true -NetAdapterName Ethernet }
   If ($existingSwitches.Name -notcontains 'hciNodeCompInternal' ) { New-VMSwitch -Name hciNodeCompInternal -SwitchType Internal -EnableIov $true }
   If ($existingSwitches.Name -notcontains 'hciNodeMgmtInternal' ) { New-VMSwitch -Name hciNodeMgmtInternal -SwitchType Internal -EnableIov $true }
-  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateA' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
-  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateB' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
-  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateC' ) { New-VMSwitch -Name hciNodeStoragePrivate -SwitchType Private -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateA' ) { New-VMSwitch -Name hciNodeStoragePrivateA -SwitchType Private -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateB' ) { New-VMSwitch -Name hciNodeStoragePrivateB -SwitchType Private -EnableIov $true }
+  If ($existingSwitches.Name -notcontains 'hciNodeStoragePrivateC' ) { New-VMSwitch -Name hciNodeStoragePrivateC -SwitchType Private -EnableIov $true }
 }
 
 # add IPs for host
@@ -180,11 +180,11 @@ ForEach ($existingVM in (Get-VM)) {
   If ($existingNICs.name -notcontains 'comp0') { $existingVM | Add-VMNetworkAdapter -Name comp0 -SwitchName hciNodeCompInternal -DeviceNaming On }
   If ($existingNICs.name -notcontains 'comp1') { $existingVM | Add-VMNetworkAdapter -Name comp1 -SwitchName hciNodeCompInternal -DeviceNaming On }
 
-  If (!$switchlessStorageConfig) {
+  If ($switchlessStorageConfig -eq 'switched') {
     log "Adding NICs to VM '$($existingVM.name)' for switched storage configuration..."
     If ($existingNICs.name -notcontains 'smb0') { $existingVM | Add-VMNetworkAdapter -Name smb0 -SwitchName hciNodeStoragePrivate -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '711' -NativeVlanId 0 }
     If ($existingNICs.name -notcontains 'smb1') { $existingVM | Add-VMNetworkAdapter -Name smb1 -SwitchName hciNodeStoragePrivate -DeviceNaming On -Passthru | Set-VMNetworkAdapterVlan -Trunk -AllowedVlanIdList '712' -NativeVlanId 0 }
-  } Else {
+  } ElseIf ($switchlessStorageConfig -eq 'switchless') {
     log "Adding NICs to VM '$($existingVM.name)' for switchless storage configuration..."
 
     switch ($existingVM.Name[-1]) {

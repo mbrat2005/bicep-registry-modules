@@ -27,6 +27,17 @@ Function log {
   Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
 }
 
+Function Test-ADConnection {
+  try {
+    If ((Get-Service -Name 'ADWS' -ErrorAction SilentlyContinue).Status -ne 'Running') { return $false }
+    $env:ADPS_LoadDefaultDrive = 0
+    Import-Module -Name ActiveDirectory -ErrorAction Stop
+    [bool](Get-ADDomainController -Server $env:COMPUTERNAME -ErrorAction SilentlyContinue)
+  } catch {
+    $false
+  }
+}
+
 # THANKS https://github.com/bfrankMS/CreateHypervVms/blob/master/Scenario-AzStackHCI/CreateVhdxFromIso.ps1
 Function New-VHDXFromISO {
   # Parameter help description
@@ -218,21 +229,36 @@ PARTITION_MSFT_RECOVERY_GUID - de94bba4-06d1-4d40-a16a-bfd50179d6ac   # Recovery
 $ErrorActionPreference = 'Stop'
 
 # download HCI VHDX or ISO
-mkdir c:\ISOs
+If (!(Test-Path -Path 'c:\ISOs')) {
+  log 'Creating c:\ISOs directory...'
+  mkdir c:\ISOs
+} Else {
+  log 'ISOs directory already exists, skipping...'
+}
+
 If ($hciVHDXDownloadURL) {
   log 'Downloading HCI VHDX...'
   If (! (Test-Path c:\ISOs\hci_os.vhdx)) {
     [System.Net.WebClient]::new().DownloadFile($hciVHDXDownloadURL, 'c:\isos\hci_os.vhdx')
+  } Else {
+    log 'HCI VHDX already exists, skipping download...'
   }
 } ElseIf ($hciISODownloadURL) {
   log 'Downloading HCI ISO...'
   If (! (Test-Path c:\ISOs\hci_os.iso)) {
     [System.Net.WebClient]::new().DownloadFile($hciISODownloadURL, 'c:\isos\hci_os.iso')
+  } Else {
+    log 'HCI ISO already exists, skipping download...'
   }
 
   # convert ISO to VHDX
-  log 'Converting ISO to VHDX...'
-  New-VHDXFromISO -IsoPath 'c:\isos\hci_os.iso' -VhdxPath 'c:\isos\hci_os.vhdx'
+  If (!(Test-Path 'c:\isos\hci_os.vhdx')) {
+    log 'Converting ISO to VHDX...'
+    New-VHDXFromISO -IsoPath 'c:\isos\hci_os.iso' -VhdxPath 'c:\isos\hci_os.vhdx'
+  } Else {
+    log 'HCI VHDX already exists, skipping conversion...'
+
+  }
 } Else {
   log 'No download URL provided, cannot continue...'
   Write-Error 'No download URL provided, cannot continue...' -ErrorAction Stop
@@ -241,7 +267,12 @@ If ($hciVHDXDownloadURL) {
 # create mount point directories on C:\
 log 'Creating mount points...'
 For ($i = 0; $i -lt $hciNodeCount; $i++) {
-  mkdir "c:\diskmounts\hcinode$($i + 1)"
+  $dirPath = "c:\diskmounts\hcinode$($i + 1)"
+  If (!(Test-Path -Path $dirPath)) {
+    mkdir $dirPath
+  } Else {
+    log "Mount point '$dirPath' already exists, skipping..."
+  }
 }
 
 # format and mount disks
@@ -260,6 +291,8 @@ log 'Copying VHDX to mount points...'
 For ($i = 0; $i -lt $hciNodeCount; $i++) {
   If (!(Test-Path -Path "c:\diskmounts\hcinode$($i + 1)\hci_os.vhdx")) {
     Copy-Item -Path c:\isos\hci_os.vhdx -Destination "c:\diskmounts\hcinode$($i + 1)"
+  } Else {
+    log "HCI VHDX already exists at 'c:\diskmounts\hcinode$($i + 1)', skipping..."
   }
 }
 
@@ -274,10 +307,16 @@ Install-RemoteAccess -VpnType RoutingOnly
 Set-Service -Name RemoteAccess -StartupType Automatic -PassThru | Start-Service
 
 # install domain controller
-log 'Installing AD forest controller...'
-Import-Module 'C:\Windows\System32\WindowsPowerShell\v1.0\Modules\ADDSDeployment\ADDSDeployment.psd1'
-$ADRecoveryPassword = ConvertTo-SecureString -Force -AsPlainText (New-Guid).guid
-Install-ADDSForest -DomainName hci.local -DomainNetbiosName hci -ForestMode Default -DomainMode Default -InstallDns:$true -SafeModeAdministratorPassword $ADRecoveryPassword -NoRebootOnCompletion:$true -Force:$true
+log 'Checking whether AD is installed...'
+If (!(Test-ADConnection)) {
+  log 'AD is not installed, installing...'
+  Import-Module 'C:\Windows\System32\WindowsPowerShell\v1.0\Modules\ADDSDeployment\ADDSDeployment.psd1'
+
+  $ADRecoveryPassword = ConvertTo-SecureString -Force -AsPlainText (New-Guid).guid
+  Install-ADDSForest -DomainName hci.local -DomainNetbiosName hci -ForestMode Default -DomainMode Default -InstallDns:$true -SafeModeAdministratorPassword $ADRecoveryPassword -NoRebootOnCompletion:$true -Force:$true
+} Else {
+  log 'AD is already installed, skipping...'
+}
 
 log 'Adding DNS forwarders...'
 Import-Module 'C:\Windows\System32\WindowsPowerShell\v1.0\Modules\DnsServer\DnsServer.psd1'

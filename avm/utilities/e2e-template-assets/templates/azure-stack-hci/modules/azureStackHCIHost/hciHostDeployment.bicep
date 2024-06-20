@@ -269,7 +269,7 @@ resource runCommand5 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       }
       {
         name: 'switchlessStorageConfig'
-        value: switchlessStorageConfig
+        value: switchlessStorageConfig ? 'switchless' : 'switched'
       }
     ]
     protectedParameters: [

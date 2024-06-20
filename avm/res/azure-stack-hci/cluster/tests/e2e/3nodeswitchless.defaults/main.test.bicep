@@ -5,7 +5,7 @@ targetScope = 'subscription'
 param name string = 'hcicluster'
 param location string = 'eastus'
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
-param serviceShort string = 'ashcmin'
+param serviceShort string = 'ashc3nsmin'
 param namePrefix string = '#_namePrefix_#'
 param deploymentPrefix string = take(namePrefix, 8)
 // credentials for the deployment and ongoing lifecycle management
@@ -18,7 +18,8 @@ param arbDeploymentSPObjectId string = '\${{secrets.AZURESTACKHCI_azureStackHCIS
 @secure()
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string = '\${{secrets.arbDeploymentServicePrincipalSecret}}'
-param clusterNodeNames array = ['hcinode1', 'hcinode2']
+param switchlessStorageConfig bool = true
+param clusterNodeNames array = ['hcinode1', 'hcinode2', 'hcinode3']
 param domainFqdn string = 'hci.local'
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
 param subnetMask string = '255.255.255.0'
@@ -26,8 +27,8 @@ param defaultGateway string = '172.20.0.1'
 param startingIPAddress string = '172.20.0.2'
 param endingIPAddress string = '172.20.0.7'
 param dnsServers array = ['172.20.0.1']
-param vnetSubnetId string = ''
 param customLocationName string = '${serviceShort}-location'
+param vnetSubnetId string = ''
 param hciISODownloadURL string = ''
 param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
 
@@ -100,16 +101,55 @@ param networkIntents networkIntent[] = [
   }
 ]
 
-param storageConnectivitySwitchless bool = false
-param enableStorageAutoIp bool = true
+param enableStorageAutoIp bool = false
 param storageNetworks storageNetworksArrayType = [
   {
     adapterName: 'smb0'
     vlan: '711'
+    storageAdapterIPInfo: [
+      {
+        //switch A
+        physicalNode: 'hcinode1'
+        ipv4Address: '10.71.1.1'
+        subnetMask: '255.255.255.0'
+      }
+      {
+        //switch A
+        physicalNode: 'hcinode2'
+        ipv4Address: '10.71.1.2'
+        subnetMask: '255.255.255.0'
+      }
+      {
+        // switch B
+        physicalNode: 'hcinode3'
+        ipv4Address: '10.71.2.3'
+        subnetMask: '255.255.255.0'
+      }
+    ]
   }
   {
     adapterName: 'smb1'
-    vlan: '712'
+    vlan: '711'
+    storageAdapterIPInfo: [
+      {
+        // switch B
+        physicalNode: 'hcinode1'
+        ipv4Address: '10.71.2.1'
+        subnetMask: '255.255.255.0'
+      }
+      {
+        // switch C
+        physicalNode: 'hcinode2'
+        ipv4Address: '10.71.3.2'
+        subnetMask: '255.255.255.0'
+      }
+      {
+        //switch C
+        physicalNode: 'hcinode3'
+        ipv4Address: '10.71.3.3'
+        subnetMask: '255.255.255.0'
+      }
+    ]
   }
 ]
 
@@ -141,7 +181,7 @@ module hciDependencies './dependencies.bicep' = {
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     vnetSubnetId: vnetSubnetId
     hciNodeCount: length(clusterNodeNames)
-    switchlessStorageConfig: storageConnectivitySwitchless
+    switchlessStorageConfig: switchlessStorageConfig
     hciISODownloadURL: hciISODownloadURL
     hciVHDXDownloadURL: hciVHDXDownloadURL
   }
@@ -169,7 +209,7 @@ module cluster_validate '../../../main.bicep' = {
     keyVaultName: keyVaultName
     networkIntents: networkIntents
     startingIPAddress: startingIPAddress
-    storageConnectivitySwitchless: storageConnectivitySwitchless
+    storageConnectivitySwitchless: switchlessStorageConfig
     storageNetworks: storageNetworks
     subnetMask: subnetMask
   }
@@ -198,7 +238,7 @@ module testDeployment '../../../main.bicep' = {
     keyVaultName: keyVaultName
     networkIntents: networkIntents
     startingIPAddress: startingIPAddress
-    storageConnectivitySwitchless: storageConnectivitySwitchless
+    storageConnectivitySwitchless: switchlessStorageConfig
     storageNetworks: storageNetworks
     subnetMask: subnetMask
   }

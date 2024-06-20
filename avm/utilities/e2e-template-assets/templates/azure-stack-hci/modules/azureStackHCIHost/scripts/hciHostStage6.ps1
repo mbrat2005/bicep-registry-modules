@@ -89,6 +89,7 @@ Set-AdAccountPassword -Identity 'deployUser' -NewPassword (ConvertTo-SecureStrin
 log 'Initializing Azure Arc on HCI nodes...'
 
 # wait for VMs to reach 'Running' state
+log 'Checking that VMs are running...'
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 while ((Get-VM | Where-Object State -NE 'Running') -and $stopwatch.Elapsed.TotalMinutes -lt 15) {
   log "Waiting for HCI node VMs to reach 'Running' state. Current state: $((Get-VM) | Select-Object Name,State)..."
@@ -103,6 +104,7 @@ If ($stopwatch.Elapsed.TotalMinutes -ge 15) {
 
 log "Creating PSSessions to HCI nodes [$((Get-VM).Name -join ',')]..."
 try {
+  $VMs = Get-VM
   If ($adminCredOld) {
     log 'Using old local administrator credential from exported CliXML...'
     $localAdminCred = $adminCredOld
@@ -110,19 +112,48 @@ try {
     log 'Using new local administrator credential from parameter input...'
     $localAdminCred = $adminCred
   }
-  $sessions = New-PSSession -VMName (Get-VM).Name -Credential $localAdminCred -ErrorAction Stop
+  $sessions = New-PSSession -VMName $VMs.Name -Credential $localAdminCred -ErrorAction Stop
 
-  if ($sessions.Count -eq 2 -and $sessions.State -eq 'Opened') {
-    log "PSSessions to HCI nodes [$((Get-VM).Name -join ',')] created successfully."
+  log "Created '$(($sessions | Where-Object State -EQ 'Opened').Count)' PSSessions to HCI nodes [$($VMs.Name -join ',')]."
+} catch {
+  If ($_ -like '*The credential is invalid*') {
+    log 'Failed to create PSSessions with "The credential is invalid" error. This is likely due to the password not matching the local administrator password on the HCI nodes. Retrying with the older passwords...'
+
+    $credFiles = Get-ChildItem -Path 'C:\temp\*' -Include 'hciHostDeployAdminCred*.xml' -Exclude 'hciHostDeployAdminCred.xml'
+
+    If ($credFiles.count -eq 0) {
+      log 'No old credential files found. Exiting...'
+      Write-Error 'No old credential files found. Exiting...'
+      Exit 1
+    }
+
+    :retryCreds ForEach ($credFile in $credFiles) {
+      log "Attempting login with credential file '$($credFile.name)'..."
+      $localAdminCred = Import-Clixml -Path $credFile.FullName
+
+      try {
+        $sessions = New-PSSession -VMName $VMs.Name -Credential $localAdminCred -ErrorAction Stop
+
+        If (($sessions | Where-Object State -EQ 'Opened').count -eq $VMs.Count) {
+          log "Created '$(($sessions | Where-Object State -EQ 'Opened').Count)' PSSessions to HCI nodes [$($VMs.Name -join ',')]."
+          break retryCreds
+        }
+      } catch {
+        log "Failed to create PSSessions with credential file '$($credFile.name)'. Error: $_"
+        continue
+      } finally {
+        If (($sessions | Where-Object State -EQ 'Opened').count -eq $VMs.Count) {
+          log "Created '$(($sessions | Where-Object State -EQ 'Opened').Count)' PSSessions to HCI nodes [$($VMs.Name -join ',')]."
+          $adminCredOld = $localAdminCred
+        }
+      }
+
+    }
   } else {
-    log "Failed to create PSSessions to HCI nodes [$((Get-VM).Name -join ',')]. Exiting..."
-    Write-Error "Failed to create PSSessions to HCI nodes [$((Get-VM).Name -join ',')]. Exiting..."
+    log "Failed to create PSSessions to HCI nodes [$($VMs.Name -join ',')]. $sessions $_ Exiting..."
+    Write-Error "Failed to create PSSessions to HCI nodes [$($VMs.Name -join ',')]. $sessions $_ Exiting..."
     Exit 1
   }
-} catch {
-  log "Failed to create PSSessions to HCI nodes [$((Get-VM).Name -join ',')]. $_ Exiting..."
-  Write-Error "Failed to create PSSessions to HCI nodes [$((Get-VM).Name -join ',')]. $_ Exiting..."
-  Exit 1
 }
 
 # update local admin password to match the adminPw value
@@ -140,6 +171,12 @@ If ($adminCredOld) {
   } -ArgumentList $adminPw, $adminUsername
 } Else {
   log "Password for '$($adminUsername)' should already match the adminPw value..."
+}
+
+# disable IPv6 on all HCI nodes
+log 'Disabling IPv6 on HCI nodes...'
+Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
+  reg add hklm\system\currentcontrolset\services\tcpip6\parameters /v DisabledComponents /t REG_DWORD /d 0xFF /f
 }
 
 ## test node internet connection - required for Azure Arc initialization

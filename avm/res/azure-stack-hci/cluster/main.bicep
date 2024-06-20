@@ -97,16 +97,16 @@ param enableStorageAutoIp bool = true
 param storageNetworks storageNetworksArrayType
 
 @description('Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01.')
-param customLocationName string = '${deploymentPrefix}_cl'
+param customLocationName string
 
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
 
-@description('Optional. The name of the storage account to be used as the witness for the HCI Windows Failover Cluster.')
-param clusterWitnessStorageAccountName string = '${deploymentPrefix}witness'
+@description('Required. The name of the storage account to be used as the witness for the HCI Windows Failover Cluster.')
+param clusterWitnessStorageAccountName string
 
-@description('Optional. The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster.')
-param keyVaultName string = 'kvhci-${deploymentPrefix}'
+@description('Required. The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster.')
+param keyVaultName string
 
 @description('Optional. Array of role assignments to create.')
 param roleAssignments roleAssignmentType
@@ -126,7 +126,7 @@ var builtInRoleNames = {
   )
 }
 
-resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+resource #_namePrefix_#Telemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
   name: take(
     '46d3xbcp.res.azurestackhci-cluster.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}',
     64
@@ -135,12 +135,12 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
     mode: 'Incremental'
     template: {
       '$schema': 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
-      contentVersion: '1.0.0.0'
+      contentVersion: '#_moduleVersion_#.0'
       resources: []
       outputs: {
         telemetry: {
           type: 'String'
-          value: 'For more information, see https://aka.ms/avm/TelemetryInfo'
+          value: 'For more information, see https://aka.ms/#_namePrefix_#/TelemetryInfo'
         }
       }
     }

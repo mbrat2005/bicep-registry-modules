@@ -1,6 +1,7 @@
 param location string
 
 param clusterWitnessStorageAccountName string
+param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
 param softDeleteRetentionDays int
 param logsRetentionInDays int
@@ -33,8 +34,6 @@ var arbDeploymentServicePrincipalValue = base64('${arbDeploymentAppId}:${arbDepl
 
 var storageAccountType = 'Standard_LRS'
 
-var diagnosticStorageAccountName = '${deploymentPrefix}diag'
-
 var azureConnectedMachineResourceManagerRoleID = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
   'f5819b54-e033-4d82-ac66-4fec3cbf3f4c'
@@ -61,7 +60,7 @@ module ARBDeploymentSPNSubscriptionRoleAssignmnent 'ashciARBSPRoleAssignment.bic
 }
 
 resource diagnosticStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: diagnosticStorageAccountName
+  name: keyVaultDiagnosticStorageAccountName
   location: location
   sku: {
     name: storageAccountType
