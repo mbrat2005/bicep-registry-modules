@@ -48,9 +48,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
 
 module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
-  params: {
-    location: location
-  }
+  params: {}
 }
 
 module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
