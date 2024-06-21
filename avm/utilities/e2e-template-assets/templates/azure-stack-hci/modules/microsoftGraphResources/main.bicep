@@ -1,10 +1,5 @@
 provider microsoftGraph
 
-param location string
-param keyId string = newGuid()
-param arbDeploymentAppCredEnd string
-param now string = utcNow('yyyy-MM-ddTHH:mm:ssZ')
-
 // TO-DO: Bicep Graph does not support adding client secret permissions to service principals or apps. This may be a viable solution when HCI moves away from client secrets.
 /* resource clientApp 'Microsoft.Graph/applications@v1.0' = {
   uniqueName: 'hciArcRB'

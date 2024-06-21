@@ -1,4 +1,3 @@
-param arbDeploymentAppCredEnd string = dateTimeAdd(utcNow(), 'P7D', 'yyyy-MM-ddTHH:mm:ssZ')
 @minLength(4)
 @maxLength(8)
 param deploymentPrefix string
@@ -50,7 +49,6 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
 module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
   params: {
-    arbDeploymentAppCredEnd: arbDeploymentAppCredEnd
     location: location
   }
 }
