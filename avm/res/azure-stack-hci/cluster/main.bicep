@@ -10,7 +10,7 @@ param name string
 @description('Optional. Location for all resources.')
 param location string = resourceGroup().location
 
-@sys.description('Optional. Tags of the resource.')
+@description('Optional. Tags of the resource.')
 param tags object?
 
 @description('Required. First must pass with this parameter set to Validate prior running with it set to Deploy. If either Validation or Deployment phases fail, fix the issue, then resubmit the template with the same deploymentMode to retry.')

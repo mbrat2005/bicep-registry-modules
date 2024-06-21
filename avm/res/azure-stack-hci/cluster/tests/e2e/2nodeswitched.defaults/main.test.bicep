@@ -1,36 +1,65 @@
+targetScope = 'subscription'
+
 metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration'
 metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
 
-targetScope = 'subscription'
+@description('Optional. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
+@maxLength(15)
+@minLength(4)
 param name string = 'hcicluster'
+@description('Optional. Location for all resources.')
 param location string = 'eastus'
+@description('Optional. The name of the resource group to deploy for testing purposes.')
+@maxLength(90)
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
+@description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'ashcmin'
+@description('Optional. A token to inject into the name of each resource.')
 param namePrefix string = '#_namePrefix_#'
-param deploymentPrefix string = take(namePrefix, 8)
-// credentials for the deployment and ongoing lifecycle management
+@minLength(4)
+@maxLength(8)
+@description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
+param deploymentPrefix string = namePrefix
+@description('Optional. The username of the LCM deployment user created in Active Directory.')
 param deploymentUsername string = 'deployUser'
+@description('Optional. The password of the LCM deployment user and local administrator accounts.')
 @secure()
 param localAdminAndDeploymentUserPass string = newGuid()
+@description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
+@description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment.')
 param arbDeploymentAppId string = '\${{secrets.AZURESTACKHCI_azureStackHCIAppId}}'
+@description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment.')
 param arbDeploymentSPObjectId string = '\${{secrets.AZURESTACKHCI_azureStackHCISpObjectId}}'
+@description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment.')
 @secure()
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string = '\${{secrets.arbDeploymentServicePrincipalSecret}}'
+@description('Optional. The names of the cluster nodes to be deployed.')
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
+@description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
+@description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')
 param domainOUPath string = 'OU=HCI,DC=hci,DC=local'
+@description('Optional. The subnet mask for the cluster network.')
 param subnetMask string = '255.255.255.0'
+@description('Optional. The default gateway for the cluster network.')
 param defaultGateway string = '172.20.0.1'
+@description('Optional. The starting IP address for the cluster network.')
 param startingIPAddress string = '172.20.0.2'
+@description('Optional. The ending IP address for the cluster network.')
 param endingIPAddress string = '172.20.0.7'
+@description('Optional. The DNS servers for the cluster network.')
 param dnsServers array = ['172.20.0.1']
+@description('Optional. The ID of the subnet in the VNet where the cluster will be deployed. If omitted, a new VNET will be deployed.')
 param vnetSubnetId string = ''
+@description('Optional. The name of the location for the custom location.')
 param customLocationName string = '${serviceShort}-location'
+@description('Conditional. The URL to download the Azure Stack HCI ISO. Required if hciVHDXDownloadURL is not supplied.')
 param hciISODownloadURL string = ''
+@description('Conditional. The URL to download the Azure Stack HCI VHDX. Required if hciISODownloadURL is not supplied.')
 param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
-
+@description('Optional. The network intents for the cluster.')
 param networkIntents networkIntent[] = [
   {
     adapter: ['mgmt']
@@ -99,9 +128,9 @@ param networkIntents networkIntent[] = [
     trafficType: ['Storage']
   }
 ]
-
-param storageConnectivitySwitchless bool = false
+@description('Optional. Enable storage auto IP configuration. If false, storageNetworks must include IP configurations.')
 param enableStorageAutoIp bool = true
+@description('Optional. The storage networks for the cluster.')
 param storageNetworks storageNetworksArrayType = [
   {
     adapterName: 'smb0'
@@ -141,7 +170,7 @@ module hciDependencies './dependencies.bicep' = {
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     vnetSubnetId: vnetSubnetId
     hciNodeCount: length(clusterNodeNames)
-    switchlessStorageConfig: storageConnectivitySwitchless
+    switchlessStorageConfig: false
     hciISODownloadURL: hciISODownloadURL
     hciVHDXDownloadURL: hciVHDXDownloadURL
   }
@@ -169,7 +198,7 @@ module cluster_validate '../../../main.bicep' = {
     keyVaultName: keyVaultName
     networkIntents: networkIntents
     startingIPAddress: startingIPAddress
-    storageConnectivitySwitchless: storageConnectivitySwitchless
+    storageConnectivitySwitchless: false
     storageNetworks: storageNetworks
     subnetMask: subnetMask
   }
@@ -198,7 +227,7 @@ module testDeployment '../../../main.bicep' = {
     keyVaultName: keyVaultName
     networkIntents: networkIntents
     startingIPAddress: startingIPAddress
-    storageConnectivitySwitchless: storageConnectivitySwitchless
+    storageConnectivitySwitchless: false
     storageNetworks: storageNetworks
     subnetMask: subnetMask
   }
