@@ -8,7 +8,7 @@ metadata description = 'This test deploys an Azure VM to host a 2 node switched 
 @minLength(4)
 param name string = 'hcicluster'
 @description('Optional. Location for all resources.')
-param location string = 'eastus'
+param location string = deployment().location
 @description('Optional. The name of the resource group to deploy for testing purposes.')
 @maxLength(90)
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
