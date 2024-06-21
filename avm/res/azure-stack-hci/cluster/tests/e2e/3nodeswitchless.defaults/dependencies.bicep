@@ -26,6 +26,7 @@ param hciISODownloadURL string
 param clusterWitnessStorageAccountName string
 param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
+param hciResourceProviderObjectId string?
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -46,7 +47,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
-module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = {
+module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (hciResourceProviderObjectId == '') {
   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
   params: {}
 }
@@ -67,7 +68,9 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: microsoftGraphResources.outputs.hciRPServicePrincipalId
+    hciResourceProviderObjectId: (hciResourceProviderObjectId == '')
+      ? microsoftGraphResources.outputs.hciRPServicePrincipalId
+      : hciResourceProviderObjectId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername
