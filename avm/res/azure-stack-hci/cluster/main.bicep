@@ -126,7 +126,8 @@ var builtInRoleNames = {
   )
 }
 
-resource #_namePrefix_#Telemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
+#disable-next-line no-deployments-resources
+resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
   name: take(
     '46d3xbcp.res.azurestackhci-cluster.${replace('-..--..-', '.', '-')}.${substring(uniqueString(deployment().name, location), 0, 4)}',
     64
@@ -135,18 +136,19 @@ resource #_namePrefix_#Telemetry 'Microsoft.Resources/deployments@2023-07-01' = 
     mode: 'Incremental'
     template: {
       '$schema': 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
-      contentVersion: '#_moduleVersion_#.0'
+      contentVersion: '0.0.0'
       resources: []
       outputs: {
         telemetry: {
           type: 'String'
-          value: 'For more information, see https://aka.ms/#_namePrefix_#/TelemetryInfo'
+          value: 'For more information, see https://aka.ms/avm/TelemetryInfo'
         }
       }
     }
   }
 }
 
+// cluster resource is created when deploymentMode is set to 'Validate'
 resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' = if (deploymentMode == 'Validate') {
   name: name
   identity: {
@@ -157,7 +159,8 @@ resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' = if (dep
   tags: tags
 }
 
-resource clusterExisting 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' existing = if (deploymentMode != 'Validate') {
+// existing cluster resource is used when deploymentMode is set to 'Deploy'
+resource clusterExisting 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' existing = if (deploymentMode == 'Deploy') {
   name: name
 }
 

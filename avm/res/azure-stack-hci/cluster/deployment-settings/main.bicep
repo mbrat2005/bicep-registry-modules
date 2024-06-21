@@ -86,7 +86,6 @@ param dnsServers array
 @description('Required. An array of Network ATC Network Intent objects that define the Compute, Management, and Storage network configuration for the cluster.')
 param networkIntents array
 
-// define network intent for the cluster
 @description('Required. Specify whether the Storage Network connectivity is switched or switchless.')
 param storageConnectivitySwitchless bool
 
@@ -96,14 +95,15 @@ param enableStorageAutoIp bool = true
 @description('Required. An array of JSON objects that define the storage network configuration for the cluster. Each object should contain the adapterName, VLAN properties, and (optionally) IP configurations.')
 param storageNetworks array
 
+// other cluster configuration parameters
 @description('Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01.')
-param customLocationName string = '${deploymentPrefix}_cl'
+param customLocationName string
 
-@description('Optional. The name of the storage account to be used as the witness for the HCI Windows Failover Cluster.')
-param clusterWitnessStorageAccountName string = '${deploymentPrefix}witness'
+@description('Required. The name of the storage account to be used as the witness for the HCI Windows Failover Cluster.')
+param clusterWitnessStorageAccountName string
 
-@description('Optional. The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster.')
-param keyVaultName string = 'kvhci-${deploymentPrefix}'
+@description('Required. The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster.')
+param keyVaultName string
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -134,13 +134,13 @@ resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings
         {
           deploymentData: {
             securitySettings: {
-              hvciProtection: true
-              drtmProtection: true
+              hvciProtection: securityConfiguration.hvciProtection
+              drtmProtection: securityConfiguration.drtmProtection
               driftControlEnforced: securityConfiguration.driftControlEnforced
               credentialGuardEnforced: securityConfiguration.credentialGuardEnforced
               smbSigningEnforced: securityConfiguration.smbSigningEnforced
               smbClusterEncryption: securityConfiguration.smbClusterEncryption
-              sideChannelMitigationEnforced: true
+              sideChannelMitigationEnforced: securityConfiguration.sideChannelMitigationEnforced
               bitlockerBootVolume: securityConfiguration.bitlockerBootVolume
               bitlockerDataVolumes: securityConfiguration.bitlockerDataVolumes
               wdacEnforced: securityConfiguration.wdacEnforced
@@ -178,11 +178,9 @@ resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings
             physicalNodes: [
               for hciNode in arcNodeResourceIds: {
                 name: reference(hciNode, '2022-12-27', 'Full').properties.displayName
-                // Getting the IP from the first management NIC of the node based on the first NIC name in the managementIntentAdapterNames array parameter
-                //
-                // During deployment, a management vNIC will be created with the name 'vManagement(managment)' and the IP config will be moved to the new vNIC--
-                // this causes a null-index error when re-running the template mid-deployment, after net intents have applied. To workaround, change the name of
-                // the management NIC in parameter file to 'vManagement(managment)'
+                // Getting the IP from the first NIC of the node with a default gateway. Only the first management NIC should have a gateway defined.
+                // This reference call requires that the 'DeviceManagementExtension' extension be fully initialized on each node, which create the
+                // referenced edgeDevices sub-resource, contain the NIC configuration.
                 ipv4Address: (filter(
                   reference('${hciNode}/providers/microsoft.azurestackhci/edgeDevices/default', '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails,
                   nic => nic.?defaultGateway != null
