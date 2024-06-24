@@ -27,14 +27,14 @@ param deploymentUsername string = 'deployUser'
 param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
-@description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment.')
-param arbDeploymentAppId string = '\${{secrets.AZURESTACKHCI_azureStackHCIAppId}}'
-@description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment.')
-param arbDeploymentSPObjectId string = '\${{secrets.AZURESTACKHCI_azureStackHCISpObjectId}}'
-@description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment.')
+@description('Optional. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
+param arbDeploymentAppId string?
+@description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
+param arbDeploymentSPObjectId string?
+@description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string = '\${{secrets.arbDeploymentServicePrincipalSecret}}'
+param arbDeploymentServicePrincipalSecret string?
 @description('Optional. The names of the cluster nodes to be deployed.')
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
