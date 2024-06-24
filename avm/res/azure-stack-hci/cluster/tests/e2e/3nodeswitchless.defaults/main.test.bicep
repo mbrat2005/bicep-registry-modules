@@ -15,7 +15,7 @@ param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'ashc3nmin'
 @description('Optional. A token to inject into the name of each resource.')
-param namePrefix string = '#_namePrefix_#'
+param namePrefix string = 'avm'
 @minLength(4)
 @maxLength(8)
 @description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
@@ -35,8 +35,6 @@ param arbDeploymentSPObjectId string?
 @secure()
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string?
-@description('Optional. The names of the cluster nodes to be deployed.')
-param clusterNodeNames array = ['hcinode1', 'hcinode2']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')
@@ -197,7 +195,7 @@ module hciDependencies './dependencies.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
-    clusterNodeNames: clusterNodeNames
+    clusterNodeNames: ['hcinode1', 'hcinode2', 'hcinode3']
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
@@ -228,7 +226,7 @@ module cluster_validate '../../../main.bicep' = {
   params: {
     name: name
     customLocationName: customLocationName
-    clusterNodeNames: clusterNodeNames
+    clusterNodeNames: ['hcinode1', 'hcinode2', 'hcinode3']
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     defaultGateway: defaultGateway
     deploymentMode: 'Validate'
