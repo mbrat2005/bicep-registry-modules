@@ -11,6 +11,10 @@ param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
 
+// =================================//
+// Deploy Host VM Infrastructure    //
+// =================================//
+
 // vm managed identity used for HCI Arc onboarding
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
   location: location
@@ -154,6 +158,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   }
 }
 
+// ====================//
+// Install Host Roles  //
+// ====================//
+
 // installs roles and features required for Azure Stack HCI Host VM
 resource runCommand1 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' = {
   parent: vm
@@ -193,6 +201,10 @@ resource wait1 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   }
   dependsOn: [runCommand2]
 }
+
+// ======================//
+// Configure Host Roles  //
+// ======================//
 
 // initializes and mounts data disks, downloads HCI VHDX, configures the Azure Stack HCI Host VM with AD, routing, DNS, DHCP
 resource runCommand3 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' = {
@@ -249,6 +261,10 @@ resource wait2 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   dependsOn: [runCommand4]
 }
 
+// ===========================//
+// Create HCI Node Guest VMs  //
+// ===========================//
+
 // creates hyper-v resources, configures NAT, builds and preps the Azure Stack HCI node VMs
 resource runCommand5 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' = {
   parent: vm
@@ -282,6 +298,10 @@ resource runCommand5 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
   }
   dependsOn: [wait2]
 }
+
+// ================================================//
+// Initialize Arc on HCI Node VMs and AD for HCI  //
+// ==============================================//
 
 // prepares AD for ASHCI onboarding, initiates Arc onboarding of HCI node VMs
 resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' = {

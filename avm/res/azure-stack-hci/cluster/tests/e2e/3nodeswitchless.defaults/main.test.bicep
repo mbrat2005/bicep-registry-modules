@@ -15,7 +15,7 @@ param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'ashc3nmin'
 @description('Optional. A token to inject into the name of each resource.')
-param namePrefix string = 'avm'
+param namePrefix string = 'hci'
 @minLength(4)
 @maxLength(8)
 @description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
@@ -28,13 +28,13 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Optional. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string?
+param arbDeploymentAppId string
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentSPObjectId string?
+param arbDeploymentSPObjectId string
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string?
+param arbDeploymentServicePrincipalSecret string
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')
@@ -210,7 +210,7 @@ module hciDependencies './dependencies.bicep' = {
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     vnetSubnetId: vnetSubnetId
-    hciNodeCount: length(clusterNodeNames)
+    hciNodeCount: 3
     switchlessStorageConfig: true
     hciISODownloadURL: hciISODownloadURL
     hciVHDXDownloadURL: hciVHDXDownloadURL
@@ -254,7 +254,7 @@ module testDeployment '../../../main.bicep' = {
   scope: resourceGroup
   params: {
     name: name
-    clusterNodeNames: clusterNodeNames
+    clusterNodeNames: ['hcinode1', 'hcinode2', 'hcinode3']
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     customLocationName: customLocationName
     defaultGateway: defaultGateway

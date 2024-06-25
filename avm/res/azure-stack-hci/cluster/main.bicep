@@ -86,7 +86,6 @@ param dnsServers array
 @description('Required. An array of Network ATC Network Intent objects that define the Compute, Management, and Storage network configuration for the cluster.')
 param networkIntents networkIntent[]
 
-// define network intent for the cluster
 @description('Required. Specify whether the Storage Network connectivity is switched or switchless.')
 param storageConnectivitySwitchless bool
 
