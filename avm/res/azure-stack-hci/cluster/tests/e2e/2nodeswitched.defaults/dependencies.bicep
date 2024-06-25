@@ -34,10 +34,11 @@ var arcNodeResourceIds = [
 
 var tenantId = subscription().tenantId
 
-resource arcGateway 'Microsoft.HybridCompute/gateways@2024-03-31-preview' = {
-  location: location
-  name: '${deploymentPrefix}-arcgateway-${serviceShort}'
-  properties: {
+module arcGateway '../../../arc-gateway/main.bicep' = {
+  name: 'arcGateway-${location}-${deploymentPrefix}'
+  params: {
+    location: location
+    name: 'arcg-${location}-${deploymentPrefix}'
     allowedFeatures: ['*']
     gatewayType: 'Public'
   }
@@ -53,7 +54,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
     switchlessStorageConfig: switchlessStorageConfig
-    arcGatewayId: arcGateway.id
+    arcGatewayId: arcGateway.outputs.resourceId
   }
 }
 
