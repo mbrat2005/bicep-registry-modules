@@ -3,8 +3,6 @@ metadata description = 'This module deploys an Arc Gateway.'
 metadata owner = 'Azure/module-maintainers'
 
 @description('Required. The name of the Arc Gateway to deploy')
-@maxLength(15)
-@minLength(4)
 param name string
 
 @description('Optional. Location for all resources.')

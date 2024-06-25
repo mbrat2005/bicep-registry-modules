@@ -47,7 +47,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
-module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (hciResourceProviderObjectId == '') {
+module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (null == hciResourceProviderObjectId) {
   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
   params: {}
 }
