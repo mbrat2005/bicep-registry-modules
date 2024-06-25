@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
-metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration'
-metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
+metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration'
+metadata description = 'This test deploys an Azure VM to host a 3 node switchless Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
 
 @description('Optional. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
 @maxLength(15)
@@ -15,7 +15,7 @@ param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'ashc3nmin'
 @description('Optional. A token to inject into the name of each resource.')
-param namePrefix string = 'hci'
+param namePrefix string = 'ashci'
 @minLength(4)
 @maxLength(8)
 @description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
