@@ -10,6 +10,7 @@ param hciISODownloadURL string = 'https://azurestackreleases.download.prss.micro
 param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
+param arcGatewayId string = '' // default to '' to support runCommand parameters requiring string values
 
 // =================================//
 // Deploy Host VM Infrastructure    //
@@ -336,6 +337,10 @@ resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       {
         name: 'adminUsername'
         value: localAdminUsername
+      }
+      {
+        name: 'arcGatewayId'
+        value: arcGatewayId
       }
     ]
     protectedParameters: [

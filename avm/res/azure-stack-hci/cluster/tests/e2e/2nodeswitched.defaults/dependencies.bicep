@@ -34,6 +34,15 @@ var arcNodeResourceIds = [
 
 var tenantId = subscription().tenantId
 
+resource arcGateway 'Microsoft.HybridCompute/gateways@2024-03-31-preview' = {
+  location: location
+  name: '${deploymentPrefix}-arcgateway-${serviceShort}'
+  properties: {
+    allowedFeatures: ['*']
+    gatewayType: 'Public'
+  }
+}
+
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
@@ -44,6 +53,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
     switchlessStorageConfig: switchlessStorageConfig
+    arcGatewayId: arcGateway.id
   }
 }
 
@@ -68,7 +78,7 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId ?? microsoftGraphResources.outputs.hciRPServicePrincipalId
+    hciResourceProviderObjectId: hciResourceProviderObjectId //?? microsoftGraphResources.outputs.hciRPServicePrincipalId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername

@@ -123,6 +123,14 @@ var builtInRoleNames = {
     'Microsoft.Authorization/roleDefinitions',
     '18d7d88d-d35e-4fb5-a5c3-7773c20a72d9'
   )
+  'Azure Stack HCI Administrator': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'bda0d508-adf1-4af0-9c28-88919fc3ae06'
+  )
+  'Windows Admin Center Administrator Login': subscriptionResourceId(
+    'Microsoft.Authorization/roleDefinitions',
+    'a6333a3e-0164-44c3-b281-7a577aff287f'
+  )
 }
 
 #disable-next-line no-deployments-resources

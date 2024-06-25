@@ -26,7 +26,11 @@ param (
 
   [Parameter()]
   [String]
-  $adminPw
+  $adminPw,
+
+  [Parameter()]
+  [String]
+  $arcGatewayId
 )
 
 Function log {
@@ -201,14 +205,20 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
   $tenantId = $args[3]
   $location = $args[4]
   $accountName = $args[5]
+  $arcGatewayId = $args[6]
+
+  $optionalParameters = @{}
+  $optionalParameters += @{
+    'arcGatewayId' = $arcGatewayId
+  }
 
   Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
   If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default }
   Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
   Install-Module Az.Resources, AzsHCI.ARCinstaller -Force
   Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
-  Invoke-AzStackHciArcInitialization -SubscriptionID $subscriptionId -ResourceGroup $resourceGroupName -TenantID $tenantId -Cloud AzureCloud -AccountID $accountName -ArmAccessToken $t -Region $location
-} -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName
+  Invoke-AzStackHciArcInitialization -SubscriptionID $subscriptionId -ResourceGroup $resourceGroupName -TenantID $tenantId -Cloud AzureCloud -AccountID $accountName -ArmAccessToken $t -Region $location @optionalParameters
+} -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName, $arcGatewayId
 
 log 'Waiting up to 30 minutes for Azure Arc initialization to complete on nodes...'
 
