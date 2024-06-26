@@ -37,13 +37,13 @@ var tenantId = subscription().tenantId
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
-    location: location
-    localAdminPassword: localAdminPassword
-    vnetSubnetID: vnetSubnetId
-    hciVHDXDownloadURL: hciVHDXDownloadURL
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
+    hciVHDXDownloadURL: hciVHDXDownloadURL
+    localAdminPassword: localAdminPassword
+    location: location
     switchlessStorageConfig: switchlessStorageConfig
+    vnetSubnetID: vnetSubnetId
   }
 }
 

@@ -30,7 +30,11 @@ param (
 
   [Parameter()]
   [String]
-  $arcGatewayId
+  $arcGatewayId,
+
+  [Parameter()]
+  [String]
+  $domainOUPath = 'OU=HCI,DC=HCI,DC=local'
 )
 
 Function log {
@@ -83,7 +87,7 @@ If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Registe
 If (!(Get-PackageProvider -Name Nuget -ListAvailable -ErrorAction SilentlyContinue)) { Install-PackageProvider -Name NuGet -Confirm:$false -Force }
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Install-Module AsHciADArtifactsPreCreationTool
-New-HciAdObjectsPreCreation -AzureStackLCMUserCredential $deployUserCred -AsHciOUName 'ou=hci,dc=hci,dc=local'
+New-HciAdObjectsPreCreation -AzureStackLCMUserCredential $deployUserCred -AsHciOUName $domainOUPath
 
 ## set the LCM deployUser password to the adminPw value - this aligns the password with the KeyVault during re-runs
 log 'Setting deployUser password...'

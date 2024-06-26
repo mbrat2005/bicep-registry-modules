@@ -162,6 +162,7 @@ module hciDependencies './dependencies.bicep' = {
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: localAdminAndDeploymentUserPass
+    domainOUPath: domainOUPath
     hciResourceProviderObjectId: hciResourceProviderObjectId
     keyVaultName: keyVaultName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName

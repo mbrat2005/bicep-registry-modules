@@ -27,6 +27,7 @@ param clusterWitnessStorageAccountName string
 param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
 param hciResourceProviderObjectId string?
+param domainOUPath string?
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -47,14 +48,15 @@ module arcGateway '../../../arc-gateway/main.bicep' = {
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
-    location: location
-    localAdminPassword: localAdminPassword
-    vnetSubnetID: vnetSubnetId
-    hciVHDXDownloadURL: hciVHDXDownloadURL
+    arcGatewayId: arcGateway.outputs.resourceId
+    domainOUPath: domainOUPath
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
+    hciVHDXDownloadURL: hciVHDXDownloadURL
+    localAdminPassword: localAdminPassword
+    location: location
     switchlessStorageConfig: switchlessStorageConfig
-    arcGatewayId: arcGateway.outputs.resourceId
+    vnetSubnetID: vnetSubnetId
   }
 }
 
