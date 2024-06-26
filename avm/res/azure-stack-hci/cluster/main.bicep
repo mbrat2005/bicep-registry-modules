@@ -224,17 +224,15 @@ resource cluster_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-0
 ]
 
 @description('The name of the cluster.')
-output name string = cluster.name
+output name string = cluster.name ?? clusterExisting.name
 @description('The ID of the cluster.')
-output resourceId string = cluster.id
+output resourceId string = cluster.id ?? clusterExisting.id
 @description('The resource group of the cluster.')
 output resourceGroupName string = resourceGroup().name
 @description('The managed identity of the cluster.')
-output systemAssignedMIPrincipalId string = deploymentMode == 'Validate'
-  ? cluster.identity.principalId
-  : clusterExisting.identity.principalId
+output systemAssignedMIPrincipalId string = cluster.identity.principalId ?? clusterExisting.identity.principalId
 @description('The location of the cluster.')
-output location string = cluster.location
+output location string = cluster.location ?? clusterExisting.location
 
 type networkIntent = {
   @description('Required. The names of the network adapters to include in the intent.')
