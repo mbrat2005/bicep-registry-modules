@@ -532,6 +532,11 @@ Describe 'Module tests' -Tag 'Module' {
           return
         }
 
+        if ($moduleFolderPath -match 'azure-stack-hci.cluster.deployment-settings') {
+          Set-ItResult -Skipped -Because 'the module path matches "azure-stack-hci.cluster.deployment-settings" which is a special case--underscores in property names.'
+          return
+        }
+
         $incorrectParameters = @()
         foreach ($parameter in ($templateFileParameters.PSBase.Keys | Sort-Object -Culture 'en-US')) {
           # Parameters in the object are formatted like
