@@ -27,7 +27,7 @@ param deploymentUsername string = 'deployUser'
 param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
-@description('Optional. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
+@description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 param arbDeploymentAppId string
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 param arbDeploymentSPObjectId string
@@ -191,7 +191,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   location: location
 }
 
-module hciDependencies './dependencies.bicep' = {
+module hciDependencies 'dependencies.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
