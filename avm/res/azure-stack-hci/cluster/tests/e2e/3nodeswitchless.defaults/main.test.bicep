@@ -28,13 +28,13 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string
+param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentSPObjectId string
+param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_#'
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string
+param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')

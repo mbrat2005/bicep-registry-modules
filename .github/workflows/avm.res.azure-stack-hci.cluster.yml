@@ -39,6 +39,9 @@ on:
 env:
   modulePath: "avm/res/azure-stack-hci/cluster"
   workflowPath: ".github/workflows/avm.res.azure-stack-hci.cluster.yml"
+  localToken_AZURESTACKHCI_AZURESTACKHCIAPPID: ${{ secrets.AZURESTACKHCI_AZURESTACKHCIAPPID }}
+  localToken_AZURESTACKHCI_AZURESTACKHCISPOBJECTID: ${{ secrets.AZURESTACKHCI_AZURESTACKHCISPOBJECTID }}
+  localToken_AZURESTACKHCI_AZURESTACKHCISPSECRET: ${{ secrets.AZURESTACKHCI_AZURESTACKHCISPSECRET }}
 
 concurrency:
   group: ${{ github.workflow }}
