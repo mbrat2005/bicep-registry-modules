@@ -2,7 +2,7 @@ metadata name = 'Arc Gateway'
 metadata description = 'This module deploys an Arc Gateway.'
 metadata owner = 'Azure/module-maintainers'
 
-@description('Required. The name of the Arc Gateway to deploy')
+@description('Required. The name of the Arc Gateway to deploy.')
 param name string
 
 @description('Optional. Location for all resources.')
@@ -11,14 +11,14 @@ param location string = resourceGroup().location
 @description('Optional. Tags of the resource.')
 param tags object?
 
-@description('Arc Gateway allowed features')
+@description('Optional. Arc Gateway allowed features.')
 param allowedFeatures array = ['*']
 
-@description('Arc Gateway type')
+@description('Optional. Arc Gateway type. Detaults to Public.')
 @allowed(['Public'])
 param gatewayType string = 'Public'
 
-resource arcGateway 'Microsoft.HybridCompute/gateways@2024-03-31-preview' = {
+resource arcGateway 'Microsoft.HybridCompute/gateways@2024-05-20-preview' = {
   location: location
   name: name
   tags: tags

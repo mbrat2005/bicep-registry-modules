@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.28.1.47646",
-      "templateHash": "11231057383652120565"
+      "templateHash": "17629507238944788819"
     },
     "name": "Arc Gateway",
     "description": "This module deploys an Arc Gateway.",
@@ -16,7 +16,7 @@
     "name": {
       "type": "string",
       "metadata": {
-        "description": "Required. The name of the Arc Gateway to deploy"
+        "description": "Required. The name of the Arc Gateway to deploy."
       }
     },
     "location": {
@@ -39,7 +39,7 @@
         "*"
       ],
       "metadata": {
-        "description": "Arc Gateway allowed features"
+        "description": "Optional. Arc Gateway allowed features."
       }
     },
     "gatewayType": {
@@ -49,14 +49,14 @@
         "Public"
       ],
       "metadata": {
-        "description": "Arc Gateway type"
+        "description": "Optional. Arc Gateway type. Detaults to Public."
       }
     }
   },
   "resources": {
     "arcGateway": {
       "type": "Microsoft.HybridCompute/gateways",
-      "apiVersion": "2024-03-31-preview",
+      "apiVersion": "2024-05-20-preview",
       "name": "[parameters('name')]",
       "location": "[parameters('location')]",
       "tags": "[parameters('tags')]",
@@ -93,7 +93,7 @@
       "metadata": {
         "description": "The location of the arcGateway."
       },
-      "value": "[reference('arcGateway', '2024-03-31-preview', 'full').location]"
+      "value": "[reference('arcGateway', '2024-05-20-preview', 'full').location]"
     }
   }
 }

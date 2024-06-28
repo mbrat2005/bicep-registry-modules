@@ -29,6 +29,7 @@ The following section provides usage examples for the module, which were used to
 
 - [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
 - [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
+- [Waf-Aligned](#example-3-waf-aligned)
 
 ### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
 
@@ -256,6 +257,39 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
       "value": "<enableStorageAutoIp>"
     }
   }
+}
+```
+
+</details>
+<p>
+
+### Example 3: _Waf-Aligned_
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
+  name: 'clusterDeployment'
+  params: {
+
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {}
 }
 ```
 

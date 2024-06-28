@@ -14,7 +14,7 @@ This module deploys an Arc Gateway.
 
 | Resource Type | API Version |
 | :-- | :-- |
-| `Microsoft.HybridCompute/gateways` | [2024-03-31-preview](https://learn.microsoft.com/en-us/azure/templates) |
+| `Microsoft.HybridCompute/gateways` | [2024-05-20-preview](https://learn.microsoft.com/en-us/azure/templates) |
 
 ## Parameters
 
@@ -22,31 +22,50 @@ This module deploys an Arc Gateway.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`name`](#parameter-name) | string | The name of the Arc Gateway to deploy |
+| [`name`](#parameter-name) | string | The name of the Arc Gateway to deploy. |
 
 **Optional parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`allowedFeatures`](#parameter-allowedfeatures) | array | Arc Gateway allowed features. |
+| [`gatewayType`](#parameter-gatewaytype) | string | Arc Gateway type. Detaults to Public. |
 | [`location`](#parameter-location) | string | Location for all resources. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
 
-**Arc Gateway allowed features parameters**
-
-| Parameter | Type | Description |
-| :-- | :-- | :-- |
-
-**Arc Gateway type parameters**
-
-| Parameter | Type | Description |
-| :-- | :-- | :-- |
-
 ### Parameter: `name`
 
-The name of the Arc Gateway to deploy
+The name of the Arc Gateway to deploy.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `allowedFeatures`
+
+Arc Gateway allowed features.
+
+- Required: No
+- Type: array
+- Default:
+  ```Bicep
+  [
+    '*'
+  ]
+  ```
+
+### Parameter: `gatewayType`
+
+Arc Gateway type. Detaults to Public.
+
+- Required: No
+- Type: string
+- Default: `'Public'`
+- Allowed:
+  ```Bicep
+  [
+    'Public'
+  ]
+  ```
 
 ### Parameter: `location`
 
