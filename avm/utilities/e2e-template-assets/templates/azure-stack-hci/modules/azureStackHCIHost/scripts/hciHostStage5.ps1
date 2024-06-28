@@ -74,9 +74,10 @@ If ($switchlessStorageConfig -eq 'switched') {
 log 'Adding IPs for host...'
 $existingIPs = Get-NetIPAddress
 If ($existingIPs.IPAddress -notcontains '172.20.0.1') { New-NetIPAddress -InterfaceAlias 'vEthernet (hciNodeMgmtInternal)' -IPAddress 172.20.0.1 -PrefixLength 24 }
-If ($existingIPs.IPAddress -notcontains '10.0.0.1') { New-NetIPAddress -InterfaceAlias 'vEthernet (hciNodeCompInternal)' -IPAddress 10.0.0.1 -PrefixLength 24 }
+If ($existingIPs.IPAddress -notcontains '10.20.0.1') { New-NetIPAddress -InterfaceAlias 'vEthernet (hciNodeCompInternal)' -IPAddress 10.20.0.1 -PrefixLength 24 }
 
 # configure NAT
+log 'Restarting RemoteAccess service...'
 Restart-Service RemoteAccess
 
 log 'Configuring NAT...'
@@ -106,7 +107,7 @@ If (!$?) {
 # create DHCP scopes
 log 'Creating DHCP scopes...'
 $existingScopes = Get-DhcpServerv4Scope
-If ($existingScopes.name -notcontains 'HCIComp') { Add-DhcpServerv4Scope -StartRange 10.0.0.10 -EndRange 10.0.0.250 -Name HCIComp -State Active -SubnetMask 255.255.255.0 }
+If ($existingScopes.name -notcontains 'HCIComp') { Add-DhcpServerv4Scope -StartRange 10.20.0.10 -EndRange 10.20.0.250 -Name HCIComp -State Active -SubnetMask 255.255.255.0 }
 If ($existingScopes.name -notcontains 'HCIMgmt') { Add-DhcpServerv4Scope -StartRange 172.20.0.10 -EndRange 172.20.0.250 -Name HCIMgmt -State Active -SubnetMask 255.255.255.0 }
 
 # test DC connectivity before attempting to authorize DHCP server in AD
@@ -129,7 +130,7 @@ try {
 }
 
 If ($existingAuthorizedServers.IPAddress -notcontains '172.20.0.1') { Add-DhcpServerInDC -DnsName "$($env:COMPUTERNAME).hci.local" -IPAddress 172.20.0.1 }
-If ($existingAuthorizedServers.IPAddress -notcontains '10.0.0.1') { Add-DhcpServerInDC -DnsName "$($env:COMPUTERNAME).hci.local" -IPAddress 10.0.0.1 }
+If ($existingAuthorizedServers.IPAddress -notcontains '10.20.0.1') { Add-DhcpServerInDC -DnsName "$($env:COMPUTERNAME).hci.local" -IPAddress 10.20.0.1 }
 
 # set router and dns options for mgmt DHCP scope
 log 'Setting router and dns options for mgmt DHCP scope...'
@@ -334,6 +335,7 @@ For ($i = 1; $i -le $hciNodeCount; $i++) {
   Push-Location c:\diskMounts\$hciNodeName
 
   If (!(Test-Path -Path unattend_injected.status) -and (Get-VM -Name $hciNodeName).State -eq 'Off') {
+    log "Injecting unattend.xml into HCI node disk '$hciNodeName'..."
     $mountedVolume = Mount-VHD .\hci_os.vhdx -Passthru | Get-Disk | Get-Partition | Get-Volume | Where-Object FileSystemType -EQ 'NTFS'
 
     $clone = $unattendSource.psobject.copy()
@@ -344,6 +346,8 @@ For ($i = 1; $i -le $hciNodeCount; $i++) {
     Dismount-VHD .\hci_os.vhdx
 
     Set-Content 'unattend_injected.status' -Value 'Unattend.xml injected'
+  } Else {
+    log "Unattend.xml already injected into HCI node disk '$hciNodeName'."
   }
 
   Pop-Location

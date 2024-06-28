@@ -12,6 +12,9 @@ param localAdminUsername string = 'admin-hci'
 param localAdminPassword string
 param domainOUPath string = 'OU=HCI,DC=HCI,DC=local'
 param arcGatewayId string = '' // default to '' to support runCommand parameters requiring string values
+param deployProxy bool = false // set to true to deploy a proxy VM for hci internet access
+param proxyBypassString string? // bypass string for proxy server - deployProxy must be true
+param proxyServerEndpoint string? // endpoint for proxy server - deployProxy must be true
 
 // =================================//
 // Deploy Host VM Infrastructure    //
@@ -60,6 +63,61 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (vnetSubnetID 
         }
       }
     ]
+  }
+}
+
+resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployProxy) {
+  name: 'proxyNic01'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          subnet: {
+            id: vnetSubnetID == '' ? vnet.properties.subnets[0].id : vnetSubnetID
+          }
+        }
+      }
+    ]
+  }
+}
+
+resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
+  name: 'proxyServer01'
+  location: location
+  properties: {
+    hardwareProfile: {
+      vmSize: 'Standard_D2s_v3'
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'Canonical'
+        offer: '0001-com-ubuntu-server-jammy'
+        sku: '22_04-lts-gen2'
+        version: 'latest'
+      }
+      osDisk: {
+        createOption: 'FromImage'
+      }
+    }
+    osProfile: {
+      computerName: 'proxyServer'
+      adminUsername: localAdminUsername
+      adminPassword: localAdminPassword
+      customData: base64(loadTextContent('./scripts/proxyConfig.sh'))
+      linuxConfiguration: {
+        disablePasswordAuthentication: false
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: proxyNic.id
+        }
+      ]
+    }
   }
 }
 
@@ -347,6 +405,16 @@ resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
         name: 'domainOUPath'
         value: domainOUPath
       }
+      {
+        name: 'proxyBypassString'
+        value: proxyBypassString ?? (deployProxy ? 'GENERATE_PROXY_BYPASS_DYNAMICALLY' : '')
+      }
+      {
+        name: 'proxyServerEndpoint'
+        value: proxyServerEndpoint ?? (deployProxy
+          ? 'http://${proxyNic.properties.ipConfigurations[0].properties.privateIPAddress}:3128'
+          : '')
+      }
     ]
     protectedParameters: [
       {
@@ -376,6 +444,10 @@ resource runCommand7 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       {
         name: 'resourceGroupName'
         value: resourceGroup().name
+      }
+      {
+        name: 'subscriptionId'
+        value: subscription().subscriptionId
       }
     ]
     treatFailureAsDeploymentFailure: true

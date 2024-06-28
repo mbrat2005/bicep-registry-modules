@@ -24,6 +24,7 @@ This module deploys an Azure Stack HCI Cluster Deployment Settings resource.
 | :-- | :-- | :-- |
 | [`clusterName`](#parameter-clustername) | string | The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure. |
 | [`clusterNodeNames`](#parameter-clusternodenames) | array | Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]. |
+| [`clusterWitnessStorageAccountName`](#parameter-clusterwitnessstorageaccountname) | string | The name of the storage account to be used as the witness for the HCI Windows Failover Cluster. |
 | [`customLocationName`](#parameter-customlocationname) | string | The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01. |
 | [`defaultGateway`](#parameter-defaultgateway) | string | The default gateway of the Management Network. Exameple: 192.168.0.1. |
 | [`deploymentMode`](#parameter-deploymentmode) | string | First must pass with this parameter set to Validate prior running with it set to Deploy. If either Validation or Deployment phases fail, fix the issue, then resubmit the template with the same deploymentMode to retry. |
@@ -33,6 +34,7 @@ This module deploys an Azure Stack HCI Cluster Deployment Settings resource.
 | [`domainOUPath`](#parameter-domainoupath) | string | The ADDS OU path - ex "OU=HCI,DC=contoso,DC=com". |
 | [`enableStorageAutoIp`](#parameter-enablestorageautoip) | bool | Enable storage auto IP assignment. This should be true for most deployments except when deploying a three-node switchless cluster, in which case storage IPs should be configured before deployment and this value set to false. |
 | [`endingIPAddress`](#parameter-endingipaddress) | string | The ending IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs. |
+| [`keyVaultName`](#parameter-keyvaultname) | string | The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster. |
 | [`networkIntents`](#parameter-networkintents) | array | An array of Network ATC Network Intent objects that define the Compute, Management, and Storage network configuration for the cluster. |
 | [`startingIPAddress`](#parameter-startingipaddress) | string | The starting IP address for the Infrastructure Network IP pool. There must be at least 6 IPs between startingIPAddress and endingIPAddress and this pool should be not include the node IPs. |
 | [`storageConnectivitySwitchless`](#parameter-storageconnectivityswitchless) | bool | Specify whether the Storage Network connectivity is switched or switchless. |
@@ -43,10 +45,8 @@ This module deploys an Azure Stack HCI Cluster Deployment Settings resource.
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`clusterWitnessStorageAccountName`](#parameter-clusterwitnessstorageaccountname) | string | The name of the storage account to be used as the witness for the HCI Windows Failover Cluster. |
 | [`episodicDataUpload`](#parameter-episodicdataupload) | bool | The diagnostic data for deploying a HCI cluster. |
 | [`isEuropeanUnionLocation`](#parameter-iseuropeanunionlocation) | bool | The location data for deploying a HCI cluster. |
-| [`keyVaultName`](#parameter-keyvaultname) | string | The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster. |
 | [`location`](#parameter-location) | string | Location for all resources. |
 | [`securityConfiguration`](#parameter-securityconfiguration) | object | Security configuration settings object; defaults to most secure posture. |
 | [`storageConfigurationMode`](#parameter-storageconfigurationmode) | string | The storage volume configuration mode. See documentation for details. |
@@ -67,13 +67,19 @@ Names of the cluster node Arc Machine resources. These are the name of the Arc M
 - Required: Yes
 - Type: array
 
+### Parameter: `clusterWitnessStorageAccountName`
+
+The name of the storage account to be used as the witness for the HCI Windows Failover Cluster.
+
+- Required: Yes
+- Type: string
+
 ### Parameter: `customLocationName`
 
 The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01.
 
-- Required: No
+- Required: Yes
 - Type: string
-- Default: `[format('{0}_cl', parameters('deploymentPrefix'))]`
 
 ### Parameter: `defaultGateway`
 
@@ -139,6 +145,13 @@ The ending IP address for the Infrastructure Network IP pool. There must be at l
 - Required: Yes
 - Type: string
 
+### Parameter: `keyVaultName`
+
+The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster.
+
+- Required: Yes
+- Type: string
+
 ### Parameter: `networkIntents`
 
 An array of Network ATC Network Intent objects that define the Compute, Management, and Storage network configuration for the cluster.
@@ -174,14 +187,6 @@ The subnet mask pf the Management Network for the HCI cluster - ex: 255.255.252.
 - Required: Yes
 - Type: string
 
-### Parameter: `clusterWitnessStorageAccountName`
-
-The name of the storage account to be used as the witness for the HCI Windows Failover Cluster.
-
-- Required: No
-- Type: string
-- Default: `[format('{0}witness', parameters('deploymentPrefix'))]`
-
 ### Parameter: `episodicDataUpload`
 
 The diagnostic data for deploying a HCI cluster.
@@ -197,14 +202,6 @@ The location data for deploying a HCI cluster.
 - Required: No
 - Type: bool
 - Default: `False`
-
-### Parameter: `keyVaultName`
-
-The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster.
-
-- Required: No
-- Type: string
-- Default: `[format('kvhci-{0}', parameters('deploymentPrefix'))]`
 
 ### Parameter: `location`
 

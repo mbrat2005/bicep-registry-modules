@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "languageVersion": "2.0",
-  "contentVersion": "#_moduleVersion_#.0",
+  "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.28.1.47646",
-      "templateHash": "4037257705874137895"
+      "templateHash": "4763263941240198493"
     },
     "name": "Azure Stack HCI Cluster Deployment Settings",
     "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -179,23 +179,20 @@
     },
     "customLocationName": {
       "type": "string",
-      "defaultValue": "[format('{0}_cl', parameters('deploymentPrefix'))]",
       "metadata": {
         "description": "Required. The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01."
       }
     },
     "clusterWitnessStorageAccountName": {
       "type": "string",
-      "defaultValue": "[format('{0}witness', parameters('deploymentPrefix'))]",
       "metadata": {
-        "description": "Optional. The name of the storage account to be used as the witness for the HCI Windows Failover Cluster."
+        "description": "Required. The name of the storage account to be used as the witness for the HCI Windows Failover Cluster."
       }
     },
     "keyVaultName": {
       "type": "string",
-      "defaultValue": "[format('kvhci-{0}', parameters('deploymentPrefix'))]",
       "metadata": {
-        "description": "Optional. The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster."
+        "description": "Required. The name of the key vault to be used for storing secrets for the HCI cluster. This currently needs to be unique per HCI cluster."
       }
     }
   },
@@ -249,13 +246,13 @@
                   }
                 ],
                 "securitySettings": {
-                  "hvciProtection": true,
-                  "drtmProtection": true,
+                  "hvciProtection": "[parameters('securityConfiguration').hvciProtection]",
+                  "drtmProtection": "[parameters('securityConfiguration').drtmProtection]",
                   "driftControlEnforced": "[parameters('securityConfiguration').driftControlEnforced]",
                   "credentialGuardEnforced": "[parameters('securityConfiguration').credentialGuardEnforced]",
                   "smbSigningEnforced": "[parameters('securityConfiguration').smbSigningEnforced]",
                   "smbClusterEncryption": "[parameters('securityConfiguration').smbClusterEncryption]",
-                  "sideChannelMitigationEnforced": true,
+                  "sideChannelMitigationEnforced": "[parameters('securityConfiguration').sideChannelMitigationEnforced]",
                   "bitlockerBootVolume": "[parameters('securityConfiguration').bitlockerBootVolume]",
                   "bitlockerDataVolumes": "[parameters('securityConfiguration').bitlockerDataVolumes]",
                   "wdacEnforced": "[parameters('securityConfiguration').wdacEnforced]"
