@@ -21,6 +21,7 @@ param gatewayType string = 'Public'
 resource arcGateway 'Microsoft.HybridCompute/gateways@2024-03-31-preview' = {
   location: location
   name: name
+  tags: tags
   properties: {
     allowedFeatures: allowedFeatures
     gatewayType: gatewayType
