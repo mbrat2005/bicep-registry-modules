@@ -32,6 +32,9 @@ If (Test-Path -Path 'C:\temp\Reboot1Required.status') {
 
   Remove-Item 'C:\temp\Reboot1Initiated.status'
   Set-Content -Path 'C:\temp\Reboot1Completed.status' -Value 'Reboot 1 Completed'
+
+
 } ElseIf (Test-Path -Path 'C:\temp\Reboot1Completed.status') {
   log 'Reboot 1 has been completed'
+
 }

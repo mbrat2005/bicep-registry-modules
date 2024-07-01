@@ -28,11 +28,14 @@ If (Test-Path -Path 'C:\temp\Reboot2Required.status') {
   $principal = New-ScheduledTaskPrincipal -UserId 'NT AUTHORITY\SYSTEM' -LogonType ServiceAccount
   $task = New-ScheduledTask -Action $action -Description 'Reboot 2' -Trigger $trigger -Principal $principal
   Register-ScheduledTask -TaskName 'Reboot2' -InputObject $task
+
 } ElseIf (Test-Path -Path 'C:\temp\Reboot2Initiated.status') {
   log 'Reboot 2 has been initiated and now completed'
 
   Remove-Item 'C:\temp\Reboot2Initiated.status'
   Set-Content -Path 'C:\temp\Reboot2Completed.status' -Value 'Reboot 2 Completed'
+
 } ElseIf (Test-Path -Path 'C:\temp\Reboot2Completed.status') {
   log 'Reboot 2 has been completed'
+
 }

@@ -371,5 +371,3 @@ If (Get-VM | Where-Object State -EQ 'Off') {
   log 'HCI node VMs are already running.'
 }
 
-
-
