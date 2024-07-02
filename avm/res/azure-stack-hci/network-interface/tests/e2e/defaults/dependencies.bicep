@@ -7,9 +7,6 @@ metadata description = 'Deploy Azure Stack HCI Cluster in Azure with a 1 node co
 param name string = 'hcicluster'
 @description('Optional. Location for all resources.')
 param location string
-@description('Optional. The name of the resource group to deploy for testing purposes.')
-@maxLength(90)
-param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'ashc3nmin'
 @description('Optional. A token to inject into the name of each resource.')
@@ -126,8 +123,6 @@ param networkIntents networkIntent[] = [
     trafficType: ['Storage']
   }
 ]
-@description('Optional. Enable storage auto IP configuration. If false, storageNetworks must include IP configurations.')
-param enableStorageAutoIp bool = false
 @description('Optional. The storage networks for the cluster.')
 param storageNetworks storageNetworksArrayType = [
   {
@@ -182,8 +177,14 @@ param storageNetworks storageNetworksArrayType = [
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
 param hciResourceProviderObjectId string?
 
-var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}wit'
-var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}kvd'
+var clusterWitnessStorageAccountName = take(
+  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}wit',
+  24
+)
+var keyVaultDiagnosticStorageAccountName = take(
+  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}kvd',
+  24
+)
 var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}'
 
 var arcNodeResourceIds = [
