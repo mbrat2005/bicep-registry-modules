@@ -83,6 +83,3 @@ module testDeployment '../../../main.bicep' = [
     }
   }
 ]
-    }
-  }
-]
