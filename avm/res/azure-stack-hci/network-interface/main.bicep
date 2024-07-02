@@ -112,6 +112,9 @@ output resourceId string = networkInterface.id
 @description('The name of the resource.')
 output name string = networkInterface.name
 
+@description('The resource group name of the resource.')
+output resourceGroupName string = resourceGroup().name
+
 @description('The location the resource was deployed into.')
 output location string = networkInterface.location
 

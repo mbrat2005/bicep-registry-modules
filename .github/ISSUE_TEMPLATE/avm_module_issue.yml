@@ -59,7 +59,7 @@ body:
         - "avm/res/app/managed-environment"
         - "avm/res/automation/automation-account"
         - "avm/res/azure-stack-hci/cluster"
-        - "avm/rest/azure-stach-hci/network-interface"
+        - "avm/res/azure-stack-hci/network-interface"
         - "avm/res/batch/batch-account"
         - "avm/res/cache/redis"
         - "avm/res/cdn/profile"
