@@ -37,7 +37,7 @@ on:
       - "!*/**/README.md"
 
 env:
-  modulePath: "avm/res/azure-stack-hci/cluster"
+  modulePath: "avm/res/azure-stack-hci/network-interface"
   workflowPath: ".github/workflows/avm.res.azure-stack-hci.network-interface.yml"
   localToken_AZURESTACKHCI_AZURESTACKHCIAPPID: ${{ secrets.AZURESTACKHCI_AZURESTACKHCIAPPID }}
   localToken_AZURESTACKHCI_AZURESTACKHCISPOBJECTID: ${{ secrets.AZURESTACKHCI_AZURESTACKHCISPOBJECTID }}
