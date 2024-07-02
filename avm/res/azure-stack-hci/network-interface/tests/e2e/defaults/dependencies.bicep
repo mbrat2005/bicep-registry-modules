@@ -301,7 +301,7 @@ resource logicalNetwork 'Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-prev
         name: 'default'
         properties: {
           addressPrefix: '10.20.0.128/25'
-          ipAllocationMethod: 'Dynamic'
+          ipAllocationMethod: 'Static'
           ipPools: [
             {
               start: '10.20.0.130'
@@ -324,13 +324,13 @@ resource logicalNetwork 'Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-prev
         }
       }
     ]
-    vmSwitchName: 'ComputeSwitch(compute)'
     dhcpOptions: {
       dnsServers: dnsServers
     }
+    vmSwitchName: 'ComputeSwitch(compute)'
   }
   dependsOn: [
-    hciCluster_deploy
+    //hciCluster_deploy
   ]
 }
 
