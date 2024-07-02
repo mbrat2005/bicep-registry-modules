@@ -1,21 +1,19 @@
-targetScope = 'subscription'
-
-metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration'
-metadata description = 'This test deploys an Azure VM to host a 3 node switchless Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
+metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 1 node configuration'
+metadata description = 'Deploy Azure Stack HCI Cluster in Azure with a 1 node configuration then create a Logical Network with a subnet and IP configuration.'
 
 @description('Optional. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
 @maxLength(15)
 @minLength(4)
 param name string = 'hcicluster'
 @description('Optional. Location for all resources.')
-param location string = deployment().location
+param location string
 @description('Optional. The name of the resource group to deploy for testing purposes.')
 @maxLength(90)
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
 param serviceShort string = 'ashc3nmin'
 @description('Optional. A token to inject into the name of each resource.')
-param namePrefix string = '#_namePrefix_#'
+param namePrefix string = 'avm1234'
 @minLength(4)
 @maxLength(8)
 @description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
@@ -35,6 +33,8 @@ param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_
 @secure()
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
+@description('Optional. Array of cluster node names.')
+param clusterNodeNames string[] = ['hcinode1']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')
@@ -182,9 +182,9 @@ param storageNetworks storageNetworksArrayType = [
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
 param hciResourceProviderObjectId string?
 
-var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit'
-var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd'
-var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
+var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}wit'
+var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}kvd'
+var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}'
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -196,16 +196,16 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
     hciISODownloadURL: hciISODownloadURL
-    hciNodeCount: hciNodeCount
+    hciNodeCount: length(clusterNodeNames)
     hciVHDXDownloadURL: hciVHDXDownloadURL
-    localAdminPassword: localAdminPassword
+    localAdminPassword: localAdminAndDeploymentUserPass
     location: location
-    switchlessStorageConfig: switchlessStorageConfig
     vnetSubnetID: vnetSubnetId
+    hostVMSize: 'Standard_E16bds_v5'
   }
 }
 
-module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (null == hciResourceProviderObjectId) {
+module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (empty(hciResourceProviderObjectId)) {
   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
   params: {}
 }
@@ -225,14 +225,165 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
-    deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId ?? microsoftGraphResources.outputs.hciRPServicePrincipalId
+    deploymentUserPassword: localAdminAndDeploymentUserPass
+    hciResourceProviderObjectId: hciResourceProviderObjectId //?? microsoftGraphResources.outputs.hciRPServicePrincipalId
     keyVaultName: keyVaultName
-    localAdminPassword: localAdminPassword
+    localAdminPassword: localAdminAndDeploymentUserPass
     localAdminUsername: localAdminUsername
-    logsRetentionInDays: logsRetentionInDays
-    softDeleteRetentionDays: softDeleteRetentionDays
     tenantId: tenantId
     vnetSubnetId: hciHostDeployment.outputs.vnetSubnetId
   }
+}
+
+module hciCluster_validate '../../../../cluster/main.bicep' = {
+  name: '${uniqueString(deployment().name, location)}-test-nichciclustervalidate-${serviceShort}'
+  params: {
+    clusterNodeNames: clusterNodeNames
+    clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
+    customLocationName: customLocationName
+    defaultGateway: defaultGateway
+    deploymentMode: 'Validate'
+    deploymentPrefix: deploymentPrefix
+    dnsServers: dnsServers
+    domainFqdn: domainFqdn
+    domainOUPath: domainOUPath
+    endingIPAddress: endingIPAddress
+    keyVaultName: keyVaultName
+    name: name
+    networkIntents: networkIntents
+    startingIPAddress: startingIPAddress
+    storageConnectivitySwitchless: false
+    storageNetworks: storageNetworks
+    subnetMask: subnetMask
+  }
+  dependsOn: [
+    hciClusterPreqs
+  ]
+}
+
+module hciCluster_deploy '../../../../cluster/main.bicep' = {
+  name: '${uniqueString(deployment().name, location)}-test-nichciclusterdeploy-${serviceShort}'
+  params: {
+    clusterNodeNames: clusterNodeNames
+    clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
+    customLocationName: customLocationName
+    defaultGateway: defaultGateway
+    deploymentMode: 'Deploy'
+    deploymentPrefix: deploymentPrefix
+    dnsServers: dnsServers
+    domainFqdn: domainFqdn
+    domainOUPath: domainOUPath
+    endingIPAddress: endingIPAddress
+    keyVaultName: keyVaultName
+    name: name
+    networkIntents: networkIntents
+    startingIPAddress: startingIPAddress
+    storageConnectivitySwitchless: false
+    storageNetworks: storageNetworks
+    subnetMask: subnetMask
+  }
+  dependsOn: [
+    hciCluster_validate
+  ]
+}
+
+resource logicalNetwork 'Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-preview' = {
+  name: 'lnet-test01'
+  location: location
+  extendedLocation: {
+    type: 'CustomLocation'
+    name: resourceId('Microsoft.ExtendedLocation/customLocations', customLocationName)
+  }
+  properties: {
+    subnets: [
+      {
+        name: 'default'
+        properties: {
+          addressPrefix: '10.20.0.128/25'
+          ipAllocationMethod: 'Dynamic'
+          ipPools: [
+            {
+              start: '10.20.0.130'
+              end: '10.20.0.135'
+            }
+          ]
+          routeTable: {
+            properties: {
+              routes: [
+                {
+                  name: 'default'
+                  properties: {
+                    addressPrefix: '0.0.0.0/0'
+                    nextHopIpAddress: '10.20.0.1'
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+    vmSwitchName: 'ComputeSwitch(compute)'
+    dhcpOptions: {
+      dnsServers: dnsServers
+    }
+  }
+  dependsOn: [
+    hciCluster_deploy
+  ]
+}
+
+output customLocationId string = resourceId('Microsoft.ExtendedLocation/customLocations', customLocationName)
+output subnetId string = logicalNetwork.id
+
+type networkIntent = {
+  adapter: string[]
+  name: string
+  overrideAdapterProperty: bool
+  adapterPropertyOverrides: {
+    jumboPacket: string
+    networkDirect: string
+    networkDirectTechnology: string
+  }
+  overrideQosPolicy: bool
+  qosPolicyOverrides: {
+    bandwidthPercentage_SMB: string
+    priorityValue8021Action_Cluster: string
+    priorityValue8021Action_SMB: string
+  }
+  overrideVirtualSwitchConfiguration: bool
+  virtualSwitchConfigurationOverrides: {
+    enableIov: string
+    loadBalancingAlgorithm: string
+  }
+  trafficType: string[]
+}
+
+// define custom type for storage adapter IP info for 3-node switchless deployments
+type storageAdapterIPInfoType = {
+  physicalNode: string
+  ipv4Address: string
+  subnetMask: string
+}
+
+// define custom type for storage network objects
+type storageNetworksType = {
+  adapterName: string
+  vlan: string
+  storageAdapterIPInfo: storageAdapterIPInfoType[]? // optional for non-switchless deployments
+}
+type storageNetworksArrayType = storageNetworksType[]
+
+// cluster security configuration settings
+type securityConfigurationType = {
+  hvciProtection: bool
+  drtmProtection: bool
+  driftControlEnforced: bool
+  credentialGuardEnforced: bool
+  smbSigningEnforced: bool
+  smbClusterEncryption: bool
+  sideChannelMitigationEnforced: bool
+  bitlockerBootVolume: bool
+  bitlockerDataVolumes: bool
+  wdacEnforced: bool
 }

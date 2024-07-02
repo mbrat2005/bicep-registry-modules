@@ -72,6 +72,10 @@ resource networkInterface 'Microsoft.AzureStackHCI/networkInterfaces@2024-01-01'
   name: name
   location: location
   tags: tags
+  extendedLocation: {
+    type: 'CustomLocation'
+    name: customLocation
+  }
   properties: {
     ipConfigurations: ipConfigurations
     dnsSettings: (!empty(dnsServers)) ? { dnsServers: dnsServers } : null
