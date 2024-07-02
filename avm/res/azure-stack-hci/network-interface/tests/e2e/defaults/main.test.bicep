@@ -34,7 +34,7 @@ param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_
 param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
 
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string?
+param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRESOURCEPROVIDERID_#'
 
 // ============ //
 // Dependencies //

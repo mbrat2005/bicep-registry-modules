@@ -30,6 +30,8 @@ param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_
 @secure()
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
+@description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
+param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRESOURCEPROVIDERID_#'
 @description('Optional. Array of cluster node names.')
 param clusterNodeNames string[] = ['hcinode1']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
@@ -174,8 +176,6 @@ param storageNetworks storageNetworksArrayType = [
     ]
   }
 ]
-@description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string?
 
 var clusterWitnessStorageAccountName = take(
   '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup().id,resourceGroup().location),6)}wit',
