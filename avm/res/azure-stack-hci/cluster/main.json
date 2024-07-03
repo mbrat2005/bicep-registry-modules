@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.28.1.47646",
-      "templateHash": "10192936237009776193"
+      "templateHash": "14579032540100473420"
     },
     "name": "Azure Stack HCI Cluster",
     "description": "This module deploys an Azure Stack HCI Cluster.",
@@ -188,6 +188,29 @@
         "$ref": "#/definitions/storageNetworksType"
       }
     },
+    "clusterNodeType": {
+      "type": "object",
+      "properties": {
+        "nodeName": {
+          "type": "string",
+          "metadata": {
+            "description": "Required. The OS computer name of the cluster node."
+          }
+        },
+        "ipv4Address": {
+          "type": "string",
+          "metadata": {
+            "description": "Required. The IP address of the cluster node management interface."
+          }
+        }
+      }
+    },
+    "clusterNodeArrayType": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/clusterNodeType"
+      }
+    },
     "securityConfigurationType": {
       "type": "object",
       "properties": {
@@ -361,10 +384,10 @@
         "description": "Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$."
       }
     },
-    "clusterNodeNames": {
-      "type": "array",
+    "clusterNodeConfigs": {
+      "$ref": "#/definitions/clusterNodeArrayType",
       "metadata": {
-        "description": "Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]."
+        "description": "Required. An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}]."
       }
     },
     "domainFqdn": {
@@ -606,8 +629,8 @@
           "clusterName": {
             "value": "[parameters('name')]"
           },
-          "clusterNodeNames": {
-            "value": "[parameters('clusterNodeNames')]"
+          "clusterNodeConfigs": {
+            "value": "[parameters('clusterNodeConfigs')]"
           },
           "clusterWitnessStorageAccountName": {
             "value": "[parameters('clusterWitnessStorageAccountName')]"
@@ -681,11 +704,36 @@
             "_generator": {
               "name": "bicep",
               "version": "0.28.1.47646",
-              "templateHash": "4763263941240198493"
+              "templateHash": "7671770065082478089"
             },
             "name": "Azure Stack HCI Cluster Deployment Settings",
             "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
             "owner": "Azure/module-maintainers"
+          },
+          "definitions": {
+            "clusterNodeType": {
+              "type": "object",
+              "properties": {
+                "nodeName": {
+                  "type": "string",
+                  "metadata": {
+                    "description": "Required. The OS computer name of the cluster node."
+                  }
+                },
+                "ipv4Address": {
+                  "type": "string",
+                  "metadata": {
+                    "description": "Required. The IP address of the cluster node management interface."
+                  }
+                }
+              }
+            },
+            "clusterNodeArrayType": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/clusterNodeType"
+              }
+            }
           },
           "parameters": {
             "clusterName": {
@@ -728,10 +776,10 @@
                 "description": "Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$."
               }
             },
-            "clusterNodeNames": {
-              "type": "array",
+            "clusterNodeConfigs": {
+              "$ref": "#/definitions/clusterNodeArrayType",
               "metadata": {
-                "description": "Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]."
+                "description": "Required. An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}]."
               }
             },
             "domainFqdn": {
@@ -875,8 +923,8 @@
             "copy": [
               {
                 "name": "arcNodeResourceIds",
-                "count": "[length(parameters('clusterNodeNames'))]",
-                "input": "[resourceId('Microsoft.HybridCompute/machines', parameters('clusterNodeNames')[copyIndex('arcNodeResourceIds')])]"
+                "count": "[length(parameters('clusterNodeConfigs'))]",
+                "input": "[resourceId('Microsoft.HybridCompute/machines', parameters('clusterNodeConfigs')[copyIndex('arcNodeResourceIds')].nodeName)]"
               },
               {
                 "name": "storageNetworkList",
@@ -913,10 +961,10 @@
                         "copy": [
                           {
                             "name": "physicalNodes",
-                            "count": "[length(variables('arcNodeResourceIds'))]",
+                            "count": "[length(parameters('clusterNodeConfigs'))]",
                             "input": {
-                              "name": "[reference(variables('arcNodeResourceIds')[copyIndex('physicalNodes')], '2022-12-27', 'Full').properties.displayName]",
-                              "ipv4Address": "[filter(reference(format('{0}/providers/microsoft.azurestackhci/edgeDevices/default', variables('arcNodeResourceIds')[copyIndex('physicalNodes')]), '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails, lambda('nic', not(equals(tryGet(lambdaVariables('nic'), 'defaultGateway'), null()))))[0].ip4Address]"
+                              "name": "[parameters('clusterNodeConfigs')[copyIndex('physicalNodes')].nodeName]",
+                              "ipv4Address": "[parameters('clusterNodeConfigs')[copyIndex('physicalNodes')].ipv4Address]"
                             }
                           }
                         ],
