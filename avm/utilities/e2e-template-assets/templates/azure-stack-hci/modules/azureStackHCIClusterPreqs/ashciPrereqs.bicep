@@ -77,6 +77,19 @@ resource diagnosticStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01'
       virtualNetworkRules: []
     }
   }
+  resource blobService 'blobServices' = {
+    name: 'default'
+    properties: {
+      deleteRetentionPolicy: {
+        enabled: true
+        days: 7
+      }
+      containerDeleteRetentionPolicy: {
+        enabled: true
+        days: 7
+      }
+    }
+  }
 }
 
 resource witnessStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
@@ -99,6 +112,19 @@ resource witnessStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = 
           id: vnetSubnetId
         }
       ]
+    }
+  }
+  resource blobService 'blobServices' = {
+    name: 'default'
+    properties: {
+      deleteRetentionPolicy: {
+        enabled: true
+        days: 7
+      }
+      containerDeleteRetentionPolicy: {
+        enabled: true
+        days: 7
+      }
     }
   }
 }

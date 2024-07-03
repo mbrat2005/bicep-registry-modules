@@ -66,6 +66,32 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (vnetSubnetID 
   }
 }
 
+// create a mintenance configuration for the Azure Stack HCI Host VM and proxy server
+resource maintenanceConfig 'Microsoft.Compute/maintenanceConfigurations@2024-03-01' = {
+  location: location
+  name: 'maintenanceConfig01'
+  properties: {
+    maintenanceScope: 'Host'
+    maintenanceWindow: {
+      recurEvery: 'Week'
+      recurOn: 'Sunday'
+      recurAt: '06:00'
+      duration: 'PT2H'
+      timeZone: 'UTC'
+    }
+  }
+}
+
+// create a maintenance configuration assignment on the resource group
+resource maintenanceAssignment 'Microsoft.Compute/maintenanceConfigurationAssignments@2024-03-01' = {
+  location: location
+  name: 'maintenanceAssignment01'
+  properties: {
+    maintenanceConfigurationId: maintenanceConfig.id
+    resourceGroup: resourceGroup().id
+  }
+}
+
 resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployProxy) {
   name: 'proxyNic01'
   location: location
@@ -87,6 +113,7 @@ resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployP
 resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
   name: 'proxyServer01'
   location: location
+  zones: ['any']
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_D2s_v3'
@@ -111,6 +138,7 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
         disablePasswordAuthentication: false
       }
     }
+
     networkProfile: {
       networkInterfaces: [
         {
@@ -143,6 +171,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
+  zones: ['any']
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
