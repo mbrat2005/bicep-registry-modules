@@ -25,8 +25,8 @@ param deploymentMode string
 @description('Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
 param deploymentPrefix string
 
-@description('Required. An array of cluster node objects with \'nodeName\' and \'ipv4Address\' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].')
-param clusterNodeConfigs clusterNodeArrayType
+@description('Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2].')
+param clusterNodeNames array
 
 @description('Required. The domain name of the Active Directory Domain Services. Example: "contoso.com".')
 param domainFqdn string
@@ -175,7 +175,7 @@ module deploymentSetting 'deployment-settings/main.bicep' = {
   name: 'deploymentSettings'
   params: {
     clusterName: name
-    clusterNodeConfigs: clusterNodeConfigs
+    clusterNodeNames: clusterNodeNames
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     customLocationName: customLocationName
     defaultGateway: defaultGateway
@@ -302,14 +302,6 @@ type storageNetworksType = {
   storageAdapterIPInfo: storageAdapterIPInfoType[]? // optional for non-switchless deployments
 }
 type storageNetworksArrayType = storageNetworksType[]
-
-type clusterNodeType = {
-  @description('Required. The OS computer name of the cluster node.')
-  nodeName: string
-  @description('Required. The IP address of the cluster node management interface.')
-  ipv4Address: string
-}
-type clusterNodeArrayType = clusterNodeType[]
 
 // cluster security configuration settings
 type securityConfigurationType = {
