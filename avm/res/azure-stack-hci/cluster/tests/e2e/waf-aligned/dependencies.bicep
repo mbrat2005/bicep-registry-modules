@@ -35,20 +35,9 @@ var arcNodeResourceIds = [
 
 var tenantId = subscription().tenantId
 
-module arcGateway '../../../arc-gateway/main.bicep' = {
-  name: 'arcGateway-${location}-${deploymentPrefix}'
-  params: {
-    location: location
-    name: 'arcg-${location}-${deploymentPrefix}'
-    allowedFeatures: ['*']
-    gatewayType: 'Public'
-  }
-}
-
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
-    arcGatewayId: arcGateway.outputs.resourceId
     domainOUPath: domainOUPath
     deployProxy: true
     hciISODownloadURL: hciISODownloadURL

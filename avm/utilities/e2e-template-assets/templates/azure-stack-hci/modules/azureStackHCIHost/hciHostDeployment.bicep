@@ -66,6 +66,22 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (vnetSubnetID 
   }
 }
 
+// create a mintenance configuration for the Azure Stack HCI Host VM and proxy server
+resource maintenanceConfig 'Microsoft.Compute/maintenanceConfigurations@2024-03-01' = {
+  location: location
+  name: 'maintenanceConfig01'
+  properties: {
+    maintenanceScope: 'Host'
+    maintenanceWindow: {
+      recurEvery: 'Week'
+      recurOn: 'Sunday'
+      recurAt: '06:00'
+      duration: 'PT2H'
+      timeZone: 'UTC'
+    }
+  }
+}
+
 resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployProxy) {
   name: 'proxyNic01'
   location: location
@@ -87,6 +103,7 @@ resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployP
 resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
   name: 'proxyServer01'
   location: location
+  zones: ['any']
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_D2s_v3'
@@ -111,6 +128,7 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
         disablePasswordAuthentication: false
       }
     }
+
     networkProfile: {
       networkInterfaces: [
         {
@@ -119,6 +137,15 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       ]
     }
   }
+}
+
+resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = {
+  location: location
+  name: 'maintenanceAssignment01'
+  properties: {
+    maintenanceConfigurationId: maintenanceConfig.id
+  }
+  scope: proxyServer
 }
 
 resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
@@ -143,6 +170,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
+  zones: ['any']
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -216,6 +244,15 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
     licenseType: 'Windows_Server'
   }
+}
+
+resource maintenanceAssignment_hciHost 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = {
+  location: location
+  name: 'maintenanceAssignmentHciHost'
+  properties: {
+    maintenanceConfigurationId: maintenanceConfig.id
+  }
+  scope: vm
 }
 
 // ====================//

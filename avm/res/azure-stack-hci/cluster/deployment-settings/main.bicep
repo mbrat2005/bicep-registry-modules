@@ -179,8 +179,8 @@ resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings
               for hciNode in arcNodeResourceIds: {
                 name: reference(hciNode, '2022-12-27', 'Full').properties.displayName
                 // Getting the IP from the first NIC of the node with a default gateway. Only the first management NIC should have a gateway defined.
-                // This reference call requires that the 'DeviceManagementExtension' extension be fully initialized on each node, which create the
-                // referenced edgeDevices sub-resource, contain the NIC configuration.
+                // This reference call requires that the 'DeviceManagementExtension' extension be fully initialized on each node, which creates the
+                // referenced edgeDevices sub-resource, containing the IP configuration.
                 ipv4Address: (filter(
                   reference('${hciNode}/providers/microsoft.azurestackhci/edgeDevices/default', '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails,
                   nic => nic.?defaultGateway != null

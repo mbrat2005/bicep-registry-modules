@@ -180,7 +180,7 @@ param storageNetworks storageNetworksArrayType = [
   }
 ]
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string?
+param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRPSPID_#'
 
 var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit'
 var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd'
