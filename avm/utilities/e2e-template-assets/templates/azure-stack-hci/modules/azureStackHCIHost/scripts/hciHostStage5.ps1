@@ -174,6 +174,23 @@ log 'Renaming first network adapter on HCI nodes...'
 if (Get-VMNetworkAdapter -Name 'Network Adapter' -VMName * -ErrorAction SilentlyContinue) { Rename-VMNetworkAdapter -NewName mgmt -VMName * -Name 'Network Adapter' }
 Get-VM | Get-VMNetworkAdapter -Name 'mgmt' | Set-VMNetworkAdapter -DeviceNaming On
 
+# create DHCP reservations for HCI node VMs management interfaces
+log 'Checking DHCP reservations for HCI node VMs management interfaces...'
+$existingReservations = Get-DhcpServerv4Reservation
+For ($i = 1; $i -le $hciNodeCount; $i++) {
+  $hciNodeName = "hciNode$i"
+  $hciNodeIP = "172.20.0.$(9 + $i)"
+  If ($existingReservations.Name -notcontains $hciNodeName) {
+    log "Creating DHCP reservation for HCI node '$hciNodeName' with IP '$hciNodeIP'..."
+    $mgmtMac = (Get-VMNetworkAdapter -VMName $hciNodeName -Name mgmt).MacAddress -split '(.{2})' -ne '' -join '-'
+
+    log "Creating DHCP reservation for HCI node '$hciNodeName' with IP '$hciNodeIP' for MAC address '$mgmtMac'..."
+    Add-DhcpServerv4Reservation -ScopeId HCIMgmt -Name $hciNodeName -IPAddress $hciNodeIP -ClientId $mgmtMac
+  } Else {
+    log "DHCP reservation for HCI node '$hciNodeName' already exists."
+  }
+}
+
 # add additional NICs to HCI node VMs
 log 'Adding additional NICs to HCI node VMs...'
 ForEach ($existingVM in (Get-VM)) {
