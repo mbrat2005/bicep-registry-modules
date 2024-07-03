@@ -61,6 +61,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
+// Microsoft Graph resources are in preview and not supported in the AVM testing tooling
 // module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (null == hciResourceProviderObjectId) {
 //   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
 //   params: {}
@@ -82,7 +83,7 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId //?? microsoftGraphResources.outputs.hciRPServicePrincipalId
+    hciResourceProviderObjectId: hciResourceProviderObjectId //?? microsoftGraphResources.outputs.hciRPServicePrincipalId // Remove comment when Microsoft Graph resources are used
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername

@@ -35,8 +35,11 @@ param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_
 @secure()
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
-@description('Optional. The names of the cluster nodes to be deployed.')
-param clusterNodeNames array = ['hcinode1', 'hcinode2']
+@description('Required. An array of cluster node objects with \'nodeName\' and \'ipv4Address\' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].')
+param clusterNodeConfigs array = [
+  { nodeName: 'hcinode1', ipv4Address: '172.20.0.10' }
+  { nodeName: 'hcinode2', ipv4Address: '172.20.0.11' }
+]
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')
@@ -157,7 +160,7 @@ module hciDependencies 'dependencies.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
-    clusterNodeNames: clusterNodeNames
+    clusterNodeNames: [for clusterNodeConfig in clusterNodeConfigs: clusterNodeConfig.nodeName]
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
@@ -173,7 +176,7 @@ module hciDependencies 'dependencies.bicep' = {
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     vnetSubnetId: vnetSubnetId
-    hciNodeCount: length(clusterNodeNames)
+    hciNodeCount: length(clusterNodeConfigs)
     switchlessStorageConfig: false
     hciISODownloadURL: hciISODownloadURL
     hciVHDXDownloadURL: hciVHDXDownloadURL
@@ -189,7 +192,7 @@ module cluster_validate '../../../main.bicep' = {
   params: {
     name: name
     customLocationName: customLocationName
-    clusterNodeNames: clusterNodeNames
+    clusterNodeConfigs: clusterNodeConfigs
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     defaultGateway: defaultGateway
     deploymentMode: 'Validate'
@@ -217,7 +220,7 @@ module testDeployment '../../../main.bicep' = {
   scope: resourceGroup
   params: {
     name: name
-    clusterNodeNames: clusterNodeNames
+    clusterNodeConfigs: clusterNodeConfigs
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     customLocationName: customLocationName
     defaultGateway: defaultGateway

@@ -25,8 +25,8 @@ param deploymentMode string
 @description('Required. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
 param deploymentPrefix string
 
-@description('Required. Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2].')
-param clusterNodeNames array
+@description('Required. An array of cluster node objects with \'nodeName\' and \'ipv4Address\' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].')
+param clusterNodeConfigs clusterNodeArrayType
 
 @description('Required. The domain name of the Active Directory Domain Services. Example: "contoso.com".')
 param domainFqdn string
@@ -106,7 +106,10 @@ param clusterWitnessStorageAccountName string
 param keyVaultName string
 
 var arcNodeResourceIds = [
-  for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
+  for (clusterNodeConfig, index) in clusterNodeConfigs: resourceId(
+    'Microsoft.HybridCompute/machines',
+    clusterNodeConfig.nodeName
+  )
 ]
 
 var storageNetworkList = [
@@ -176,15 +179,18 @@ resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings
               }
             ]
             physicalNodes: [
-              for hciNode in arcNodeResourceIds: {
-                name: reference(hciNode, '2022-12-27', 'Full').properties.displayName
+              for clusterNodeConfig in clusterNodeConfigs: {
+                name: clusterNodeConfig.nodeName
+                // BELOW APPROACH is not currently supported in the AVM testing tooling, but allows supplying just a node name and getting the IP from the node itself--decreasing input parameters
+                //
                 // Getting the IP from the first NIC of the node with a default gateway. Only the first management NIC should have a gateway defined.
                 // This reference call requires that the 'DeviceManagementExtension' extension be fully initialized on each node, which creates the
                 // referenced edgeDevices sub-resource, containing the IP configuration.
-                ipv4Address: (filter(
-                  reference('${hciNode}/providers/microsoft.azurestackhci/edgeDevices/default', '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails,
-                  nic => nic.?defaultGateway != null
-                ))[0].ip4Address
+                // ipv4Address: (filter(
+                //   reference('${hciNode}/providers/microsoft.azurestackhci/edgeDevices/default', '2024-01-01', 'Full').properties.deviceConfiguration.nicDetails,
+                //   nic => nic.?defaultGateway != null
+                // ))[0].ip4Address
+                ipv4Address: clusterNodeConfig.ipv4Address
               }
             ]
             hostNetwork: {
@@ -211,3 +217,11 @@ output name string = deploymentSettings.name
 output resourceId string = deploymentSettings.id
 @description('The resource group of the cluster deployment settings.')
 output resourceGroupName string = resourceGroup().name
+
+type clusterNodeType = {
+  @description('Required. The OS computer name of the cluster node.')
+  nodeName: string
+  @description('Required. The IP address of the cluster node management interface.')
+  ipv4Address: string
+}
+type clusterNodeArrayType = clusterNodeType[]

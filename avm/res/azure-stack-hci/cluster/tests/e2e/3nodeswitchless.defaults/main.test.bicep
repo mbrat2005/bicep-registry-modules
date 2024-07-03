@@ -27,6 +27,12 @@ param deploymentUsername string = 'deployUser'
 param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
+@description('Required. An array of cluster node objects with \'nodeName\' and \'ipv4Address\' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].')
+param clusterNodeConfigs array = [
+  { nodeName: 'hcinode1', ipv4Address: '172.20.0.10' }
+  { nodeName: 'hcinode2', ipv4Address: '172.20.0.11' }
+  { nodeName: 'hcinode3', ipv4Address: '172.20.0.12' }
+]
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
@@ -226,7 +232,7 @@ module cluster_validate '../../../main.bicep' = {
   params: {
     name: name
     customLocationName: customLocationName
-    clusterNodeNames: ['hcinode1', 'hcinode2', 'hcinode3']
+    clusterNodeConfigs: clusterNodeConfigs
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     defaultGateway: defaultGateway
     deploymentMode: 'Validate'
@@ -254,7 +260,7 @@ module testDeployment '../../../main.bicep' = {
   scope: resourceGroup
   params: {
     name: name
-    clusterNodeNames: ['hcinode1', 'hcinode2', 'hcinode3']
+    clusterNodeConfigs: clusterNodeConfigs
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     customLocationName: customLocationName
     defaultGateway: defaultGateway
