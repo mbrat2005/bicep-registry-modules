@@ -82,16 +82,6 @@ resource maintenanceConfig 'Microsoft.Compute/maintenanceConfigurations@2024-03-
   }
 }
 
-// create a maintenance configuration assignment on the resource group
-resource maintenanceAssignment 'Microsoft.Compute/maintenanceConfigurationAssignments@2024-03-01' = {
-  location: location
-  name: 'maintenanceAssignment01'
-  properties: {
-    maintenanceConfigurationId: maintenanceConfig.id
-    resourceGroup: resourceGroup().id
-  }
-}
-
 resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployProxy) {
   name: 'proxyNic01'
   location: location
@@ -147,6 +137,15 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       ]
     }
   }
+}
+
+resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = {
+  location: location
+  name: 'maintenanceAssignment01'
+  properties: {
+    maintenanceConfigurationId: maintenanceConfig.id
+  }
+  scope: proxyServer
 }
 
 resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
@@ -245,6 +244,15 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
     licenseType: 'Windows_Server'
   }
+}
+
+resource maintenanceAssignment_hciHost 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = {
+  location: location
+  name: 'maintenanceAssignmentHciHost'
+  properties: {
+    maintenanceConfigurationId: maintenanceConfig.id
+  }
+  scope: vm
 }
 
 // ====================//
