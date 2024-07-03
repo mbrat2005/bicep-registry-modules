@@ -15,6 +15,7 @@ param arcGatewayId string = '' // default to '' to support runCommand parameters
 param deployProxy bool = false // set to true to deploy a proxy VM for hci internet access
 param proxyBypassString string? // bypass string for proxy server - deployProxy must be true
 param proxyServerEndpoint string? // endpoint for proxy server - deployProxy must be true
+param now string = utcNow()
 
 // =================================//
 // Deploy Host VM Infrastructure    //
@@ -67,15 +68,15 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (vnetSubnetID 
 }
 
 // create a mintenance configuration for the Azure Stack HCI Host VM and proxy server
-resource maintenanceConfig 'Microsoft.Compute/maintenanceConfigurations@2024-03-01' = {
+resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023-04-01' = {
   location: location
   name: 'maintenanceConfig01'
   properties: {
     maintenanceScope: 'Host'
     maintenanceWindow: {
       recurEvery: 'Week'
-      recurOn: 'Sunday'
-      recurAt: '06:00'
+      startDateTime: now
+      expirationDateTime: dateTimeAdd(now, 'P1Y')
       duration: 'PT2H'
       timeZone: 'UTC'
     }
@@ -103,7 +104,7 @@ resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployP
 resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
   name: 'proxyServer01'
   location: location
-  zones: ['any']
+  zones: ['2']
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_D2s_v3'
@@ -170,7 +171,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
-  zones: ['any']
+  zones: ['2']
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
