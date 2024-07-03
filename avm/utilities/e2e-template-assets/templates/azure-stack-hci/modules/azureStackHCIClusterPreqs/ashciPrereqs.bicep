@@ -3,8 +3,8 @@ param location string
 param clusterWitnessStorageAccountName string
 param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
-param softDeleteRetentionDays int
-param logsRetentionInDays int
+param softDeleteRetentionDays int = 30
+param logsRetentionInDays int = 30
 param tenantId string
 param hciResourceProviderObjectId string
 param arcNodeResourceIds array
