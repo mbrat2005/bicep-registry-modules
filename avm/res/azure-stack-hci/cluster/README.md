@@ -45,7 +45,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   name: 'clusterDeployment'
   params: {
     // Required parameters
-    clusterNodeConfigs: '<clusterNodeConfigs>'
+    clusterNodeNames: '<clusterNodeNames>'
     clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
     customLocationName: '<customLocationName>'
     defaultGateway: '<defaultGateway>'
@@ -81,8 +81,8 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "clusterNodeConfigs": {
-      "value": "<clusterNodeConfigs>"
+    "clusterNodeNames": {
+      "value": "<clusterNodeNames>"
     },
     "clusterWitnessStorageAccountName": {
       "value": "<clusterWitnessStorageAccountName>"
@@ -157,7 +157,11 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   name: 'clusterDeployment'
   params: {
     // Required parameters
-    clusterNodeConfigs: '<clusterNodeConfigs>'
+    clusterNodeNames: [
+      'hcinode1'
+      'hcinode2'
+      'hcinode3'
+    ]
     clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
     customLocationName: '<customLocationName>'
     defaultGateway: '<defaultGateway>'
@@ -193,8 +197,12 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "clusterNodeConfigs": {
-      "value": "<clusterNodeConfigs>"
+    "clusterNodeNames": {
+      "value": [
+        "hcinode1",
+        "hcinode2",
+        "hcinode3"
+      ]
     },
     "clusterWitnessStorageAccountName": {
       "value": "<clusterWitnessStorageAccountName>"
@@ -269,7 +277,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   name: 'clusterDeployment'
   params: {
     // Required parameters
-    clusterNodeConfigs: '<clusterNodeConfigs>'
+    clusterNodeNames: '<clusterNodeNames>'
     clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
     customLocationName: '<customLocationName>'
     defaultGateway: '<defaultGateway>'
@@ -305,8 +313,8 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "clusterNodeConfigs": {
-      "value": "<clusterNodeConfigs>"
+    "clusterNodeNames": {
+      "value": "<clusterNodeNames>"
     },
     "clusterWitnessStorageAccountName": {
       "value": "<clusterWitnessStorageAccountName>"
@@ -374,7 +382,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`clusterNodeConfigs`](#parameter-clusternodeconfigs) | array | An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}]. |
+| [`clusterNodeNames`](#parameter-clusternodenames) | array | Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]. |
 | [`clusterWitnessStorageAccountName`](#parameter-clusterwitnessstorageaccountname) | string | The name of the storage account to be used as the witness for the HCI Windows Failover Cluster. |
 | [`customLocationName`](#parameter-customlocationname) | string | The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01. |
 | [`defaultGateway`](#parameter-defaultgateway) | string | The default gateway of the Management Network. Exameple: 192.168.0.1. |
@@ -407,9 +415,9 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 | [`streamingDataClient`](#parameter-streamingdataclient) | bool | The metrics data for deploying a HCI cluster. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
 
-### Parameter: `clusterNodeConfigs`
+### Parameter: `clusterNodeNames`
 
-An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].
+Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2].
 
 - Required: Yes
 - Type: array
