@@ -330,7 +330,7 @@ resource logicalNetwork 'Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-prev
     vmSwitchName: 'ComputeSwitch(compute)'
   }
   dependsOn: [
-    //hciCluster_deploy
+    hciCluster_deploy
   ]
 }
 

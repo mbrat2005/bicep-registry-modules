@@ -56,7 +56,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
     mode: 'Incremental'
     template: {
       '$schema': 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
-      contentVersion: '1.0.0.0'
+      contentVersion: '#_moduleVersion_#.0'
       resources: []
       outputs: {
         telemetry: {

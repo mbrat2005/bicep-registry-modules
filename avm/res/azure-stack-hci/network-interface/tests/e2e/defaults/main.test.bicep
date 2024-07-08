@@ -36,6 +36,12 @@ param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHC
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
 param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRESOURCEPROVIDERID_#'
 
+@description('Optional. The password to use for the local and domain accounts in the test.')
+param localAdminAndDeploymentUserPass string = newGuid()
+
+@description('Optional. The subnet ID of an existing subnet in the same location. KeyVault and Storage service endpoints must be enabled!. If not provided, a new VNET is created.')
+param vnetSubnetId string?
+
 // ============ //
 // Dependencies //
 // ============ //
@@ -56,6 +62,8 @@ module nestedDependencies 'dependencies.bicep' = {
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
+    localAdminAndDeploymentUserPass: localAdminAndDeploymentUserPass
+    vnetSubnetId: vnetSubnetId
   }
 }
 
