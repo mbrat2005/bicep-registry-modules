@@ -15,7 +15,6 @@ param arcGatewayId string = '' // default to '' to support runCommand parameters
 param deployProxy bool = false // set to true to deploy a proxy VM for hci internet access
 param proxyBypassString string? // bypass string for proxy server - deployProxy must be true
 param proxyServerEndpoint string? // endpoint for proxy server - deployProxy must be true
-param now string = utcNow()
 
 // =================================//
 // Deploy Host VM Infrastructure    //
@@ -68,17 +67,25 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (vnetSubnetID 
 }
 
 // create a mintenance configuration for the Azure Stack HCI Host VM and proxy server
-resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023-04-01' = {
+resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023-09-01-preview' = {
   location: location
   name: 'maintenanceConfig01'
   properties: {
-    maintenanceScope: 'Host'
+    maintenanceScope: 'InGuestPatch'
     maintenanceWindow: {
-      recurEvery: 'Week'
-      startDateTime: now
-      expirationDateTime: dateTimeAdd(now, 'P1Y')
-      duration: 'PT2H'
+      recurEvery: 'Week Sunday'
+      startDateTime: '2020-04-30 08:00'
+      duration: '02:00'
       timeZone: 'UTC'
+    }
+    installPatches: {
+      windowsParameters: {
+        classificationsToInclude: ['Critical', 'Security']
+      }
+      rebootSetting: 'IfRequired'
+    }
+    extensionProperties: {
+      InGuestPatchMode: 'User'
     }
   }
 }
@@ -127,6 +134,12 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       customData: base64(loadTextContent('./scripts/proxyConfig.sh'))
       linuxConfiguration: {
         disablePasswordAuthentication: false
+        patchSettings: {
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            bypassPlatformSafetyChecksOnUserSchedule: true
+          }
+        }
       }
     }
 
@@ -140,7 +153,7 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
   }
 }
 
-resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = {
+resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationAssignments@2023-04-01' = if (deployProxy) {
   location: location
   name: 'maintenanceAssignment01'
   properties: {
@@ -230,9 +243,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
         provisionVMAgent: true
         enableAutomaticUpdates: true
         patchSettings: {
-          patchMode: 'AutomaticByOS'
-          assessmentMode: 'ImageDefault'
-          enableHotpatching: false
+          patchMode: 'AutomaticByPlatform'
+          automaticByPlatformSettings: {
+            bypassPlatformSafetyChecksOnUserSchedule: true
+          }
         }
       }
     }
