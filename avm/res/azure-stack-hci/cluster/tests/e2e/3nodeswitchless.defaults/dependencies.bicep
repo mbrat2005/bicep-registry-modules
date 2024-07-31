@@ -68,7 +68,9 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId ?? microsoftGraphResources.outputs.hciRPServicePrincipalId
+    hciResourceProviderObjectId: hciResourceProviderObjectId != null
+      ? hciResourceProviderObjectId
+      : microsoftGraphResources.outputs.hciRPServicePrincipalId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername
