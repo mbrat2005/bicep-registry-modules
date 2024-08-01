@@ -57,12 +57,11 @@ while (!$allExtensionsReady -and $timer.Elapsed.TotalMinutes -lt 120) {
       log "Waiting for extensions to be installed on HCI Arc Machine '$($arcMachine.Name)'..."
 
       # install extensions if not already installed
-      log "Installing extensions on HCI Arc Machine '$($arcMachine.Name)'..."
+      log "Installing any missing extensions on HCI Arc Machine '$($arcMachine.Name)'..."
       $extensionParams = @{
         ResourceGroupName = $resourceGroupName
         MachineName       = $arcMachine.Name
         Location          = $arcMachine.Location
-        Tags              = $arcMachine.Tags
       }
 
       # Invoke-AzStackHciArcInitialization seemingly misses installing some extensions some of the time - so we'll install them here if missing
