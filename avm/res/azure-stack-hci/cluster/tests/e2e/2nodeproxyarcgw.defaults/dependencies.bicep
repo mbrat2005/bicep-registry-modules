@@ -51,7 +51,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   params: {
     arcGatewayId: deployArcGateway ? arcGateway.outputs.resourceId : null
     domainOUPath: domainOUPath
-    deployProxy: false
+    deployProxy: true
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
     hciVHDXDownloadURL: hciVHDXDownloadURL

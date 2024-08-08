@@ -298,9 +298,9 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
   Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
   try {
-    Invoke-AzStackHciArcInitialization -SubscriptionID $subscriptionId -ResourceGroup $resourceGroupName -TenantID $tenantId -Cloud AzureCloud -AccountID $accountName -ArmAccessToken $t -Region $location @optionalParameters
+    Invoke-AzStackHciArcInitialization -SubscriptionID $subscriptionId -ResourceGroup $resourceGroupName -TenantID $tenantId -Cloud AzureCloud -AccountID $accountName -ArmAccessToken $t -Region $location -ErrorAction Stop @optionalParameters
   } catch {
-    Write-Error $_
+    Write-Error $_ -ErrorAction Stop
   }
 } -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName, $arcGatewayId, $proxyServerEndpoint
 
@@ -312,12 +312,14 @@ $arcInitializationJobs | Wait-Job -Timeout 1800
 log 'Checking status of Azure Arc initialization jobs...'
 $arcInitializationJobs | ForEach-Object {
   $job = $_
+  log "[$($job.ComputerName)] Job output (Receive-Job): '$($job | Receive-Job -Keep)'"
   Get-Job -Id $job.Id -IncludeChildJob | Receive-Job -ErrorAction SilentlyContinue | ForEach-Object {
     If ($_.Exception -or $_.state -eq 'Failed') {
       log "Azure Arc initialization failed on node '$($job.Location)' with error: $($_.Exception.Message)"
       Exit 1
     } Else {
       log "[$($job.ComputerName)] Job output: '$($_ | ConvertTo-Json -Compress)'"
+
     }
   }
 }

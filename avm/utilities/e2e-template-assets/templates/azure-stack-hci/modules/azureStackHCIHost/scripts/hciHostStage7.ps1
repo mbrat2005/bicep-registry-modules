@@ -41,9 +41,17 @@ Login-AzAccount -Identity -Subscription $subscriptionId
 
 log "Waiting for HCI Arc Machines to exist in the resource group '$($resourceGroupName)'..."
 
-While (($arcMachines = Get-AzConnectedMachine -ResourceGroupName $resourceGroupName | Where-Object { $_.name -in ($hciNodeNames) }).Count -lt $hciNodeNames.Count) {
-  log "Found '$($arcMachines.Count)' HCI Arc Machines, waiting for '$($hciNodeNames.Count)'..."
+$timer = [System.Diagnostics.Stopwatch]::StartNew()
+While (($arcMachines = Get-AzConnectedMachine -ResourceGroupName $resourceGroupName | Where-Object { $_.name -in ($hciNodeNames) }).Count -lt $hciNodeNames.Count -and $timer.Elapsed.TotalMinutes -lt 60) {
+  log "Found '$($arcMachines.Count)' HCI Arc Machines, waiting for '$($hciNodeNames.Count)' machines for up to 1 hour..."
   Start-Sleep -Seconds 30
+}
+If ($timer.Elapsed.TotalMinutes -gt 60) {
+  log 'HCI Arc Machines did not exist within the 1 hour timeout period'
+  Write-Error 'HCI Arc Machines did not exist within the 1 hour timeout period' -ErrorAction Stop
+  Exit 1
+} Else {
+  log "All HCI Arc Machines exist in the resource group '$($resourceGroupName)'"
 }
 
 log 'Waiting up to two hours for HCI Arc Machine extensions to be installed...'

@@ -26,7 +26,7 @@ resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
   name: 'hciHost01Identity'
 }
 
-// grant identity owner permissions on the subscription
+// grant identity owner permissions on the resource group
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().subscriptionId, userAssignedIdentity.name, 'Owner', resourceGroup().id)
   properties: {
@@ -34,6 +34,15 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')
     principalType: 'ServicePrincipal'
     description: 'Role assigned used for Azure Stack HCI IaC testing pipeline - remove if identity no longer exists!'
+  }
+}
+
+// grant identity contributor permissions on the subscription - needed to register resource providers
+module roleAssignment_subscriptionContributor 'modules/subscriptionRoleAssignment.bicep' = {
+  name: 'roleAssignment_subscriptionContributor'
+  scope: subscription()
+  params: {
+    principalId: userAssignedIdentity.properties.principalId
   }
 }
 
