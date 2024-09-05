@@ -1,4 +1,4 @@
-provider microsoftGraph
+extension microsoftGraph
 
 //param arbDeploymentAppId string
 

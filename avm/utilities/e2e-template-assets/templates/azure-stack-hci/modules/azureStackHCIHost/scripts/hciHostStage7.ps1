@@ -23,7 +23,7 @@ Function log {
   }
 
   Write-Host $message
-  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
+  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [hciHostStage7] - $message"
 }
 
 $ErrorActionPreference = 'Stop'

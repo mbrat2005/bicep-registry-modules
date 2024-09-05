@@ -29,6 +29,7 @@ param keyVaultName string
 param hciResourceProviderObjectId string?
 param domainOUPath string?
 param deployArcGateway bool = false
+param hciHostAssignPublicIp bool = false
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -50,6 +51,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   name: 'hciHostDeployment-${location}-${deploymentPrefix}'
   params: {
     arcGatewayId: deployArcGateway ? arcGateway.outputs.resourceId : null
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     domainOUPath: domainOUPath
     deployProxy: false
     hciISODownloadURL: hciISODownloadURL

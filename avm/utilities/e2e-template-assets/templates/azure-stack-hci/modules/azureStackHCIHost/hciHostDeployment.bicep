@@ -15,6 +15,7 @@ param arcGatewayId string = '' // default to '' to support runCommand parameters
 param deployProxy bool = false // set to true to deploy a proxy VM for hci internet access
 param proxyBypassString string? // bypass string for proxy server - deployProxy must be true
 param proxyServerEndpoint string? // endpoint for proxy server - deployProxy must be true
+param hciHostAssignPublicIp bool = false // set to true to deploy a public IP for the HCI Host VM
 
 // =================================//
 // Deploy Host VM Infrastructure    //
@@ -120,7 +121,6 @@ resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployP
 resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
   name: 'proxyServer01'
   location: location
-  zones: ['2']
   properties: {
     hardwareProfile: {
       vmSize: 'Standard_D2s_v3'
@@ -171,10 +171,29 @@ resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationA
   scope: proxyServer
 }
 
+resource publicIP_HCIHost 'Microsoft.Network/publicIPAddresses@2024-01-01' = if (hciHostAssignPublicIp) {
+  name: 'pip-hcihost01'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource networkSecurityGroup_HCIHost 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  location: location
+  name: 'hciHostNSG'
+}
+
 resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
   location: location
   name: 'nic01'
   properties: {
+    networkSecurityGroup: {
+      id: networkSecurityGroup_HCIHost.id
+    }
     ipConfigurations: [
       {
         name: 'ipConfig01'
@@ -183,6 +202,11 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
             id: vnetSubnetID == '' ? vnet.properties.subnets[0].id : vnetSubnetID
           }
           privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: hciHostAssignPublicIp
+            ? {
+                id: publicIP_HCIHost.id
+              }
+            : null
         }
       }
     ]
@@ -193,7 +217,6 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
-  zones: ['2']
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -234,15 +257,15 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
         for diskNum in range(1, hciNodeCount): {
           name: 'dataDisk${string(diskNum)}'
           createOption: 'Empty'
-          diskSizeGB: 4096
+          diskSizeGB: 2048
           lun: diskNum
           managedDisk: {
-            storageAccountType: 'StandardSSD_LRS'
+            storageAccountType: 'Premium_LRS'
           }
           deleteOption: 'Delete'
         }
       ]
-      diskControllerType: 'SCSI'
+      //diskControllerType: 'NVMe'
     }
     osProfile: {
       adminPassword: localAdminPassword

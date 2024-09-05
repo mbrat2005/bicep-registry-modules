@@ -61,6 +61,8 @@ param hciISODownloadURL string = ''
 param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
 param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRPSPID_#'
+@description('Optional. Specify true to assing a public IP address to the HCI host VM--usually for deployment debugging access.')
+param hciHostAssignPublicIp bool = false
 @description('Optional. The network intents for the cluster.')
 param networkIntents networkIntent[] = [
   {
@@ -166,6 +168,7 @@ module hciDependencies 'dependencies.bicep' = {
     deploymentUserPassword: localAdminAndDeploymentUserPass
     domainOUPath: domainOUPath
     hciResourceProviderObjectId: hciResourceProviderObjectId
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     keyVaultName: keyVaultName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     localAdminPassword: localAdminAndDeploymentUserPass

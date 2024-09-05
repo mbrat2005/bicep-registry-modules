@@ -56,7 +56,7 @@ Function log {
   }
 
   Write-Host $message
-  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
+  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [hciHostStage6] - $message"
 }
 
 $ErrorActionPreference = 'Stop'
@@ -312,7 +312,7 @@ $arcInitializationJobs | Wait-Job -Timeout 1800
 log 'Checking status of Azure Arc initialization jobs...'
 $arcInitializationJobs | ForEach-Object {
   $job = $_
-  log "[$($job.ComputerName)] Job output (Receive-Job): '$($job | Receive-Job -Keep)'"
+  log "[$($job.ComputerName)] Job output (Receive-Job): '$($job | Receive-Job -Keep -ErrorAction Continue | Out-String)'"
   Get-Job -Id $job.Id -IncludeChildJob | Receive-Job -ErrorAction SilentlyContinue | ForEach-Object {
     If ($_.Exception -or $_.state -eq 'Failed') {
       log "Azure Arc initialization failed on node '$($job.Location)' with error: $($_.Exception.Message)"

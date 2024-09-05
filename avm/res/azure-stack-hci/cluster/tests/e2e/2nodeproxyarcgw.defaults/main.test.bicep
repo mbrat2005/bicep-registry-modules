@@ -143,10 +143,19 @@ param storageNetworks storageNetworksArrayType = [
     vlan: '712'
   }
 ]
+@description('Optional. Deploy the Azure Arc Gateway and Proxy server.')
 param deployArcGateway bool = true
+@description('Optional. Assign public IP to the HCI host.')
+param hciHostAssignPublicIp bool = false
 
-var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit'
-var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd'
+var clusterWitnessStorageAccountName = take(
+  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit',
+  24
+)
+var keyVaultDiagnosticStorageAccountName = take(
+  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd',
+  24
+)
 var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
@@ -166,6 +175,7 @@ module hciDependencies 'dependencies.bicep' = {
     deploymentUserPassword: localAdminAndDeploymentUserPass
     domainOUPath: domainOUPath
     hciResourceProviderObjectId: hciResourceProviderObjectId
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     keyVaultName: keyVaultName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     localAdminPassword: localAdminAndDeploymentUserPass
