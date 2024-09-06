@@ -67,10 +67,11 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
-module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (hciResourceProviderObjectId == null) {
-  name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
-  params: {}
-}
+// MICROSOFT GRAPH RESOURCES in Bicep are in preview and break the AVM end-to-end tests
+// module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (hciResourceProviderObjectId == null) {
+//   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
+//   params: {}
+// }
 
 module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
   dependsOn: [
@@ -88,9 +89,7 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId != null
-      ? hciResourceProviderObjectId
-      : microsoftGraphResources.outputs.hciRPServicePrincipalId
+    hciResourceProviderObjectId: hciResourceProviderObjectId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername
