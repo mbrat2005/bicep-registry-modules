@@ -8,7 +8,6 @@ This module deploys an Azure Stack HCI Cluster.
 - [Usage examples](#Usage-examples)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
-- [Cross-referenced modules](#Cross-referenced-modules)
 - [Data Collection](#Data-Collection)
 
 ## Resource Types
@@ -28,8 +27,9 @@ The following section provides usage examples for the module, which were used to
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/azure-stack-hci/cluster:<version>`.
 
 - [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
-- [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
-- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-4-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
 
 ### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
 
@@ -45,7 +45,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   name: 'clusterDeployment'
   params: {
     // Required parameters
-    clusterNodeConfigs: '<clusterNodeConfigs>'
+    clusterNodeNames: '<clusterNodeNames>'
     clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
     customLocationName: '<customLocationName>'
     defaultGateway: '<defaultGateway>'
@@ -81,8 +81,8 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "clusterNodeConfigs": {
-      "value": "<clusterNodeConfigs>"
+    "clusterNodeNames": {
+      "value": "<clusterNodeNames>"
     },
     "clusterWitnessStorageAccountName": {
       "value": "<clusterWitnessStorageAccountName>"
@@ -143,7 +143,119 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 2: _Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration_
+### Example 2: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
+
+This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
+  name: 'clusterDeployment'
+  params: {
+    // Required parameters
+    clusterNodeNames: '<clusterNodeNames>'
+    clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
+    customLocationName: '<customLocationName>'
+    defaultGateway: '<defaultGateway>'
+    deploymentMode: 'Deploy'
+    deploymentPrefix: '<deploymentPrefix>'
+    dnsServers: '<dnsServers>'
+    domainFqdn: '<domainFqdn>'
+    domainOUPath: '<domainOUPath>'
+    endingIPAddress: '<endingIPAddress>'
+    keyVaultName: '<keyVaultName>'
+    name: '<name>'
+    networkIntents: '<networkIntents>'
+    startingIPAddress: '<startingIPAddress>'
+    storageConnectivitySwitchless: false
+    storageNetworks: '<storageNetworks>'
+    subnetMask: '<subnetMask>'
+    // Non-required parameters
+    enableStorageAutoIp: '<enableStorageAutoIp>'
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "clusterNodeNames": {
+      "value": "<clusterNodeNames>"
+    },
+    "clusterWitnessStorageAccountName": {
+      "value": "<clusterWitnessStorageAccountName>"
+    },
+    "customLocationName": {
+      "value": "<customLocationName>"
+    },
+    "defaultGateway": {
+      "value": "<defaultGateway>"
+    },
+    "deploymentMode": {
+      "value": "Deploy"
+    },
+    "deploymentPrefix": {
+      "value": "<deploymentPrefix>"
+    },
+    "dnsServers": {
+      "value": "<dnsServers>"
+    },
+    "domainFqdn": {
+      "value": "<domainFqdn>"
+    },
+    "domainOUPath": {
+      "value": "<domainOUPath>"
+    },
+    "endingIPAddress": {
+      "value": "<endingIPAddress>"
+    },
+    "keyVaultName": {
+      "value": "<keyVaultName>"
+    },
+    "name": {
+      "value": "<name>"
+    },
+    "networkIntents": {
+      "value": "<networkIntents>"
+    },
+    "startingIPAddress": {
+      "value": "<startingIPAddress>"
+    },
+    "storageConnectivitySwitchless": {
+      "value": false
+    },
+    "storageNetworks": {
+      "value": "<storageNetworks>"
+    },
+    "subnetMask": {
+      "value": "<subnetMask>"
+    },
+    // Non-required parameters
+    "enableStorageAutoIp": {
+      "value": "<enableStorageAutoIp>"
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 3: _Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration_
 
 This test deploys an Azure VM to host a 3 node switchless Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
 
@@ -157,7 +269,11 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   name: 'clusterDeployment'
   params: {
     // Required parameters
-    clusterNodeConfigs: '<clusterNodeConfigs>'
+    clusterNodeNames: [
+      'hcinode1'
+      'hcinode2'
+      'hcinode3'
+    ]
     clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
     customLocationName: '<customLocationName>'
     defaultGateway: '<defaultGateway>'
@@ -193,8 +309,12 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "clusterNodeConfigs": {
-      "value": "<clusterNodeConfigs>"
+    "clusterNodeNames": {
+      "value": [
+        "hcinode1",
+        "hcinode2",
+        "hcinode3"
+      ]
     },
     "clusterWitnessStorageAccountName": {
       "value": "<clusterWitnessStorageAccountName>"
@@ -255,7 +375,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 3: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned_
+### Example 4: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned_
 
 This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster. WAF aligned.
 
@@ -269,7 +389,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   name: 'clusterDeployment'
   params: {
     // Required parameters
-    clusterNodeConfigs: '<clusterNodeConfigs>'
+    clusterNodeNames: '<clusterNodeNames>'
     clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
     customLocationName: '<customLocationName>'
     defaultGateway: '<defaultGateway>'
@@ -305,8 +425,8 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
-    "clusterNodeConfigs": {
-      "value": "<clusterNodeConfigs>"
+    "clusterNodeNames": {
+      "value": "<clusterNodeNames>"
     },
     "clusterWitnessStorageAccountName": {
       "value": "<clusterWitnessStorageAccountName>"
@@ -367,14 +487,13 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-
 ## Parameters
 
 **Required parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
-| [`clusterNodeConfigs`](#parameter-clusternodeconfigs) | array | An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}]. |
+| [`clusterNodeNames`](#parameter-clusternodenames) | array | Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]. |
 | [`clusterWitnessStorageAccountName`](#parameter-clusterwitnessstorageaccountname) | string | The name of the storage account to be used as the witness for the HCI Windows Failover Cluster. |
 | [`customLocationName`](#parameter-customlocationname) | string | The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01. |
 | [`defaultGateway`](#parameter-defaultgateway) | string | The default gateway of the Management Network. Exameple: 192.168.0.1. |
@@ -407,9 +526,9 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 | [`streamingDataClient`](#parameter-streamingdataclient) | bool | The metrics data for deploying a HCI cluster. |
 | [`tags`](#parameter-tags) | object | Tags of the resource. |
 
-### Parameter: `clusterNodeConfigs`
+### Parameter: `clusterNodeNames`
 
-An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].
+Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2].
 
 - Required: Yes
 - Type: array
@@ -956,7 +1075,6 @@ Tags of the resource.
 - Required: No
 - Type: object
 
-
 ## Outputs
 
 | Output | Type | Description |
@@ -966,10 +1084,6 @@ Tags of the resource.
 | `resourceGroupName` | string | The resource group of the cluster. |
 | `resourceId` | string | The ID of the cluster. |
 | `systemAssignedMIPrincipalId` | string | The managed identity of the cluster. |
-
-## Cross-referenced modules
-
-_None_
 
 ## Data Collection
 
