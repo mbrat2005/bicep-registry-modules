@@ -19,7 +19,7 @@ param namePrefix string = '#_namePrefix_#'
 @minLength(4)
 @maxLength(8)
 @description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
-param deploymentPrefix string = namePrefix
+param deploymentPrefix string = take('${take(namePrefix, 8)}${uniqueString(utcNow())}', 8)
 @description('Optional. The username of the LCM deployment user created in Active Directory.')
 param deploymentUsername string = 'deployUser'
 @description('Optional. The password of the LCM deployment user and local administrator accounts.')
