@@ -8,11 +8,11 @@ param localAdminUsername string
 @secure()
 param localAdminPassword string
 @secure()
-param arbDeploymentAppId string
+param arbDeploymentAppId string?
 @secure()
-param arbDeploymentSPObjectId string
+param arbDeploymentSPObjectId string?
 @secure()
-param arbDeploymentServicePrincipalSecret string
+param arbDeploymentServicePrincipalSecret string?
 param location string
 param clusterNodeNames array
 param softDeleteRetentionDays int = 30
