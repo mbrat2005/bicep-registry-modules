@@ -28,13 +28,15 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
+@secure()
+param arbDeploymentAppId string
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_#'
+@secure()
+param arbDeploymentSPObjectId string
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
+param arbDeploymentServicePrincipalSecret string
 @description('Optional. The names of the cluster nodes to be deployed.')
 param clusterNodeNames array = ['hcinode1', 'hcinode2']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
@@ -60,7 +62,8 @@ param hciISODownloadURL string = ''
 @description('Conditional. The URL to download the Azure Stack HCI VHDX. Required if hciISODownloadURL is not supplied.')
 param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRPSPID_#'
+@secure()
+param hciResourceProviderObjectId string
 @description('Optional. Specify true to assing a public IP address to the HCI host VM--usually for deployment debugging access.')
 param hciHostAssignPublicIp bool = false
 @description('Optional. The network intents for the cluster.')

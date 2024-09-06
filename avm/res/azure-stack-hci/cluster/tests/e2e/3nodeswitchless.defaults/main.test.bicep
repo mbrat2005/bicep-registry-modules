@@ -28,13 +28,15 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
+@secure()
+param arbDeploymentAppId string
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_#'
+@secure()
+param arbDeploymentSPObjectId string
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
+param arbDeploymentServicePrincipalSecret string
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')
@@ -180,7 +182,8 @@ param storageNetworks storageNetworksArrayType = [
   }
 ]
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRPSPID_#'
+@secure()
+param hciResourceProviderObjectId string
 
 var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit'
 var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd'

@@ -7,7 +7,9 @@ param deploymentUserPassword string
 param localAdminUsername string
 @secure()
 param localAdminPassword string
+@secure()
 param arbDeploymentAppId string
+@secure()
 param arbDeploymentSPObjectId string
 @secure()
 param arbDeploymentServicePrincipalSecret string
@@ -26,6 +28,7 @@ param hciISODownloadURL string
 param clusterWitnessStorageAccountName string
 param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
+@secure()
 param hciResourceProviderObjectId string?
 param domainOUPath string?
 
