@@ -2,6 +2,10 @@ metadata name = 'Azure Stack HCI Cluster'
 metadata description = 'This module deploys an Azure Stack HCI Cluster.'
 metadata owner = 'Azure/module-maintainers'
 
+// ============== //
+//   Parameters   //
+// ============== //
+
 @description('Required. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
 @maxLength(15)
 @minLength(4)
@@ -110,6 +114,10 @@ param keyVaultName string
 @description('Optional. Array of role assignments to create.')
 param roleAssignments roleAssignmentType
 
+// ============= //
+//   Variables   //
+// ============= //
+
 var builtInRoleNames = {
   // Add other relevant built-in roles here for your resource as per BCPNFR5
   Contributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
@@ -143,6 +151,10 @@ var formattedRoleAssignments = [
       : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName))
   })
 ]
+
+// ============= //
+//   Resources   //
+// ============= //
 
 #disable-next-line no-deployments-resources
 resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
@@ -248,6 +260,10 @@ output systemAssignedMIPrincipalId string = (deploymentMode == 'Validate')
 output location string = (deploymentMode == 'Validate')
   ? cluster.location
   : (deploymentMode == 'Deploy') ? clusterExisting.location : ''
+
+// =============== //
+//   Definitions   //
+// =============== //
 
 type networkIntent = {
   @description('Required. The names of the network adapters to include in the intent.')
