@@ -131,7 +131,7 @@ resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployP
 resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
   name: 'proxyServer01'
   location: location
-  zones: ['1', '2', '3']
+  zones: ['1']
   properties: {
     virtualMachineScaleSet: {
       id: proxyVMSSFlex.id
@@ -244,7 +244,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
-  zones: ['1', '2', '3']
+  zones: ['1']
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
