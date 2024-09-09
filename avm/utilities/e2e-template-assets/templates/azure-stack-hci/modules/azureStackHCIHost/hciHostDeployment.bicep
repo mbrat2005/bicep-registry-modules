@@ -105,7 +105,6 @@ resource proxyVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = 
   location: location
   zones: ['1', '2', '3']
   properties: {
-    virtualMachineProfile: {}
     orchestrationMode: 'Flexible'
     platformFaultDomainCount: 1
   }
@@ -210,7 +209,6 @@ resource hciHostVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' 
   location: location
   zones: ['1', '2', '3']
   properties: {
-    virtualMachineProfile: {}
     orchestrationMode: 'Flexible'
     platformFaultDomainCount: 1
   }
