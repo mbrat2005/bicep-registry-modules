@@ -8,11 +8,13 @@ param localAdminUsername string
 @secure()
 param localAdminPassword string
 @secure()
-param arbDeploymentAppId string?
+#disable-next-line secure-parameter-default
+param arbDeploymentAppId string = ''
 @secure()
-param arbDeploymentSPObjectId string?
+#disable-next-line secure-parameter-default
+param arbDeploymentSPObjectId string = ''
 @secure()
-param arbDeploymentServicePrincipalSecret string?
+param arbDeploymentServicePrincipalSecret string = ''
 param location string
 param clusterNodeNames array
 param softDeleteRetentionDays int = 30
@@ -29,7 +31,8 @@ param clusterWitnessStorageAccountName string
 param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
 @secure()
-param hciResourceProviderObjectId string?
+#disable-next-line secure-parameter-default
+param hciResourceProviderObjectId string = ''
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
