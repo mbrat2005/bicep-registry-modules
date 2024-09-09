@@ -153,17 +153,20 @@ param storageNetworks storageNetworksArrayType = [
 ]
 param deployArcGateway bool = false
 
+#disable-next-line no-hardcoded-location // Due to quotas and capacity challenges, this region must be used in the AVM testing subscription
+var enforcedLocation = 'southeastasia'
+
 var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit'
 var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd'
 var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
-  location: location
+  location: enforcedLocation
 }
 
 module hciDependencies 'dependencies.bicep' = {
-  name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
     clusterNodeNames: clusterNodeNames
@@ -179,7 +182,7 @@ module hciDependencies 'dependencies.bicep' = {
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     localAdminPassword: localAdminAndDeploymentUserPass
     localAdminUsername: localAdminUsername
-    location: location
+    location: enforcedLocation
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
@@ -195,7 +198,7 @@ module cluster_validate '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
-  name: '${uniqueString(deployment().name, location)}-test-clustervalidate-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-clustervalidate-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
@@ -224,7 +227,7 @@ module testDeployment '../../../main.bicep' = {
     hciDependencies
     cluster_validate
   ]
-  name: '${uniqueString(deployment().name, location)}-test-clusterdeploy-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-clusterdeploy-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name

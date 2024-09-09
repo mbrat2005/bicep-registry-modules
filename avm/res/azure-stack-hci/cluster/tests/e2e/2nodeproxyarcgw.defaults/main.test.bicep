@@ -154,6 +154,9 @@ param deployArcGateway bool = true
 @description('Optional. Assign public IP to the HCI host.')
 param hciHostAssignPublicIp bool = false
 
+#disable-next-line no-hardcoded-location // Due to quotas and capacity challenges, this region must be used in the AVM testing subscription
+var enforcedLocation = 'southeastasia'
+
 var clusterWitnessStorageAccountName = take(
   '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit',
   24
@@ -166,11 +169,11 @@ var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.i
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
-  location: location
+  location: enforcedLocation
 }
 
 module hciDependencies 'dependencies.bicep' = {
-  name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
     clusterNodeNames: clusterNodeNames
@@ -186,7 +189,7 @@ module hciDependencies 'dependencies.bicep' = {
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     localAdminPassword: localAdminAndDeploymentUserPass
     localAdminUsername: localAdminUsername
-    location: location
+    location: enforcedLocation
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
@@ -231,7 +234,7 @@ module testDeployment '../../../main.bicep' = {
     hciDependencies
     cluster_validate
   ]
-  name: '${uniqueString(deployment().name, location)}-test-clusterdeploy-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-clusterdeploy-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
