@@ -41,7 +41,7 @@ var arcNodeResourceIds = [
 var tenantId = subscription().tenantId
 
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
-  name: 'hciHostDeployment-${location}-${deploymentPrefix}'
+  name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount

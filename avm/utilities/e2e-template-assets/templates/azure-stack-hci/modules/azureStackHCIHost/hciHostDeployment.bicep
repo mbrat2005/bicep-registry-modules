@@ -40,7 +40,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // grant identity contributor permissions on the subscription - needed to register resource providers
 module roleAssignment_subscriptionContributor 'modules/subscriptionRoleAssignment.bicep' = {
-  name: '${uniqueString(deployment().name, location)}-roleAssignment_subscriptionContributor'
+  name: '${uniqueString(deployment().name, location)}-hcihostmi-roleAssignment_subscriptionContributor'
   scope: subscription()
   params: {
     principalId: userAssignedIdentity.properties.principalId

@@ -54,7 +54,7 @@ module arcGateway '../../../arc-gateway/main.bicep' = if (deployArcGateway) {
 }
 
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
-  name: 'hciHostDeployment-${location}-${deploymentPrefix}'
+  name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
     arcGatewayId: deployArcGateway ? arcGateway.outputs.resourceId : null
     domainOUPath: domainOUPath
