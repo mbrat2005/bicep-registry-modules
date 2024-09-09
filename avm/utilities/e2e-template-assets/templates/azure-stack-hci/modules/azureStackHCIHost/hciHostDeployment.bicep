@@ -282,7 +282,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
         diskSizeGB: 128
         deleteOption: 'Delete'
         managedDisk: {
-          storageAccountType: 'Premium_ZRS'
+          storageAccountType: 'Premium_LRS'
         }
       }
       dataDisks: [
