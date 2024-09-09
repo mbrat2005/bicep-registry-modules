@@ -100,7 +100,7 @@ resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023
   }
 }
 
-resource proxyVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
+resource proxyVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = if (deployProxy) {
   name: 'vmss-proxy01'
   location: location
   zones: ['1', '2', '3']
