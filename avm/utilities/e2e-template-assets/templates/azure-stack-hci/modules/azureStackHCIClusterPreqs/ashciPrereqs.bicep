@@ -33,7 +33,7 @@ var deploymentUserSecretValue = base64('${deploymentUsername}:${deploymentUserPa
 var localAdminSecretValue = base64('${localAdminUsername}:${localAdminPassword}')
 var arbDeploymentServicePrincipalValue = base64('${arbDeploymentAppId}:${arbDeploymentServicePrincipalSecret}')
 
-var storageAccountType = 'Standard_LRS'
+var storageAccountType = 'Standard_ZRS'
 
 var azureConnectedMachineResourceManagerRoleID = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',

@@ -100,6 +100,15 @@ resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023
   }
 }
 
+resource proxyVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
+  name: 'vmss-proxy01'
+  location: location
+  properties: {
+    virtualMachineProfile: {}
+    orchestrationMode: 'Flex'
+  }
+}
+
 resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployProxy) {
   name: 'proxyNic01'
   location: location
@@ -122,6 +131,9 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
   name: 'proxyServer01'
   location: location
   properties: {
+    virtualMachineScaleSet: {
+      id: proxyVMSSFlex.id
+    }
     hardwareProfile: {
       vmSize: 'Standard_D2s_v3'
     }
@@ -185,6 +197,15 @@ resource publicIP_HCIHost 'Microsoft.Network/publicIPAddresses@2024-01-01' = if 
 resource networkSecurityGroup_HCIHost 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   location: location
   name: 'hciHostNSG'
+}
+
+resource hciHostVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
+  name: 'vmss-hcihost01'
+  location: location
+  properties: {
+    virtualMachineProfile: {}
+    orchestrationMode: 'Flex'
+  }
 }
 
 resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
