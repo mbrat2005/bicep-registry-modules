@@ -103,6 +103,7 @@ resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023
 resource proxyVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
   name: 'vmss-proxy01'
   location: location
+  zones: ['1', '2', '3']
   properties: {
     virtualMachineProfile: {}
     orchestrationMode: 'Flex'
@@ -146,6 +147,9 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       }
       osDisk: {
         createOption: 'FromImage'
+        managedDisk: {
+          storageAccountType: 'Premium_ZRS'
+        }
       }
     }
     osProfile: {
@@ -202,6 +206,7 @@ resource networkSecurityGroup_HCIHost 'Microsoft.Network/networkSecurityGroups@2
 resource hciHostVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
   name: 'vmss-hcihost01'
   location: location
+  zones: ['1', '2', '3']
   properties: {
     virtualMachineProfile: {}
     orchestrationMode: 'Flex'
@@ -245,6 +250,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
   }
   properties: {
+    virtualMachineScaleSet: {
+      id: hciHostVMSSFlex.id
+    }
     hardwareProfile: {
       vmSize: hostVMSize
     }
@@ -273,6 +281,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
         createOption: 'FromImage'
         diskSizeGB: 128
         deleteOption: 'Delete'
+        managedDisk: {
+          storageAccountType: 'Premium_ZRS'
+        }
       }
       dataDisks: [
         for diskNum in range(1, hciNodeCount): {
