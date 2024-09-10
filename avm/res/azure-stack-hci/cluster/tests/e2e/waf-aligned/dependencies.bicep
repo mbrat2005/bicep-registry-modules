@@ -75,7 +75,6 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     arcNodeResourceIds: arcNodeResourceIds
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
-    deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
     hciResourceProviderObjectId: hciResourceProviderObjectId
