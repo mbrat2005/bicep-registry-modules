@@ -6,16 +6,18 @@ param keyVaultName string
 param softDeleteRetentionDays int = 30
 param logsRetentionInDays int = 30
 param tenantId string
+@secure()
 param hciResourceProviderObjectId string?
 param arcNodeResourceIds array
-param deploymentPrefix string
 param deploymentUsername string
 @secure()
 param deploymentUserPassword string
 param localAdminUsername string
 @secure()
 param localAdminPassword string
+@secure()
 param arbDeploymentAppId string
+@secure()
 param arbDeploymentSPObjectId string
 @secure()
 param arbDeploymentServicePrincipalSecret string
