@@ -45,7 +45,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
     domainOUPath: domainOUPath
-    deployProxy: true
+    deployProxy: false
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
     hciVHDXDownloadURL: hciVHDXDownloadURL
