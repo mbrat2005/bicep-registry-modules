@@ -9,7 +9,7 @@ param tenantId string
 @secure()
 param hciResourceProviderObjectId string?
 param arcNodeResourceIds array
-param deploymentUsername string
+param deploymentUsername string = 'deployUser'
 @secure()
 param deploymentUserPassword string
 param localAdminUsername string

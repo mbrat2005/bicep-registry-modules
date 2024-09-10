@@ -11,6 +11,7 @@ param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
 param domainOUPath string = 'OU=HCI,DC=HCI,DC=local'
+param deploymentUsername string = 'deployUser'
 param arcGatewayId string = '' // default to '' to support runCommand parameters requiring string values
 param deployProxy bool = false // set to true to deploy a proxy VM for hci internet access
 param proxyBypassString string? // bypass string for proxy server - deployProxy must be true
@@ -157,7 +158,9 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       computerName: 'proxyServer'
       adminUsername: localAdminUsername
       adminPassword: localAdminPassword
-      customData: base64(loadTextContent('./scripts/proxyConfig.sh'))
+      customData: arcGatewayId == null
+        ? (loadTextContent('./scripts/proxyConfig.sh'))
+        : (loadTextContent('./scripts/proxyConfigArcGW.sh'))
       linuxConfiguration: {
         disablePasswordAuthentication: false
         patchSettings: {
@@ -518,6 +521,10 @@ resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       {
         name: 'arcGatewayId'
         value: arcGatewayId
+      }
+      {
+        name: 'deploymentUsername'
+        value: deploymentUsername
       }
       {
         name: 'domainOUPath'

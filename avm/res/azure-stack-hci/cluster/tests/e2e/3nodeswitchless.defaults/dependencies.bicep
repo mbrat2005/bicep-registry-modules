@@ -43,6 +43,7 @@ var tenantId = subscription().tenantId
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
+    deploymentUsername: deploymentUsername
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
     hciVHDXDownloadURL: hciVHDXDownloadURL
