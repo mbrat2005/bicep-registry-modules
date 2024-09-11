@@ -23,15 +23,21 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentAppId string = ''
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_#'
+@secure()
+#disable-next-line secure-param
+param arbDeploymentSPObjectId string = ''
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRESOURCEPROVIDERID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param hciResourceProviderObjectId string = ''
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
+param arbDeploymentServicePrincipalSecret string = ''
 @description('Optional. Array of cluster node names.')
 param clusterNodeNames string[] = ['hcinode1']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
@@ -206,10 +212,10 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
-module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (empty(hciResourceProviderObjectId)) {
-  name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
-  params: {}
-}
+// module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (empty(hciResourceProviderObjectId)) {
+//   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
+//   params: {}
+// }
 
 module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
   dependsOn: [
@@ -224,7 +230,6 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     arcNodeResourceIds: arcNodeResourceIds
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
-    deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: localAdminAndDeploymentUserPass
     hciResourceProviderObjectId: hciResourceProviderObjectId //?? microsoftGraphResources.outputs.hciRPServicePrincipalId
