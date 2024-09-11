@@ -210,10 +210,10 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
-module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (empty(hciResourceProviderObjectId)) {
-  name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
-  params: {}
-}
+// module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (empty(hciResourceProviderObjectId)) {
+//   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
+//   params: {}
+// }
 
 module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIClusterPreqs/ashciPrereqs.bicep' = {
   dependsOn: [
