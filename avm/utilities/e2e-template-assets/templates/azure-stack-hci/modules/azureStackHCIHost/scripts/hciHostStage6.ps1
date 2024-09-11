@@ -102,8 +102,8 @@ Install-Module AsHciADArtifactsPreCreationTool
 New-HciAdObjectsPreCreation -AzureStackLCMUserCredential $deployUserCred -AsHciOUName $domainOUPath
 
 ## set the LCM deployUser password to the adminPw value - this aligns the password with the KeyVault during re-runs
-log 'Setting deployUser password...'
-Set-AdAccountPassword -Identity 'deployUser' -NewPassword (ConvertTo-SecureString -AsPlainText -Force $adminPw) -Reset -Confirm:$false
+log "Setting deploy user '$deploymentUsername's password..."
+Set-AdAccountPassword -Identity $deploymentUsername -NewPassword (ConvertTo-SecureString -AsPlainText -Force $adminPw) -Reset -Confirm:$false
 
 # initialize arc on hci nodes
 log 'Initializing Azure Arc on HCI nodes...'
