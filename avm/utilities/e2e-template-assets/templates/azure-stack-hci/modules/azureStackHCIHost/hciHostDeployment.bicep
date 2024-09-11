@@ -248,6 +248,7 @@ resource disks 'Microsoft.Compute/disks@2023-10-02' = [
   for diskNum in range(1, hciNodeCount): {
     name: 'dataDisk${string(diskNum)}'
     location: location
+    zones: ['1']
     sku: {
       name: 'Premium_LRS'
     }
