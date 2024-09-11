@@ -243,6 +243,24 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
   }
 }
 
+// host VM disks
+resource disks 'Microsoft.Compute/disks@2023-10-02' = [
+  for diskNum in range(1, hciNodeCount): {
+    name: 'dataDisk${string(diskNum)}'
+    location: location
+    sku: {
+      name: 'Premium_LRS'
+    }
+    properties: {
+      diskSizeGB: 2048
+      networkAccessPolicy: 'DenyAll'
+      creationData: {
+        createOption: 'Empty'
+      }
+    }
+  }
+]
+
 // Azure Stack HCI Host VM -
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
@@ -292,12 +310,11 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
       }
       dataDisks: [
         for diskNum in range(1, hciNodeCount): {
-          name: 'dataDisk${string(diskNum)}'
-          createOption: 'Empty'
-          diskSizeGB: 2048
           lun: diskNum
+          createOption: 'Attach'
+          caching: 'ReadOnly'
           managedDisk: {
-            storageAccountType: 'Premium_LRS'
+            id: disks[diskNum - 1].id
           }
           deleteOption: 'Delete'
         }
