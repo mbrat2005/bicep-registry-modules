@@ -6,20 +6,23 @@ param keyVaultName string
 param softDeleteRetentionDays int = 30
 param logsRetentionInDays int = 30
 param tenantId string
-param hciResourceProviderObjectId string
+@secure()
+param hciResourceProviderObjectId string?
 param arcNodeResourceIds array
-param deploymentPrefix string
-param deploymentUsername string
+param deploymentUsername string = 'deployUser'
 @secure()
 param deploymentUserPassword string
 param localAdminUsername string
 @secure()
 param localAdminPassword string
+@secure()
 param arbDeploymentAppId string
+@secure()
 param arbDeploymentSPObjectId string
 @secure()
 param arbDeploymentServicePrincipalSecret string
-param vnetSubnetId string
+param vnetSubnetId string?
+param allowIPtoStorageAndKeyVault string?
 
 // secret names for the Azure Key Vault - these cannot be changed
 var localAdminSecretName = 'LocalAdminCredential'
@@ -32,7 +35,7 @@ var deploymentUserSecretValue = base64('${deploymentUsername}:${deploymentUserPa
 var localAdminSecretValue = base64('${localAdminUsername}:${localAdminPassword}')
 var arbDeploymentServicePrincipalValue = base64('${arbDeploymentAppId}:${arbDeploymentServicePrincipalSecret}')
 
-var storageAccountType = 'Standard_LRS'
+var storageAccountType = 'Standard_ZRS'
 
 var azureConnectedMachineResourceManagerRoleID = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
@@ -60,7 +63,7 @@ module ARBDeploymentSPNSubscriptionRoleAssignmnent 'ashciARBSPRoleAssignment.bic
 }
 
 resource diagnosticStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: keyVaultDiagnosticStorageAccountName
+  name: toLower(keyVaultDiagnosticStorageAccountName)
   location: location
   sku: {
     name: storageAccountType
@@ -106,12 +109,20 @@ resource witnessStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = 
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Deny'
-      ipRules: []
-      virtualNetworkRules: [
-        {
-          id: vnetSubnetId
-        }
-      ]
+      ipRules: (allowIPtoStorageAndKeyVault != null)
+        ? [
+            {
+              value: allowIPtoStorageAndKeyVault
+            }
+          ]
+        : []
+      virtualNetworkRules: (vnetSubnetId != null)
+        ? [
+            {
+              id: vnetSubnetId
+            }
+          ]
+        : []
     }
   }
   resource blobService 'blobServices' = {
@@ -149,12 +160,20 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Deny'
-      ipRules: []
-      virtualNetworkRules: [
-        {
-          id: vnetSubnetId
-        }
-      ]
+      ipRules: (allowIPtoStorageAndKeyVault != null)
+        ? [
+            {
+              value: allowIPtoStorageAndKeyVault
+            }
+          ]
+        : []
+      virtualNetworkRules: (vnetSubnetId != null)
+        ? [
+            {
+              id: vnetSubnetId
+            }
+          ]
+        : []
     }
   }
   dependsOn: [

@@ -30,6 +30,8 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl Safe_ports port 777         # multiling http
   acl Safe_ports port 6443
 
+  acl HCI_ResourceBridgeIPs src 172.20.0.3-172.20.0.5
+
   acl HCI_Dest_URLs dstdomain   mcr.microsoft.com
   acl HCI_Dest_URLs dstdomain   northeurope.data.mcr.microsoft.com
   acl HCI_Dest_URLs dstdomain   westeurope.data.mcr.microsoft.com
@@ -130,6 +132,19 @@ sudo cat <<EOF > /etc/squid/squid.conf
 
   acl HCI_Dest_URLs_regex dstdom_regex azgn[a-zA-Z0-9]+?\.servicebus\.windows\.net
 
+  # list of URLs that are redirected to the gateway in preview see https://learn.microsoft.com/en-us/azure-stack/hci/deploy/deployment-azure-arc-gateway-overview#arc-enabled-server-endpoints-redirected-via-the-arc-gateway-in-limited-public-preview
+  acl HCI_ArcGW_Redirected_URLs dstdomain       login.windows.net
+  acl HCI_ArcGW_Redirected_URLs dstdomain       pas.windows.net
+  acl HCI_ArcGW_Redirected_URLs dstdomain       .guestconfiguration.azure.com # Extension management and guest configuration services   Always
+  acl HCI_ArcGW_Redirected_URLs dstdomain       guestnotificationservice.azure.com #    Notification service for extension and connectivity scenarios      Always
+  #acl HCI_ArcGW_Redirected_URLs dstdomain      .guestnotificationservice.azure.com #   Notification service for extension and connectivity scenarios      Always
+  acl HCI_ArcGW_Redirected_URLs dstdomain       .servicesbus.windows.net #      Multiple HCI services require access to this endpoint   Always
+  acl HCI_ArcGW_Redirected_URLs dstdomain       .waconazure.com #       For Windows Admin Center connectivity   If using Windows Admin Center
+  # REMOVED TO ALLOW CLUSTER WITNESS acl HCI_ArcGW_Redirected_URLs dstdomain       .blob.core.windows.net #        Multiple HCI services require access to this endpoint   Always
+  acl HCI_ArcGW_Redirected_URLs dstdomain       dc.services.visualstudio.com #  Multiple HCI services require access to this endpoint   Always
+
+  acl ArcGateway dstdomain .gw.arc.azure.com
+
   # used to test internet connectivity during HCI node deployment (tests NAT configuration)
   acl testURL dstdomain ipinfo.io
 
@@ -142,7 +157,10 @@ sudo cat <<EOF > /etc/squid/squid.conf
 
   http_port 3128
 
+  http_access allow ArcGateway
   http_access allow testURL
+
+  http_access deny HCI_ArcGW_Redirected_URLs !HCI_ResourceBridgeIPs # block redirected URLs except from the ARB
   http_access allow HCI_Dest_URLs_regex
   http_access allow HCI_Dest_URLs
 EOF

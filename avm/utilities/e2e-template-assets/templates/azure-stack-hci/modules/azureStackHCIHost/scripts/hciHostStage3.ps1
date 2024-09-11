@@ -24,7 +24,7 @@ Function log {
   }
 
   Write-Host $message
-  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
+  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [hciHostStage3] - $message"
 }
 
 Function Test-ADConnection {
@@ -60,7 +60,7 @@ Function New-VHDXFromISO {
     [UInt64]
     [ValidateNotNullOrEmpty()]
     [ValidateRange(512MB, 64TB)]
-    $SizeBytes = 50GB,
+    $SizeBytes = 120GB,
 
     [Parameter(ParameterSetName = 'SRC')]
     [Alias('Index')]

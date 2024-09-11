@@ -11,10 +11,12 @@ param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
 param domainOUPath string = 'OU=HCI,DC=HCI,DC=local'
+param deploymentUsername string = 'deployUser'
 param arcGatewayId string = '' // default to '' to support runCommand parameters requiring string values
 param deployProxy bool = false // set to true to deploy a proxy VM for hci internet access
 param proxyBypassString string? // bypass string for proxy server - deployProxy must be true
 param proxyServerEndpoint string? // endpoint for proxy server - deployProxy must be true
+param hciHostAssignPublicIp bool = false // set to true to deploy a public IP for the HCI Host VM
 
 // =================================//
 // Deploy Host VM Infrastructure    //
@@ -26,7 +28,7 @@ resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
   name: 'hciHost01Identity'
 }
 
-// grant identity owner permissions on the subscription
+// grant identity owner permissions on the resource group
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().subscriptionId, userAssignedIdentity.name, 'Owner', resourceGroup().id)
   properties: {
@@ -34,6 +36,15 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')
     principalType: 'ServicePrincipal'
     description: 'Role assigned used for Azure Stack HCI IaC testing pipeline - remove if identity no longer exists!'
+  }
+}
+
+// grant identity contributor permissions on the subscription - needed to register resource providers
+module roleAssignment_subscriptionContributor 'modules/subscriptionRoleAssignment.bicep' = {
+  name: '${uniqueString(deployment().name, location)}-hcihostmi-roleAssignment_subscriptionContributor'
+  scope: subscription()
+  params: {
+    principalId: userAssignedIdentity.properties.principalId
   }
 }
 
@@ -90,6 +101,16 @@ resource maintenanceConfig 'Microsoft.Maintenance/maintenanceConfigurations@2023
   }
 }
 
+resource proxyVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = if (deployProxy) {
+  name: 'vmss-proxy01'
+  location: location
+  zones: ['1', '2', '3']
+  properties: {
+    orchestrationMode: 'Flexible'
+    platformFaultDomainCount: 1
+  }
+}
+
 resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployProxy) {
   name: 'proxyNic01'
   location: location
@@ -111,8 +132,11 @@ resource proxyNic 'Microsoft.Network/networkInterfaces@2023-11-01' = if (deployP
 resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deployProxy) {
   name: 'proxyServer01'
   location: location
-  zones: ['2']
+  zones: ['1']
   properties: {
+    virtualMachineScaleSet: {
+      id: proxyVMSSFlex.id
+    }
     hardwareProfile: {
       vmSize: 'Standard_D2s_v3'
     }
@@ -125,13 +149,18 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       }
       osDisk: {
         createOption: 'FromImage'
+        managedDisk: {
+          storageAccountType: 'Premium_ZRS'
+        }
       }
     }
     osProfile: {
       computerName: 'proxyServer'
       adminUsername: localAdminUsername
       adminPassword: localAdminPassword
-      customData: base64(loadTextContent('./scripts/proxyConfig.sh'))
+      customData: arcGatewayId == null
+        ? (loadTextContent('./scripts/proxyConfig.sh'))
+        : (loadTextContent('./scripts/proxyConfigArcGW.sh'))
       linuxConfiguration: {
         disablePasswordAuthentication: false
         patchSettings: {
@@ -162,10 +191,39 @@ resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationA
   scope: proxyServer
 }
 
+resource publicIP_HCIHost 'Microsoft.Network/publicIPAddresses@2024-01-01' = if (hciHostAssignPublicIp) {
+  name: 'pip-hcihost01'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource networkSecurityGroup_HCIHost 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+  location: location
+  name: 'hciHostNSG'
+}
+
+resource hciHostVMSSFlex 'Microsoft.Compute/virtualMachineScaleSets@2024-03-01' = {
+  name: 'vmss-hcihost01'
+  location: location
+  zones: ['1', '2', '3']
+  properties: {
+    orchestrationMode: 'Flexible'
+    platformFaultDomainCount: 1
+  }
+}
+
 resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
   location: location
   name: 'nic01'
   properties: {
+    networkSecurityGroup: {
+      id: networkSecurityGroup_HCIHost.id
+    }
     ipConfigurations: [
       {
         name: 'ipConfig01'
@@ -174,17 +232,40 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-11-01' = {
             id: vnetSubnetID == '' ? vnet.properties.subnets[0].id : vnetSubnetID
           }
           privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: hciHostAssignPublicIp
+            ? {
+                id: publicIP_HCIHost.id
+              }
+            : null
         }
       }
     ]
   }
 }
 
+// host VM disks
+resource disks 'Microsoft.Compute/disks@2023-10-02' = [
+  for diskNum in range(1, hciNodeCount): {
+    name: 'dataDisk${string(diskNum)}'
+    location: location
+    sku: {
+      name: 'Premium_LRS'
+    }
+    properties: {
+      diskSizeGB: 2048
+      networkAccessPolicy: 'DenyAll'
+      creationData: {
+        createOption: 'Empty'
+      }
+    }
+  }
+]
+
 // Azure Stack HCI Host VM -
 resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
   location: location
   name: 'hciHost01'
-  zones: ['2']
+  zones: ['1']
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -192,6 +273,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
     }
   }
   properties: {
+    virtualMachineScaleSet: {
+      id: hciHostVMSSFlex.id
+    }
     hardwareProfile: {
       vmSize: hostVMSize
     }
@@ -220,20 +304,22 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-03-01' = {
         createOption: 'FromImage'
         diskSizeGB: 128
         deleteOption: 'Delete'
+        managedDisk: {
+          storageAccountType: 'Premium_LRS'
+        }
       }
       dataDisks: [
         for diskNum in range(1, hciNodeCount): {
-          name: 'dataDisk${string(diskNum)}'
-          createOption: 'Empty'
-          diskSizeGB: 4096
           lun: diskNum
+          createOption: 'Attach'
+          caching: 'ReadOnly'
           managedDisk: {
-            storageAccountType: 'StandardSSD_LRS'
+            id: disks[diskNum - 1].id
           }
           deleteOption: 'Delete'
         }
       ]
-      diskControllerType: 'SCSI'
+      //diskControllerType: 'NVMe'
     }
     osProfile: {
       adminPassword: localAdminPassword
@@ -452,6 +538,10 @@ resource runCommand6 'Microsoft.Compute/virtualMachines/runCommands@2024-03-01' 
       {
         name: 'arcGatewayId'
         value: arcGatewayId
+      }
+      {
+        name: 'deploymentUsername'
+        value: deploymentUsername
       }
       {
         name: 'domainOUPath'

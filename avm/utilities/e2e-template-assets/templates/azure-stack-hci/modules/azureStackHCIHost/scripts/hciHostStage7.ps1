@@ -23,7 +23,7 @@ Function log {
   }
 
   Write-Host $message
-  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
+  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [hciHostStage7] - $message"
 }
 
 $ErrorActionPreference = 'Stop'
@@ -41,9 +41,17 @@ Login-AzAccount -Identity -Subscription $subscriptionId
 
 log "Waiting for HCI Arc Machines to exist in the resource group '$($resourceGroupName)'..."
 
-While (($arcMachines = Get-AzConnectedMachine -ResourceGroupName $resourceGroupName | Where-Object { $_.name -in ($hciNodeNames) }).Count -lt $hciNodeNames.Count) {
-  log "Found '$($arcMachines.Count)' HCI Arc Machines, waiting for '$($hciNodeNames.Count)'..."
+$timer = [System.Diagnostics.Stopwatch]::StartNew()
+While (($arcMachines = Get-AzConnectedMachine -ResourceGroupName $resourceGroupName | Where-Object { $_.name -in ($hciNodeNames) }).Count -lt $hciNodeNames.Count -and $timer.Elapsed.TotalMinutes -lt 60) {
+  log "Found '$($arcMachines.Count)' HCI Arc Machines, waiting for '$($hciNodeNames.Count)' machines for up to 1 hour..."
   Start-Sleep -Seconds 30
+}
+If ($timer.Elapsed.TotalMinutes -gt 60) {
+  log 'HCI Arc Machines did not exist within the 1 hour timeout period'
+  Write-Error 'HCI Arc Machines did not exist within the 1 hour timeout period' -ErrorAction Stop
+  Exit 1
+} Else {
+  log "All HCI Arc Machines exist in the resource group '$($resourceGroupName)'"
 }
 
 log 'Waiting up to two hours for HCI Arc Machine extensions to be installed...'
@@ -55,6 +63,33 @@ while (!$allExtensionsReady -and $timer.Elapsed.TotalMinutes -lt 120) {
     $extensions = Get-AzConnectedMachineExtension -ResourceGroupName $resourceGroupName -MachineName $arcMachine.Name
     if ($extensions.MachineExtensionType -notcontains 'TelemetryAndDiagnostics' -or $extensions.MachineExtensionType -notcontains 'DeviceManagementExtension' -or $extensions.MachineExtensionType -notcontains 'LcmController' -or $extensions.MachineExtensionType -notcontains 'EdgeRemoteSupport') {
       log "Waiting for extensions to be installed on HCI Arc Machine '$($arcMachine.Name)'..."
+
+      # install extensions if not already installed
+      log "Installing any missing extensions on HCI Arc Machine '$($arcMachine.Name)'..."
+      $extensionParams = @{
+        ResourceGroupName = $resourceGroupName
+        MachineName       = $arcMachine.Name
+        Location          = $arcMachine.Location
+      }
+
+      # Invoke-AzStackHciArcInitialization seemingly misses installing some extensions some of the time - so we'll install them here if missing
+      If ($extensions.MachineExtensionType -notcontains 'TelemetryAndDiagnostics') {
+        log "Installing TelemetryAndDiagnostics extension on HCI Arc Machine '$($arcMachine.Name)'..."
+        New-AzConnectedMachineExtension -Name 'AzureEdgeTelemetryAndDiagnostics' -Publisher 'Microsoft.AzureStack.Observability' -ExtensionType 'TelemetryAndDiagnostics' -NoWait @extensionParams
+      }
+      If ($extensions.MachineExtensionType -notcontains 'DeviceManagementExtension') {
+        log "Installing DeviceManagementExtension extension on HCI Arc Machine '$($arcMachine.Name)'..."
+        New-AzConnectedMachineExtension -Name 'AzureEdgeDeviceManagement' -Publisher 'Microsoft.Edge' -ExtensionType 'DeviceManagementExtension' -NoWait @extensionParams
+      }
+      If ($extensions.MachineExtensionType -notcontains 'LcmController') {
+        log "Installing LcmController extension on HCI Arc Machine '$($arcMachine.Name)'..."
+        New-AzConnectedMachineExtension -Name 'AzureEdgeLifecycleManager' -Publisher 'Microsoft.AzureStack.Orchestration' -ExtensionType 'LcmController' -NoWait @extensionParams
+      }
+      If ($extensions.MachineExtensionType -notcontains 'EdgeRemoteSupport') {
+        log "Installing EdgeRemoteSupport extension on HCI Arc Machine '$($arcMachine.Name)'..."
+        New-AzConnectedMachineExtension -Name 'AzureEdgeRemoteSupport' -Publisher 'Microsoft.AzureStack.Observability' -ExtensionType 'EdgeRemoteSupport' -NoWait @extensionParams
+      }
+
       $allExtensionsReadyCheck = $false
       continue
     } elseIf (($extensionState = $extensions | Where-Object MachineExtensionType -EQ 'TelemetryAndDiagnostics').ProvisioningState -ne 'Succeeded') {
