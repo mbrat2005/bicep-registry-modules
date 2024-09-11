@@ -8,7 +8,6 @@ This module deploys an Azure Stack HCI Cluster.
 - [Usage examples](#Usage-examples)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
-- [Cross-referenced modules](#Cross-referenced-modules)
 - [Data Collection](#Data-Collection)
 
 ## Resource Types
@@ -27,14 +26,11 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/azure-stack-hci/cluster:<version>`.
 
-- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
-- [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
-- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
+- [2Nodeswitched.Defaults](#example-1-2nodeswitcheddefaults)
+- [3Nodeswitchless.Defaults](#example-2-3nodeswitchlessdefaults)
+- [Waf-Aligned](#example-3-waf-aligned)
 
-### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
-
-This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
-
+### Example 1: _2Nodeswitched.Defaults_
 
 <details>
 
@@ -143,10 +139,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 2: _Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration_
-
-This test deploys an Azure VM to host a 3 node switchless Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
-
+### Example 2: _3Nodeswitchless.Defaults_
 
 <details>
 
@@ -263,10 +256,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 3: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned_
-
-This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster. WAF aligned.
-
+### Example 3: _Waf-Aligned_
 
 <details>
 
@@ -374,7 +364,6 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 
 </details>
 <p>
-
 
 ## Parameters
 
@@ -964,7 +953,6 @@ Tags of the resource.
 - Required: No
 - Type: object
 
-
 ## Outputs
 
 | Output | Type | Description |
@@ -974,10 +962,6 @@ Tags of the resource.
 | `resourceGroupName` | string | The resource group of the cluster. |
 | `resourceId` | string | The ID of the cluster. |
 | `systemAssignedMIPrincipalId` | string | The managed identity of the cluster. |
-
-## Cross-referenced modules
-
-_None_
 
 ## Data Collection
 

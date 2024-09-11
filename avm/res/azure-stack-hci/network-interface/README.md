@@ -8,7 +8,6 @@
 - [Usage examples](#Usage-examples)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
-- [Cross-referenced modules](#Cross-referenced-modules)
 - [Data Collection](#Data-Collection)
 
 ## Resource Types
@@ -177,7 +176,6 @@ module networkInterface 'br/public:avm/res/azure-stack-hci/network-interface:<ve
 </details>
 <p>
 
-
 ## Parameters
 
 **Required parameters**
@@ -338,7 +336,6 @@ Tags of the resource.
 - Required: No
 - Type: object
 
-
 ## Outputs
 
 | Output | Type | Description |
@@ -347,10 +344,6 @@ Tags of the resource.
 | `name` | string | The name of the resource. |
 | `resourceGroupName` | string | The resource group name of the resource. |
 | `resourceId` | string | The resource ID of the resource. |
-
-## Cross-referenced modules
-
-_None_
 
 ## Data Collection
 
