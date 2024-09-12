@@ -25,10 +25,13 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/azure-stack-hci/virtual-hard-disk:<version>`.
 
-- [Defaults](#example-1-defaults)
-- [Waf-Aligned](#example-2-waf-aligned)
+- [Deploy Azure Stack HCI virtual hard disk](#example-1-deploy-azure-stack-hci-virtual-hard-disk)
+- [Deploy Azure Stack HCI virtual hard disk WAF aligned](#example-2-deploy-azure-stack-hci-virtual-hard-disk-waf-aligned)
 
-### Example 1: _Defaults_
+### Example 1: _Deploy Azure Stack HCI virtual hard disk_
+
+Deploy Azure Stack HCI Cluster virutal disk in Azure Stack HCI
+
 
 <details>
 
@@ -81,7 +84,10 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
 </details>
 <p>
 
-### Example 2: _Waf-Aligned_
+### Example 2: _Deploy Azure Stack HCI virtual hard disk WAF aligned_
+
+Deploy Azure Stack HCI Cluster virutal disk in Azure Stack HCI with WAF aligned test
+
 
 <details>
 
