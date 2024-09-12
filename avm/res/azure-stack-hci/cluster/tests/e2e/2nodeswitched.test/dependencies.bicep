@@ -34,6 +34,8 @@ param keyVaultName string
 #disable-next-line secure-parameter-default
 param hciResourceProviderObjectId string = ''
 param domainOUPath string?
+param deployArcGateway bool = false
+param hciHostAssignPublicIp bool = false
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -41,9 +43,21 @@ var arcNodeResourceIds = [
 
 var tenantId = subscription().tenantId
 
+module arcGateway '../../../arc-gateway/main.bicep' = if (deployArcGateway) {
+  name: '${uniqueString(deployment().name, location)}-test-arcgw-${location}-${deploymentPrefix}'
+  params: {
+    location: location
+    name: 'arcg-${location}-${deploymentPrefix}'
+    allowedFeatures: ['*']
+    gatewayType: 'Public'
+  }
+}
+
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
   name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
+    arcGatewayId: deployArcGateway ? arcGateway.outputs.resourceId : null
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     domainOUPath: domainOUPath
     deployProxy: false
     hciISODownloadURL: hciISODownloadURL

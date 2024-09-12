@@ -92,7 +92,10 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
   name: 'virtualHardDiskDeployment'
   params: {
     // Required parameters
+    customLocation: '<customLocation>'
+    diskSizeGB: '<diskSizeGB>'
     name: 'ashvhdwaf001'
+    // Non-required parameters
     location: '<location>'
   }
 }
@@ -111,9 +114,16 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "customLocation": {
+      "value": "<customLocation>"
+    },
+    "diskSizeGB": {
+      "value": "<diskSizeGB>"
+    },
     "name": {
       "value": "ashvhdwaf001"
     },
+    // Non-required parameters
     "location": {
       "value": "<location>"
     }

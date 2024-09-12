@@ -7,8 +7,6 @@ This module deploys an Azure Stack HCI Cluster Deployment Settings resource.
 - [Resource Types](#Resource-Types)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
-- [Cross-referenced modules](#Cross-referenced-modules)
-- [Data Collection](#Data-Collection)
 
 ## Resource Types
 
@@ -23,7 +21,7 @@ This module deploys an Azure Stack HCI Cluster Deployment Settings resource.
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`clusterName`](#parameter-clustername) | string | The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure. |
-| [`clusterNodeConfigs`](#parameter-clusternodeconfigs) | array | An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}]. |
+| [`clusterNodeNames`](#parameter-clusternodenames) | array | Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2]. |
 | [`clusterWitnessStorageAccountName`](#parameter-clusterwitnessstorageaccountname) | string | The name of the storage account to be used as the witness for the HCI Windows Failover Cluster. |
 | [`customLocationName`](#parameter-customlocationname) | string | The name of the Custom Location associated with the Arc Resource Bridge for this cluster. This value should reflect the physical location and identifier of the HCI cluster. Example: cl-hci-den-clu01. |
 | [`defaultGateway`](#parameter-defaultgateway) | string | The default gateway of the Management Network. Exameple: 192.168.0.1. |
@@ -60,9 +58,9 @@ The name of the Azure Stack HCI cluster - this must be a valid Active Directory 
 - Required: Yes
 - Type: string
 
-### Parameter: `clusterNodeConfigs`
+### Parameter: `clusterNodeNames`
 
-An array of cluster node objects with 'nodeName' and 'ipv4Address' properties for each node. The ipv4Address property should be the management IP address of the node. Example: [{nodeName: hci-node-1, ipv4Adress: 172.20.0.11}, {nodeName: hci-node-2, ipv4Adress: 172.20.0.12}].
+Names of the cluster node Arc Machine resources. These are the name of the Arc Machine resources created when the new HCI nodes were Arc initialized. Example: [hci-node-1, hci-node-2].
 
 - Required: Yes
 - Type: array
@@ -264,7 +262,6 @@ Tags of the resource.
 - Required: No
 - Type: object
 
-
 ## Outputs
 
 | Output | Type | Description |
@@ -272,11 +269,3 @@ Tags of the resource.
 | `name` | string | The name of the cluster deployment settings. |
 | `resourceGroupName` | string | The resource group of the cluster deployment settings. |
 | `resourceId` | string | The ID of the cluster deployment settings. |
-
-## Cross-referenced modules
-
-_None_
-
-## Data Collection
-
-The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the [repository](https://aka.ms/avm/telemetry). There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.

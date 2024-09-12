@@ -2,6 +2,10 @@ metadata name = 'Azure Stack HCI Cluster'
 metadata description = 'This module deploys an Azure Stack HCI Cluster.'
 metadata owner = 'Azure/module-maintainers'
 
+// ============== //
+//   Parameters   //
+// ============== //
+
 @description('Required. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
 @maxLength(15)
 @minLength(4)
@@ -110,6 +114,10 @@ param keyVaultName string
 @description('Optional. Array of role assignments to create.')
 param roleAssignments roleAssignmentType
 
+// ============= //
+//   Variables   //
+// ============= //
+
 var builtInRoleNames = {
   // Add other relevant built-in roles here for your resource as per BCPNFR5
   Contributor: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
@@ -132,6 +140,21 @@ var builtInRoleNames = {
     'a6333a3e-0164-44c3-b281-7a577aff287f'
   )
 }
+
+var formattedRoleAssignments = [
+  for (roleAssignment, index) in (roleAssignments ?? []): union(roleAssignment, {
+    roleDefinitionId: builtInRoleNames[?roleAssignment.roleDefinitionIdOrName] ?? (contains(
+        roleAssignment.roleDefinitionIdOrName,
+        '/providers/Microsoft.Authorization/roleDefinitions/'
+      )
+      ? roleAssignment.roleDefinitionIdOrName
+      : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName))
+  })
+]
+
+// ============= //
+//   Resources   //
+// ============= //
 
 #disable-next-line no-deployments-resources
 resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableTelemetry) {
@@ -204,14 +227,10 @@ module deploymentSetting 'deployment-settings/main.bicep' = {
 }
 
 resource cluster_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
-  for (roleAssignment, index) in (roleAssignments ?? []): {
-    name: guid(cluster.id, roleAssignment.principalId, roleAssignment.roleDefinitionIdOrName)
+  for (roleAssignment, index) in (formattedRoleAssignments ?? []): {
+    name: roleAssignment.?name ?? guid(cluster.id, roleAssignment.principalId, roleAssignment.roleDefinitionId)
     properties: {
-      roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName)
-        ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName]
-        : contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/')
-            ? roleAssignment.roleDefinitionIdOrName
-            : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName)
+      roleDefinitionId: roleAssignment.roleDefinitionId
       principalId: roleAssignment.principalId
       description: roleAssignment.?description
       principalType: roleAssignment.?principalType
@@ -241,6 +260,10 @@ output systemAssignedMIPrincipalId string = (deploymentMode == 'Validate')
 output location string = (deploymentMode == 'Validate')
   ? cluster.location
   : (deploymentMode == 'Deploy') ? clusterExisting.location : ''
+
+// =============== //
+//   Definitions   //
+// =============== //
 
 type networkIntent = {
   @description('Required. The names of the network adapters to include in the intent.')
@@ -328,6 +351,9 @@ type securityConfigurationType = {
 }
 
 type roleAssignmentType = {
+  @description('Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated.')
+  name: string?
+
   @description('Required. The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: \'/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11\'.')
   roleDefinitionIdOrName: string
 

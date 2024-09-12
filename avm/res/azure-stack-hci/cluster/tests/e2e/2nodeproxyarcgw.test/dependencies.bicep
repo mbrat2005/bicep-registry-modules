@@ -7,10 +7,14 @@ param deploymentUserPassword string
 param localAdminUsername string
 @secure()
 param localAdminPassword string
-param arbDeploymentAppId string
-param arbDeploymentSPObjectId string
 @secure()
-param arbDeploymentServicePrincipalSecret string
+#disable-next-line secure-parameter-default
+param arbDeploymentAppId string = ''
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentSPObjectId string = ''
+@secure()
+param arbDeploymentServicePrincipalSecret string = ''
 param location string
 param clusterNodeNames array
 param softDeleteRetentionDays int = 30
@@ -26,8 +30,12 @@ param hciISODownloadURL string
 param clusterWitnessStorageAccountName string
 param keyVaultDiagnosticStorageAccountName string
 param keyVaultName string
-param hciResourceProviderObjectId string?
+@secure()
+#disable-next-line secure-parameter-default
+param hciResourceProviderObjectId string = ''
 param domainOUPath string?
+param deployArcGateway bool = false
+param hciHostAssignPublicIp bool
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -35,7 +43,7 @@ var arcNodeResourceIds = [
 
 var tenantId = subscription().tenantId
 
-module arcGateway '../../../arc-gateway/main.bicep' = {
+module arcGateway '../../../arc-gateway/main.bicep' = if (deployArcGateway) {
   name: 'arcGateway-${location}-${deploymentPrefix}'
   params: {
     location: location
@@ -46,14 +54,15 @@ module arcGateway '../../../arc-gateway/main.bicep' = {
 }
 
 module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/azureStackHCIHost/hciHostDeployment.bicep' = {
-  name: 'hciHostDeployment-${location}-${deploymentPrefix}'
+  name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
-    arcGatewayId: arcGateway.outputs.resourceId
+    arcGatewayId: deployArcGateway ? arcGateway.outputs.resourceId : null
     domainOUPath: domainOUPath
     deployProxy: true
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
     hciVHDXDownloadURL: hciVHDXDownloadURL
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     localAdminPassword: localAdminPassword
     location: location
     switchlessStorageConfig: switchlessStorageConfig
@@ -61,7 +70,8 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   }
 }
 
-// module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (null == hciResourceProviderObjectId) {
+// MICROSOFT GRAPH RESOURCES in Bicep are in preview and break the AVM end-to-end tests
+// module microsoftGraphResources '../../../../../../utilities/e2e-template-assets/templates/azure-stack-hci/modules/microsoftGraphResources/main.bicep' = if (hciResourceProviderObjectId == null) {
 //   name: '${uniqueString(deployment().name, location)}-test-arbappreg-${serviceShort}'
 //   params: {}
 // }
@@ -79,10 +89,9 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     arcNodeResourceIds: arcNodeResourceIds
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
-    deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: deploymentUserPassword
-    hciResourceProviderObjectId: hciResourceProviderObjectId //?? microsoftGraphResources.outputs.hciRPServicePrincipalId
+    hciResourceProviderObjectId: hciResourceProviderObjectId
     keyVaultName: keyVaultName
     localAdminPassword: localAdminPassword
     localAdminUsername: localAdminUsername

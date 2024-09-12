@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.28.1.47646",
-      "templateHash": "17629507238944788819"
+      "version": "0.29.47.4906",
+      "templateHash": "13534388380783658406"
     },
     "name": "Arc Gateway",
     "description": "This module deploys an Arc Gateway.",

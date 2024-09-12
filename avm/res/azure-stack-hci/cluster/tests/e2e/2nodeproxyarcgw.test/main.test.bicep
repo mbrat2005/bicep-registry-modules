@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
-metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned'
-metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster. WAF aligned.'
+metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration'
+metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
 
 @description('Optional. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
 @maxLength(15)
@@ -13,7 +13,7 @@ param location string = deployment().location
 @maxLength(90)
 param resourceGroupName string = 'dep-azure-stack-hci.cluster-${serviceShort}-rg'
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
-param serviceShort string = 'ashc2nwaf'
+param serviceShort string = 'ashcproxmin'
 @description('Optional. A token to inject into the name of each resource.')
 param namePrefix string = '#_namePrefix_#'
 @minLength(4)
@@ -149,13 +149,23 @@ param storageNetworks storageNetworksArrayType = [
     vlan: '712'
   }
 ]
-
-var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),4)}wit'
-var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),4)}kvd'
-var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
+@description('Optional. Deploy the Azure Arc Gateway and Proxy server.')
+param deployArcGateway bool = true
+@description('Optional. Assign public IP to the HCI host.')
+param hciHostAssignPublicIp bool = false
 
 #disable-next-line no-hardcoded-location // Due to quotas and capacity challenges, this region must be used in the AVM testing subscription
 var enforcedLocation = 'southeastasia'
+
+var clusterWitnessStorageAccountName = take(
+  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit',
+  24
+)
+var keyVaultDiagnosticStorageAccountName = take(
+  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd',
+  24
+)
+var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
@@ -168,11 +178,13 @@ module hciDependencies 'dependencies.bicep' = {
   params: {
     clusterNodeNames: clusterNodeNames
     clusterWitnessStorageAccountName: clusterWitnessStorageAccountName
+    deployArcGateway: deployArcGateway
     deploymentPrefix: deploymentPrefix
     deploymentUsername: deploymentUsername
     deploymentUserPassword: localAdminAndDeploymentUserPass
     domainOUPath: domainOUPath
     hciResourceProviderObjectId: hciResourceProviderObjectId
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     keyVaultName: keyVaultName
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     localAdminPassword: localAdminAndDeploymentUserPass
@@ -193,7 +205,7 @@ module cluster_validate '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
-  name: '${uniqueString(deployment().name, enforcedLocation)}-test-clustervalidate-${serviceShort}'
+  name: '${uniqueString(deployment().name, location)}-test-clustervalidate-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
