@@ -1,3 +1,6 @@
+metadata name = 'Deploy Azure Stack HCI virtual hard disk WAF aligned'
+metadata description = 'Deploy Azure Stack HCI Cluster virutal disk in Azure Stack HCI with WAF aligned test'
+
 targetScope = 'subscription'
 
 // ========== //

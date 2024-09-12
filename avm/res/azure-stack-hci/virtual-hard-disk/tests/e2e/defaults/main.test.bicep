@@ -1,3 +1,6 @@
+metadata name = 'Deploy Azure Stack HCI virtual hard disk'
+metadata description = 'Deploy Azure Stack HCI Cluster virutal disk in Azure Stack HCI'
+
 targetScope = 'subscription'
 
 // ========== //
