@@ -20,18 +20,24 @@ param serviceShort string = 'ashvhdmin'
 param namePrefix string = '#_namePrefix_#'
 
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentAppId string = ''
 
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentSPObjectId string = '#_AZURESTACKHCI_AZURESTACKHCISPOBJECTID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentSPObjectId string = ''
 
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-parameter-default
-param arbDeploymentServicePrincipalSecret string = '#_AZURESTACKHCI_AZURESTACKHCISPSECRET_#'
+param arbDeploymentServicePrincipalSecret string = ''
 
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRESOURCEPROVIDERID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param hciResourceProviderObjectId string = ''
 
 @description('Optional. Disk size in GB. Defaults to 30GB.')
 param diskSizeInGB int = 30

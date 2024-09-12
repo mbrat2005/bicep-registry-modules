@@ -1,6 +1,6 @@
-# <Add module name> `[Microsoft.AzureStackHCI/virtualharddisks]`
+# Azure Stack HCI Virtual Hard Disk `[Microsoft.AzureStackHCI/virtualHardDisks]`
 
-<Add description>
+This module deploys an Azure Stack HCI Virtual Hard Disk.
 
 ## Navigation
 
@@ -8,13 +8,14 @@
 - [Usage examples](#Usage-examples)
 - [Parameters](#Parameters)
 - [Outputs](#Outputs)
-- [Cross-referenced modules](#Cross-referenced-modules)
 - [Data Collection](#Data-Collection)
 
 ## Resource Types
 
 | Resource Type | API Version |
 | :-- | :-- |
+| `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
+| `Microsoft.AzureStackHCI/virtualHardDisks` | [2024-01-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/virtualHardDisks) |
 
 ## Usage examples
 
@@ -38,7 +39,9 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
   name: 'virtualHardDiskDeployment'
   params: {
     // Required parameters
-    name: 'ashvhddef001'
+    customLocation: '<customLocation>'
+    diskSizeGB: '<diskSizeGB>'
+    name: 'ashvhdmin001'
     // Non-required parameters
     location: '<location>'
   }
@@ -58,8 +61,14 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
   "contentVersion": "1.0.0.0",
   "parameters": {
     // Required parameters
+    "customLocation": {
+      "value": "<customLocation>"
+    },
+    "diskSizeGB": {
+      "value": "<diskSizeGB>"
+    },
     "name": {
-      "value": "ashvhddef001"
+      "value": "ashvhdmin001"
     },
     // Non-required parameters
     "location": {
@@ -84,7 +93,6 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
   params: {
     // Required parameters
     name: 'ashvhdwaf001'
-    // Non-required parameters
     location: '<location>'
   }
 }
@@ -106,7 +114,6 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
     "name": {
       "value": "ashvhdwaf001"
     },
-    // Non-required parameters
     "location": {
       "value": "<location>"
     }
@@ -117,21 +124,45 @@ module virtualHardDisk 'br/public:avm/res/azure-stack-hci/virtual-hard-disk:<ver
 </details>
 <p>
 
-
 ## Parameters
 
 **Required parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`customLocation`](#parameter-customlocation) | string | Resource ID of the associated custom location. |
+| [`diskSizeGB`](#parameter-disksizegb) | int | The size of the disk in GB. |
 | [`name`](#parameter-name) | string | Name of the resource to create. |
 
 **Optional parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
+| [`blockSizeBytes`](#parameter-blocksizebytes) | int | The block size of the disk in bytes. |
+| [`diskFileFormat`](#parameter-diskfileformat) | string | The file format of the disk. Defaults to 'vhdx'. |
+| [`dynamic`](#parameter-dynamic) | bool | The type of the disk. Defaults to 'true'. |
 | [`enableTelemetry`](#parameter-enabletelemetry) | bool | Enable/Disable usage telemetry for module. |
+| [`hyperVGeneration`](#parameter-hypervgeneration) | string | The generation of the Hyper-V virtual machine. Defaults to 'V2'. |
 | [`location`](#parameter-location) | string | Location for all Resources. |
+| [`logicalSectorBytes`](#parameter-logicalsectorbytes) | int | The logical sector size of the disk in bytes. |
+| [`physicalSectorBytes`](#parameter-physicalsectorbytes) | int | The physical sector size of the disk in bytes. |
+| [`roleAssignments`](#parameter-roleassignments) | array | Array of role assignments to create. |
+| [`storagePathName`](#parameter-storagepathname) | string | The storage path name of the container. If omitted, the disk will be created on any available CSV. |
+| [`tags`](#parameter-tags) | object | Tags of the resource. |
+
+### Parameter: `customLocation`
+
+Resource ID of the associated custom location.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `diskSizeGB`
+
+The size of the disk in GB.
+
+- Required: Yes
+- Type: int
 
 ### Parameter: `name`
 
@@ -139,6 +170,36 @@ Name of the resource to create.
 
 - Required: Yes
 - Type: string
+
+### Parameter: `blockSizeBytes`
+
+The block size of the disk in bytes.
+
+- Required: No
+- Type: int
+
+### Parameter: `diskFileFormat`
+
+The file format of the disk. Defaults to 'vhdx'.
+
+- Required: No
+- Type: string
+- Default: `'vhdx'`
+- Allowed:
+  ```Bicep
+  [
+    'vhd'
+    'vhdx'
+  ]
+  ```
+
+### Parameter: `dynamic`
+
+The type of the disk. Defaults to 'true'.
+
+- Required: No
+- Type: bool
+- Default: `True`
 
 ### Parameter: `enableTelemetry`
 
@@ -148,6 +209,21 @@ Enable/Disable usage telemetry for module.
 - Type: bool
 - Default: `True`
 
+### Parameter: `hyperVGeneration`
+
+The generation of the Hyper-V virtual machine. Defaults to 'V2'.
+
+- Required: No
+- Type: string
+- Default: `'V2'`
+- Allowed:
+  ```Bicep
+  [
+    'V1'
+    'V2'
+  ]
+  ```
+
 ### Parameter: `location`
 
 Location for all Resources.
@@ -156,15 +232,139 @@ Location for all Resources.
 - Type: string
 - Default: `[resourceGroup().location]`
 
+### Parameter: `logicalSectorBytes`
+
+The logical sector size of the disk in bytes.
+
+- Required: No
+- Type: int
+
+### Parameter: `physicalSectorBytes`
+
+The physical sector size of the disk in bytes.
+
+- Required: No
+- Type: int
+
+### Parameter: `roleAssignments`
+
+Array of role assignments to create.
+
+- Required: No
+- Type: array
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`principalId`](#parameter-roleassignmentsprincipalid) | string | The principal ID of the principal (user/group/identity) to assign the role to. |
+| [`roleDefinitionIdOrName`](#parameter-roleassignmentsroledefinitionidorname) | string | The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: '/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11'. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`condition`](#parameter-roleassignmentscondition) | string | The conditions on the role assignment. This limits the resources it can be assigned to. e.g.: @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:ContainerName] StringEqualsIgnoreCase "foo_storage_container". |
+| [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
+| [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
+| [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
+| [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
+
+### Parameter: `roleAssignments.principalId`
+
+The principal ID of the principal (user/group/identity) to assign the role to.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `roleAssignments.roleDefinitionIdOrName`
+
+The role to assign. You can provide either the display name of the role definition, the role definition GUID, or its fully qualified ID in the following format: '/providers/Microsoft.Authorization/roleDefinitions/c2f4ef07-c644-48eb-af81-4b1b4947fb11'.
+
+- Required: Yes
+- Type: string
+
+### Parameter: `roleAssignments.condition`
+
+The conditions on the role assignment. This limits the resources it can be assigned to. e.g.: @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:ContainerName] StringEqualsIgnoreCase "foo_storage_container".
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.conditionVersion`
+
+Version of the condition.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    '2.0'
+  ]
+  ```
+
+### Parameter: `roleAssignments.delegatedManagedIdentityResourceId`
+
+The Resource Id of the delegated managed identity resource.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.description`
+
+The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.principalType`
+
+The principal type of the assigned principal ID.
+
+- Required: No
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'Device'
+    'ForeignGroup'
+    'Group'
+    'ServicePrincipal'
+    'User'
+  ]
+  ```
+
+### Parameter: `storagePathName`
+
+The storage path name of the container. If omitted, the disk will be created on any available CSV.
+
+- Required: No
+- Type: string
+
+### Parameter: `tags`
+
+Tags of the resource.
+
+- Required: No
+- Type: object
 
 ## Outputs
 
-| Output | Type |
-| :-- | :-- |
-
-## Cross-referenced modules
-
-_None_
+| Output | Type | Description |
+| :-- | :-- | :-- |
+| `location` | string | The location the resource was deployed into. |
+| `name` | string | The name of the resource. |
+| `resourceGroupName` | string | The resource group name of the resource. |
+| `resourceId` | string | The resource ID of the resource. |
 
 ## Data Collection
 

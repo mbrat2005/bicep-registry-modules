@@ -7,7 +7,7 @@ targetScope = 'subscription'
 @description('Optional. The name of the resource group to deploy for testing purposes.')
 @maxLength(90)
 // e.g., for a module 'network/private-endpoint' you could use 'dep-dev-network.privateendpoints-${serviceShort}-rg'
-param resourceGroupName string = 'dep-${namePrefix}-<provider>-<resourceType>-${serviceShort}-rg'
+param resourceGroupName string = 'dep-${namePrefix}-azurestackhci-virtualharddisk-${serviceShort}-rg'
 
 @description('Optional. The location to deploy resources to.')
 param resourceLocation string = deployment().location
@@ -18,6 +18,29 @@ param serviceShort string = 'ashvhdwaf'
 
 @description('Optional. A token to inject into the name of each resource. This value can be automatically injected by the CI.')
 param namePrefix string = '#_namePrefix_#'
+
+@description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentAppId string = ''
+
+@description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentSPObjectId string = ''
+
+@description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentServicePrincipalSecret string = ''
+
+@description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
+@secure()
+#disable-next-line secure-parameter-default
+param hciResourceProviderObjectId string = ''
+
+@description('Optional. Disk size in GB. Defaults to 30GB.')
+param diskSizeInGB int = 30
 
 // ============ //
 // Dependencies //
@@ -30,6 +53,18 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   location: resourceLocation
 }
 
+module nestedDependencies 'dependencies.bicep' = {
+  scope: resourceGroup
+  name: '${uniqueString(deployment().name, resourceLocation)}-nestedDependencies'
+  params: {
+    location: resourceLocation
+    hciResourceProviderObjectId: hciResourceProviderObjectId
+    arbDeploymentAppId: arbDeploymentAppId
+    arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
+    arbDeploymentSPObjectId: arbDeploymentSPObjectId
+  }
+}
+
 // ============== //
 // Test Execution //
 // ============== //
@@ -40,9 +75,10 @@ module testDeployment '../../../main.bicep' = [
     scope: resourceGroup
     name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
     params: {
-      // You parameters go here
       name: '${namePrefix}${serviceShort}001'
       location: resourceLocation
+      customLocation: nestedDependencies.outputs.customLocationId
+      diskSizeGB: diskSizeInGB
     }
   }
 ]
