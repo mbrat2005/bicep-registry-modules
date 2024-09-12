@@ -23,7 +23,9 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
+@secure()
+#disable-next-line secure-param
+param arbDeploymentAppId string = ''
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
 #disable-next-line secure-param
@@ -390,4 +392,8 @@ type securityConfigurationType = {
   bitlockerBootVolume: bool
   bitlockerDataVolumes: bool
   wdacEnforced: bool
+}
+wdacEnforced: bool
+}
+wdacEnforced: bool
 }
