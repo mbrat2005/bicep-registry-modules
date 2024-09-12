@@ -28,7 +28,7 @@ Function log {
   }
 
   Write-Host $message
-  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $message"
+  Add-Content -Path $logPath -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [hciHostStage5] - $message"
 }
 
 Function Test-ADConnection {
@@ -173,23 +173,6 @@ Get-VM | ForEach-Object {
 log 'Renaming first network adapter on HCI nodes...'
 if (Get-VMNetworkAdapter -Name 'Network Adapter' -VMName * -ErrorAction SilentlyContinue) { Rename-VMNetworkAdapter -NewName mgmt -VMName * -Name 'Network Adapter' }
 Get-VM | Get-VMNetworkAdapter -Name 'mgmt' | Set-VMNetworkAdapter -DeviceNaming On
-
-# create DHCP reservations for HCI node VMs management interfaces
-log 'Checking DHCP reservations for HCI node VMs management interfaces...'
-$existingReservations = Get-DhcpServerv4Reservation
-For ($i = 1; $i -le $hciNodeCount; $i++) {
-  $hciNodeName = "hciNode$i"
-  $hciNodeIP = "172.20.0.$(9 + $i)"
-  If ($existingReservations.Name -notcontains $hciNodeName) {
-    log "Creating DHCP reservation for HCI node '$hciNodeName' with IP '$hciNodeIP'..."
-    $mgmtMac = (Get-VMNetworkAdapter -VMName $hciNodeName -Name mgmt).MacAddress -split '(.{2})' -ne '' -join '-'
-
-    log "Creating DHCP reservation for HCI node '$hciNodeName' with IP '$hciNodeIP' for MAC address '$mgmtMac'..."
-    Add-DhcpServerv4Reservation -ScopeId HCIMgmt -Name $hciNodeName -IPAddress $hciNodeIP -ClientId $mgmtMac
-  } Else {
-    log "DHCP reservation for HCI node '$hciNodeName' already exists."
-  }
-}
 
 # add additional NICs to HCI node VMs
 log 'Adding additional NICs to HCI node VMs...'
@@ -388,3 +371,28 @@ If (Get-VM | Where-Object State -EQ 'Off') {
   log 'HCI node VMs are already running.'
 }
 
+# create DHCP reservations for HCI node VMs management interfaces
+log 'Checking DHCP reservations for HCI node VMs management interfaces...'
+$existingReservations = Get-DhcpServerv4Reservation -ScopeId 172.20.0.0
+For ($i = 1; $i -le $hciNodeCount; $i++) {
+  $hciNodeName = "hciNode$i"
+  $hciNodeIP = "172.20.0.$(9 + $i)"
+  If ($existingReservations.Description -notcontains $hciNodeName) {
+    log "Creating DHCP reservation for HCI node '$hciNodeName' with IP '$hciNodeIP'..."
+
+    $mgmtNIC = Get-VMNetworkAdapter -VMName $hciNodeName -Name mgmt
+
+    If ($mgmtNIC) {
+      $mgmtMac = $mgmtNIC.MacAddress -split '(.{2})' -ne '' -join '-'
+
+      log "Creating DHCP reservation for HCI node '$hciNodeName' with IP '$hciNodeIP' for MAC address '$mgmtMac'..."
+      Add-DhcpServerv4Reservation -ScopeId 172.20.0.0 -Name $hciNodeName -IPAddress $hciNodeIP -ClientId $mgmtMac -Description $hciNodeName
+    } Else {
+      log "Failed to create DHCP reservation for HCI node '$hciNodeName'. Could not find NIC named 'mgmt'."
+      Write-Error "Failed to create DHCP reservation for HCI node '$hciNodeName'. Could not find NIC named 'mgmt'."
+      exit 1
+    }
+  } Else {
+    log "DHCP reservation for HCI node '$hciNodeName' already exists."
+  }
+}
