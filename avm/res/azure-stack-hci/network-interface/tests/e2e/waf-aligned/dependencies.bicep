@@ -393,7 +393,3 @@ type securityConfigurationType = {
   bitlockerDataVolumes: bool
   wdacEnforced: bool
 }
-wdacEnforced: bool
-}
-wdacEnforced: bool
-}
