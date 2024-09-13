@@ -208,7 +208,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
     localAdminPassword: localAdminAndDeploymentUserPass
     location: location
     vnetSubnetID: vnetSubnetId
-    hostVMSize: 'Standard_E16bds_v5'
+    hostVMSize: 'Standard_E8bds_v5'
   }
 }
 
