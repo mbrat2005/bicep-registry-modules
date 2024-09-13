@@ -1,7 +1,7 @@
 targetScope = 'subscription'
 
-metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration'
-metadata description = 'This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.'
+metadata name = 'Deploy Azure Stack HCI Cluster in Azure with a 1 node switched configuration with proxy and Arc Gateway'
+metadata description = 'This test deploys an Azure VM to host a 1 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster with proxy and Arc Gateway.'
 
 @description('Optional. The name of the Azure Stack HCI cluster - this must be a valid Active Directory computer name and will be the name of your cluster in Azure.')
 @maxLength(15)
@@ -40,7 +40,7 @@ param arbDeploymentSPObjectId string = ''
 #disable-next-line secure-parameter-default
 param arbDeploymentServicePrincipalSecret string = ''
 @description('Optional. The names of the cluster nodes to be deployed.')
-param clusterNodeNames array = ['hcinode1', 'hcinode2']
+param clusterNodeNames array = ['hcinode1']
 @description('Optional. The fully qualified domain name of the Active Directory domain.')
 param domainFqdn string = 'hci.local'
 @description('Optional. The organizational unit path in Active Directory where the cluster computer objects will be created.')

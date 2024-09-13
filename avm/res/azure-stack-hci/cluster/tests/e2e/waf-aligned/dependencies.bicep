@@ -48,6 +48,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
     deployProxy: false
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
+    hostVMSize: 'Standard_E16bds_v5'
     hciVHDXDownloadURL: hciVHDXDownloadURL
     localAdminPassword: localAdminPassword
     location: location

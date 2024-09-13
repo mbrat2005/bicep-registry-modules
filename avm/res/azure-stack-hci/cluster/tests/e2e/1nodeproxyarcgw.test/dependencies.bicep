@@ -63,6 +63,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
     hciNodeCount: hciNodeCount
     hciVHDXDownloadURL: hciVHDXDownloadURL
     hciHostAssignPublicIp: hciHostAssignPublicIp
+    hostVMSize: 'Standard_E8bds_v5'
     localAdminPassword: localAdminPassword
     location: location
     switchlessStorageConfig: switchlessStorageConfig
