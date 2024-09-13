@@ -26,14 +26,14 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/azure-stack-hci/cluster:<version>`.
 
-- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 1 node switched configuration with proxy and Arc Gateway](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-1-node-switched-configuration-with-proxy-and-arc-gateway)
 - [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
 - [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
 - [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-4-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
 
-### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
+### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 1 node switched configuration with proxy and Arc Gateway_
 
-This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
+This test deploys an Azure VM to host a 1 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster with proxy and Arc Gateway.
 
 
 <details>
