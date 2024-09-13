@@ -159,8 +159,8 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       adminUsername: localAdminUsername
       adminPassword: localAdminPassword
       customData: arcGatewayId == null
-        ? (loadTextContent('./scripts/proxyConfig.sh'))
-        : (loadTextContent('./scripts/proxyConfigArcGW.sh'))
+        ? base64(loadTextContent('./scripts/proxyConfig.sh'))
+        : base64(loadTextContent('./scripts/proxyConfigArcGW.sh'))
       linuxConfiguration: {
         disablePasswordAuthentication: false
         patchSettings: {
@@ -457,7 +457,10 @@ resource wait2 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
     scriptContent: 'Start-Sleep -Seconds 300 #enough time for AD start-up'
     retentionInterval: 'PT6H'
   }
-  dependsOn: [runCommand4]
+  dependsOn: [
+    proxyServer
+    runCommand4
+  ]
 }
 
 // ===========================//
