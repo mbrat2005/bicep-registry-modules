@@ -1,6 +1,6 @@
 # Azure Stack HCI Cluster `[Microsoft.AzureStackHCI/clusters]`
 
-This module deploys an Azure Stack HCI Cluster.
+This module deploys an Azure Stack HCI Cluster on the provided Arc Machines.
 
 ## Navigation
 
@@ -15,8 +15,8 @@ This module deploys an Azure Stack HCI Cluster.
 | Resource Type | API Version |
 | :-- | :-- |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.AzureStackHCI/clusters` | [2024-02-15-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters) |
-| `Microsoft.AzureStackHCI/clusters/deploymentSettings` | [2024-02-15-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters/deploymentSettings) |
+| `Microsoft.AzureStackHCI/clusters` | [2024-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters) |
+| `Microsoft.AzureStackHCI/clusters/deploymentSettings` | [2024-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters/deploymentSettings) |
 
 ## Usage examples
 

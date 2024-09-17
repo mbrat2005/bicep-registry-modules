@@ -6,10 +6,10 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "12359896870426778402"
+      "templateHash": "2756767529893421666"
     },
     "name": "Azure Stack HCI Cluster",
-    "description": "This module deploys an Azure Stack HCI Cluster.",
+    "description": "This module deploys an Azure Stack HCI Cluster on the provided Arc Machines.",
     "owner": "Azure/module-maintainers"
   },
   "definitions": {
@@ -569,7 +569,7 @@
     "cluster": {
       "condition": "[equals(parameters('deploymentMode'), 'Validate')]",
       "type": "Microsoft.AzureStackHCI/clusters",
-      "apiVersion": "2024-02-15-preview",
+      "apiVersion": "2024-04-01",
       "name": "[parameters('name')]",
       "identity": {
         "type": "SystemAssigned"
@@ -582,7 +582,7 @@
       "condition": "[equals(parameters('deploymentMode'), 'Deploy')]",
       "existing": true,
       "type": "Microsoft.AzureStackHCI/clusters",
-      "apiVersion": "2024-02-15-preview",
+      "apiVersion": "2024-04-01",
       "name": "[parameters('name')]"
     },
     "cluster_roleAssignments": {
@@ -695,7 +695,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "3129562996701250573"
+              "templateHash": "14432220259159867333"
             },
             "name": "Azure Stack HCI Cluster Deployment Settings",
             "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -908,13 +908,12 @@
             "cluster": {
               "existing": true,
               "type": "Microsoft.AzureStackHCI/clusters",
-              "apiVersion": "2024-02-15-preview",
+              "apiVersion": "2024-04-01",
               "name": "[parameters('clusterName')]"
             },
             "deploymentSettings": {
-              "condition": "[not(equals(parameters('deploymentMode'), 'LocksOnly'))]",
               "type": "Microsoft.AzureStackHCI/clusters/deploymentSettings",
-              "apiVersion": "2024-02-15-preview",
+              "apiVersion": "2024-04-01",
               "name": "[format('{0}/{1}', parameters('clusterName'), 'default')]",
               "properties": {
                 "arcNodeResourceIds": "[variables('arcNodeResourceIds')]",
@@ -1054,14 +1053,14 @@
       "metadata": {
         "description": "The managed identity of the cluster."
       },
-      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-02-15-preview', 'full').identity.principalId, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-02-15-preview', 'full').identity.principalId, ''))]"
+      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-04-01', 'full').identity.principalId, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-04-01', 'full').identity.principalId, ''))]"
     },
     "location": {
       "type": "string",
       "metadata": {
         "description": "The location of the cluster."
       },
-      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-02-15-preview', 'full').location, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-02-15-preview', 'full').location, ''))]"
+      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-04-01', 'full').location, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-04-01', 'full').location, ''))]"
     }
   }
 }
