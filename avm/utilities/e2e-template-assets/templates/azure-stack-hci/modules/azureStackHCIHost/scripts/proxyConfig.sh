@@ -65,7 +65,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   eus.his.arc.azure.com
   acl HCI_Dest_URLs dstdomain   eastus-gas.guestconfiguration.azure.com
   acl HCI_Dest_URLs dstdomain   sea.his.arc.azure.com
-  acl HCI_Dest_URLs dstdomain   southeastasua-gas.guestconfiguration.azure.com
+  acl HCI_Dest_URLs dstdomain   southeastasia-gas.guestconfiguration.azure.com
   acl HCI_Dest_URLs dstdomain   agentserviceapi.guestconfiguration.azure.com
   acl HCI_Dest_URLs dstdomain   .servicebus.windows.net
   acl HCI_Dest_URLs dstdomain   .waconazure.com
@@ -91,7 +91,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   licensing.platform.edge.azure.com
   acl HCI_Dest_URLs dstdomain   billing.platform.edge.azure.com
   acl HCI_Dest_URLs dstdomain   azurestackhci.azurefd.net
-  acl HCI_Dest_URLs dstdomain   global.prod.microsoftmetrics.com
+  acl HCI_Dest_URLs dstdomain   .prod.microsoftmetrics.com
   acl HCI_Dest_URLs dstdomain   dc.services.visualstudio.com
   acl HCI_Dest_URLs dstdomain   qos.prod.warm.ingest.monitor.core.windows.net
   acl HCI_Dest_URLs dstdomain   eastus-shared.prod.warm.ingest.monitor.core.windows.net
@@ -126,6 +126,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   ocsp2.globalsign.com
   acl HCI_Dest_URLs dstdomain   hciarcvmsstorage.z13.web.core.windows.net
   acl HCI_Dest_URLs dstdomain   management.azure.com
+  acl HCI_Dest_URLs dstdomain   developer.microsoft.com
   acl HCI_Dest_URLs dstdomain   .vault.azure.net
 
   acl HCI_Dest_URLs_regex dstdom_regex azgn[a-zA-Z0-9]+?\.servicebus\.windows\.net

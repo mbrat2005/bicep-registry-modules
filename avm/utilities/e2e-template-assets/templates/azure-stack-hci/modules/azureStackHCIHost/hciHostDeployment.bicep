@@ -158,7 +158,7 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       computerName: 'proxyServer'
       adminUsername: localAdminUsername
       adminPassword: localAdminPassword
-      customData: arcGatewayId == null
+      customData: (arcGatewayId == null || arcGatewayId == '')
         ? base64(loadTextContent('./scripts/proxyConfig.sh'))
         : base64(loadTextContent('./scripts/proxyConfigArcGW.sh'))
       linuxConfiguration: {

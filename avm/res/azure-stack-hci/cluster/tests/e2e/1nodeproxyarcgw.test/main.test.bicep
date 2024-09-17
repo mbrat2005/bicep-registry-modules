@@ -150,7 +150,7 @@ param storageNetworks storageNetworksArrayType = [
   }
 ]
 @description('Optional. Deploy the Azure Arc Gateway and Proxy server.')
-param deployArcGateway bool = true
+param deployArcGateway bool = false
 @description('Optional. Assign public IP to the HCI host.')
 param hciHostAssignPublicIp bool = false
 

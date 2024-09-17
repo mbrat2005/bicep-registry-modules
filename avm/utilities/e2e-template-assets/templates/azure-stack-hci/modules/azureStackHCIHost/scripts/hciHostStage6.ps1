@@ -269,7 +269,7 @@ If (!$testNodeInternetConnection) {
 }
 
 ## create jobs for each node to initialize Azure Arc
-log "Creating Azure Arc initialization jobs for HCI nodes [$((Get-VM).Name -join ',')]..."
+log "Creating Azure Arc initialization jobs for HCI nodes [$((Get-VM).Name -join ',')]. ArcGatewayId: '$arcGatewayId', ProxyServerEndpoint: '$proxyServerEndpoint'..."
 $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
     $ErrorActionPreference = 'Stop'
 
