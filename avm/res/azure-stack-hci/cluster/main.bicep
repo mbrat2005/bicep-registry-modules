@@ -1,5 +1,5 @@
 metadata name = 'Azure Stack HCI Cluster'
-metadata description = 'This module deploys an Azure Stack HCI Cluster.'
+metadata description = 'This module deploys an Azure Stack HCI Cluster on the provided Arc Machines.'
 metadata owner = 'Azure/module-maintainers'
 
 // ============== //
@@ -179,7 +179,7 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2023-07-01' = if (enableT
 }
 
 // cluster resource is created when deploymentMode is set to 'Validate'
-resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' = if (deploymentMode == 'Validate') {
+resource cluster 'Microsoft.AzureStackHCI/clusters@2024-04-01' = if (deploymentMode == 'Validate') {
   name: name
   identity: {
     type: 'SystemAssigned'
@@ -190,7 +190,7 @@ resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' = if (dep
 }
 
 // existing cluster resource is used when deploymentMode is set to 'Deploy'
-resource clusterExisting 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' existing = if (deploymentMode == 'Deploy') {
+resource clusterExisting 'Microsoft.AzureStackHCI/clusters@2024-04-01' existing = if (deploymentMode == 'Deploy') {
   name: name
 }
 
