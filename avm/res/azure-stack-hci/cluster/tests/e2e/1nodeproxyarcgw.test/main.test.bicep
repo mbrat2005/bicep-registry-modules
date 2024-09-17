@@ -157,14 +157,8 @@ param hciHostAssignPublicIp bool = false
 #disable-next-line no-hardcoded-location // Due to quotas and capacity challenges, this region must be used in the AVM testing subscription
 var enforcedLocation = 'southeastasia'
 
-var clusterWitnessStorageAccountName = take(
-  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit',
-  24
-)
-var keyVaultDiagnosticStorageAccountName = take(
-  '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd',
-  24
-)
+var clusterWitnessStorageAccountName = '${take('${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}',21)}wit'
+var keyVaultDiagnosticStorageAccountName = '${take('${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}',21)}kvd'
 var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
