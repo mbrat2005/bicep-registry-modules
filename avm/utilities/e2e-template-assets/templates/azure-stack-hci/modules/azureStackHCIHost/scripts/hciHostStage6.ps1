@@ -207,12 +207,14 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
 
     If ($proxyBypassString -eq 'GENERATE_PROXY_BYPASS_DYNAMICALLY') {
         log 'Generating proxy bypass string dynamically...'
-        $proxyBypassString = '127.0.0.1;localhost;172.20.0.*;*.hci.local;hcicluster'
+        $proxyBypassString = '127.0.0.1;localhost;172.20.0.*;*.hci.local;hcicluster;172.20.0.2;172.20.0.3;172.20.0.4;172.20.0.5'
         For ($i = 1; $i -le (Get-VM).count; $i++) {
             $proxyBypassString += ";hcinode$i"
+            $proxyBypassString += ';172.20.0.{0}' -f (9 + $i)
         }
     }
 
+    log 'Configuring proxy settings on HCI nodes...'
     $proxyConfigLogs = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
         $ErrorActionPreference = 'Stop'
 
@@ -220,10 +222,10 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
         $proxyBypassString = $args[1]
 
         ## install winInetProxy module
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+        If (!(Get-PackageProvider -Name NuGet)) { Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force }
         If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default }
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        Install-Module WinInetProxy -Force
+        If (!(Get-InstalledModule -Name WinInetProxy)) { Install-Module WinInetProxy -Force }
         Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
         ## set WinInet proxy settings
@@ -242,7 +244,10 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
 
         Write-Output "[$($env:COMPUTERNAME)] WinInetProxy Settings: $(Get-WinhttpProxy -Advanced)"
         Write-Output "[$($env:COMPUTERNAME)] WinhttpProxy Settings: $(Get-WinhttpProxy -Default)"
-        Write-Output "[$($env:COMPUTERNAME)] Environment Variables: $(Get-ChildItem -Path env:*PROXY* | ConvertTo-Json -Compress)"
+
+        Write-Output ("[{0}] Environment Variables {1}: '{2}'" -f $env:COMPUTERNAME, 'HTTPS_PROXY', [Environment]::GetEnvironmentVariable('HTTPS_PROXY', 'Machine'))
+        Write-Output ("[{0}] Environment Variables {1}: '{2}'" -f $env:COMPUTERNAME, 'HTTP_PROXY', [Environment]::GetEnvironmentVariable('HTTP_PROXY', 'Machine'))
+        Write-Output ("[{0}] Environment Variables {1}: '{2}'" -f $env:COMPUTERNAME, 'NO_PROXY', [Environment]::GetEnvironmentVariable('NO_PROXY', 'Machine'))
 
     } -ArgumentList $proxyServerEndpoint, $proxyBypassString
 
