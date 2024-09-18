@@ -225,7 +225,7 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
         If (!(Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) { Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force }
         If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default }
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        If (!(Get-InstalledModule -Name WinInetProxy)) { Install-Module WinInetProxy -Force }
+        If (!(Get-InstalledModule -Name WinInetProxy -ErrorAction SilentlyContinue)) { Install-Module WinInetProxy -Force }
         Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
         ## set WinInet proxy settings
