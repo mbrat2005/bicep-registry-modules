@@ -18,6 +18,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
 
   acl SSL_ports port 443
   acl SSL_ports port 6443
+  acl SSL_ports port 8084
 
   acl Safe_ports port 80          # http
   acl Safe_ports port 21          # ftp
@@ -122,6 +123,10 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   management.azure.com
   acl HCI_Dest_URLs dstdomain   developer.microsoft.com
   acl HCI_Dest_URLs dstdomain   .vault.azure.net
+  acl HCI_Dest_URLs dstdomain   .prod.hot.ingestion.msftcloudes.com         # optional metrics and telemetry
+  acl HCI_Dest_URLs dstdomain   edgesupprd.trafficmanager.net               # optional support
+  acl HCI_Dest_URLs dstdomain   .obo.arc.azure.com                          # optional arc - port 8084
+  acl HCI_Dest_URLs dstdomain   azurewatsonanalysis-prod.core.windows.net   # optional observability
 
   acl HCI_Dest_URLs_regex dstdom_regex azgn[a-zA-Z0-9]+?\.servicebus\.windows\.net
 

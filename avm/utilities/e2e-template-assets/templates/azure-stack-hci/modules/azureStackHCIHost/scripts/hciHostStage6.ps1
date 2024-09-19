@@ -207,7 +207,7 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
 
     If ($proxyBypassString -eq 'GENERATE_PROXY_BYPASS_DYNAMICALLY') {
         log 'Generating proxy bypass string dynamically...'
-        $proxyBypassString = '127.0.0.1;localhost;172.20.0.*;*.hci.local;hcicluster;172.20.0.2;172.20.0.3;172.20.0.4;172.20.0.5'
+        $proxyBypassString = '127.0.0.1;localhost;172.20.0.*;*.hci.local;hcicluster;172.20.0.2;172.20.0.3;172.20.0.4;172.20.0.5;*.svc'
         For ($i = 1; $i -le (Get-VM).count; $i++) {
             $proxyBypassString += ";hcinode$i"
             $proxyBypassString += ';172.20.0.{0}' -f (9 + $i)
