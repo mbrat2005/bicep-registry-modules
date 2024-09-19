@@ -304,7 +304,7 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default }
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
     Install-Module Az.Resources
-    Install-Module -Name AzsHCI.ARCinstaller -RequiredVersion '0.2.2690.99'
+    Install-Module -Name AzsHCI.ARCinstaller # -RequiredVersion '0.2.2690.99' # hardcode for 2408 testing
     Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
     try {
