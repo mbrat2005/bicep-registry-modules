@@ -47,7 +47,7 @@ module arcGateway '../../../arc-gateway/main.bicep' = if (deployArcGateway) {
   name: 'arcGateway-${location}-${deploymentPrefix}'
   params: {
     location: location
-    name: 'arcg-${location}-${deploymentPrefix}'
+    name: 'arcg-${location}-${serviceShort}'
     allowedFeatures: ['*']
     gatewayType: 'Public'
   }
