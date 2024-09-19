@@ -201,7 +201,7 @@ resource keyVaultName_Microsoft_Insights_service 'microsoft.insights/diagnosticS
 }
 
 resource SPConnectedMachineResourceManagerRolePermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid('ConnectedMachineResourceManagerRolePermissions', resourceGroup().id)
+  name: guid('ConnectedMachineResourceManagerRolePermissions', resourceGroup().id, hciResourceProviderObjectId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: azureConnectedMachineResourceManagerRoleID
@@ -248,7 +248,7 @@ resource NodereaderRoleIDPermissions 'Microsoft.Authorization/roleAssignments@20
 
 resource KeyVaultSecretsUserPermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for hciNode in arcNodeResourceIds: {
-    name: guid(resourceGroup().id, hciNode, keyVaultSecretUserRoleID)
+    name: guid(keyVault.id, hciNode, keyVaultSecretUserRoleID)
     scope: keyVault
     properties: {
       roleDefinitionId: keyVaultSecretUserRoleID

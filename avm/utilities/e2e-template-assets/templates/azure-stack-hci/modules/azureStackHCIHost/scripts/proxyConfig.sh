@@ -89,7 +89,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   azurestackhci.azurefd.net
   acl HCI_Dest_URLs dstdomain   .prod.microsoftmetrics.com
   acl HCI_Dest_URLs dstdomain   dc.services.visualstudio.com
-#  acl HCI_Dest_URLs dstdomain   qos.prod.warm.ingest.monitor.core.windows.net
+#  acl HCI_Dest_URLs dstdomain  qos.prod.warm.ingest.monitor.core.windows.net
   acl HCI_Dest_URLs dstdomain   .prod.warm.ingest.monitor.core.windows.net
   acl HCI_Dest_URLs dstdomain   gcs.prod.monitoring.core.windows.net
   acl HCI_Dest_URLs dstdomain   adhs.events.data.microsoft.com

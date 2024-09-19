@@ -60,9 +60,10 @@ param vnetSubnetId string = ''
 @description('Optional. The name of the location for the custom location.')
 param customLocationName string = '${serviceShort}-location'
 @description('Conditional. The URL to download the Azure Stack HCI ISO. Required if hciVHDXDownloadURL is not supplied.')
-param hciISODownloadURL string = ''
+// ARC Gateway requires the 2405 ISO
+param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2405.0.3018/AZURESTACKHCI.25398.469.LCM_2405.0.3018.x64.en-us.iso'
 @description('Conditional. The URL to download the Azure Stack HCI VHDX. Required if hciISODownloadURL is not supplied.')
-param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
+param hciVHDXDownloadURL string = '' // 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
 @secure()
 #disable-next-line secure-parameter-default
@@ -150,7 +151,7 @@ param storageNetworks storageNetworksArrayType = [
   }
 ]
 @description('Optional. Deploy the Azure Arc Gateway and Proxy server.')
-param deployArcGateway bool = false
+param deployArcGateway bool = true
 @description('Optional. Assign public IP to the HCI host.')
 param hciHostAssignPublicIp bool = false
 
