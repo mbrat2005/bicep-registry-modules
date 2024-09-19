@@ -6,7 +6,7 @@ param hciNodeCount int = 2 // number of Azure Stack HCI nodes to deploy
 param switchlessStorageConfig bool = false // set to true to configure switchless storage
 // specify either a VHDX or ISO download URL; if both are specified, the VHDX download URL will be used
 param hciVHDXDownloadURL string = ''
-param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2405.0.3018/AZURESTACKHCI.25398.469.LCM_2405.0.3018.x64.en-us.iso'
+param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2408.0.3061/AZURESTACKHci23H2.25398.469.LCM.10.2408.0.3061.x64.en-us.iso'
 param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
