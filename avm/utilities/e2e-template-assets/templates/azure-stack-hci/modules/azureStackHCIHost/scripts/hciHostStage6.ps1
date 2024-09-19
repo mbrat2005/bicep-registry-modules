@@ -307,6 +307,16 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     Install-Module -Name AzsHCI.ARCinstaller # -RequiredVersion '0.2.2690.99' # hardcode for 2408 testing
     Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
+    #wait for bootstrap service to be reachable
+    $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+    While (!(Test-NetConnection -ComputerName '127.0.0.1' -Port 9098 -InformationLevel Quiet) -and $stopwatch.Elapsed.TotalMinutes -lt 30) {
+        Write-Host 'Waiting for bootstrap service at 127.0.0.1:9098 to be reachable...'
+        Start-Sleep -Seconds 30
+    }
+    If ($stopwatch.Elapsed.TotalMinutes -ge 30) {
+        Write-Error 'Bootstrap service at 127.0.0.1:9098 did not become reachable within 30 minutes. Exiting...' -ErrorAction Stop
+    }
+
     try {
         Invoke-AzStackHciArcInitialization -SubscriptionID $subscriptionId -ResourceGroup $resourceGroupName -TenantID $tenantId -Cloud AzureCloud -AccountID $accountName -ArmAccessToken $t -Region $location -ErrorAction Stop @optionalParameters
     } catch {
