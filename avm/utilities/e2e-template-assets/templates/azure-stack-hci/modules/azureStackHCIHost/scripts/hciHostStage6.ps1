@@ -286,6 +286,7 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     $accountName = $args[5]
     $arcGatewayId = $args[6]
     $proxyServerEndpoint = $args[7]
+    $proxyBypassString = $args[8]
 
     $optionalParameters = @{}
 
@@ -296,7 +297,8 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     }
     If ($proxyServerEndpoint) {
         $optionalParameters += @{
-            'proxy' = $proxyServerEndpoint
+            'proxy'       = $proxyServerEndpoint
+            'proxyBypass' = $proxyBypassString
         }
     }
 
@@ -322,7 +324,7 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     } catch {
         Write-Error $_ -ErrorAction Stop
     }
-} -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName, $arcGatewayId, $proxyServerEndpoint
+} -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName, $arcGatewayId, $proxyServerEndpoint, $proxyBypassString
 
 log 'Waiting up to 30 minutes for Azure Arc initialization to complete on nodes...'
 
