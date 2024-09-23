@@ -140,7 +140,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
   #acl HCI_ArcGW_Redirected_URLs dstdomain      .guestnotificationservice.azure.com #   Notification service for extension and connectivity scenarios      Always
   acl HCI_ArcGW_Redirected_URLs dstdomain       .servicesbus.windows.net #      Multiple HCI services require access to this endpoint   Always
   acl HCI_ArcGW_Redirected_URLs dstdomain       .waconazure.com #       For Windows Admin Center connectivity   If using Windows Admin Center
-  # REMOVED TO ALLOW CLUSTER WITNESS acl HCI_ArcGW_Redirected_URLs dstdomain       .blob.core.windows.net #        Multiple HCI services require access to this endpoint   Always
+  acl HCI_ArcGW_Redirected_URLs dstdomain       .blob.core.windows.net #        Multiple HCI services require access to this endpoint   Always
   acl HCI_ArcGW_Redirected_URLs dstdomain       dc.services.visualstudio.com #  Multiple HCI services require access to this endpoint   Always
 
   acl ArcGateway dstdomain .gw.arc.azure.com

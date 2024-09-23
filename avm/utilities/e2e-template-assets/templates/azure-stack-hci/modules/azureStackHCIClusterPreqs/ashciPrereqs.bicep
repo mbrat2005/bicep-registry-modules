@@ -23,6 +23,7 @@ param arbDeploymentSPObjectId string
 param arbDeploymentServicePrincipalSecret string
 param vnetSubnetId string?
 param allowIPtoStorageAndKeyVault string?
+param usingArcGW bool = false
 
 // secret names for the Azure Key Vault - these cannot be changed
 var localAdminSecretName = 'LocalAdminCredential'
@@ -108,7 +109,7 @@ resource witnessStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = 
     minimumTlsVersion: 'TLS1_2'
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Deny'
+      defaultAction: usingArcGW ? 'Allow' : 'Deny' // we don't know the source IP when traffic is redirected through the Arc GW
       ipRules: (allowIPtoStorageAndKeyVault != null)
         ? [
             {

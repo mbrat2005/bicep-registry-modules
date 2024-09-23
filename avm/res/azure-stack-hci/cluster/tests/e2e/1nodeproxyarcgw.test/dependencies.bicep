@@ -34,8 +34,8 @@ param keyVaultName string
 #disable-next-line secure-parameter-default
 param hciResourceProviderObjectId string = ''
 param domainOUPath string?
-param deployArcGateway bool = false
-param hciHostAssignPublicIp bool
+param deployArcGateway bool = true
+param hciHostAssignPublicIp bool = false
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -101,5 +101,6 @@ module hciClusterPreqs '../../../../../../utilities/e2e-template-assets/template
     softDeleteRetentionDays: softDeleteRetentionDays
     tenantId: tenantId
     vnetSubnetId: hciHostDeployment.outputs.vnetSubnetId
+    usingArcGW: deployArcGateway
   }
 }
