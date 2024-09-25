@@ -26,124 +26,11 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/azure-stack-hci/cluster:<version>`.
 
-- [Deploy Azure Stack HCI Cluster in Azure with a 1 node switched configuration with proxy and Arc Gateway](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-1-node-switched-configuration-with-proxy-and-arc-gateway)
-- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
-- [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
-- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-4-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
 
-### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 1 node switched configuration with proxy and Arc Gateway_
-
-This test deploys an Azure VM to host a 1 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster with proxy and Arc Gateway.
-
-
-<details>
-
-<summary>via Bicep module</summary>
-
-```bicep
-module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
-  name: 'clusterDeployment'
-  params: {
-    // Required parameters
-    clusterNodeNames: '<clusterNodeNames>'
-    clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
-    customLocationName: '<customLocationName>'
-    defaultGateway: '<defaultGateway>'
-    deploymentMode: 'Deploy'
-    deploymentPrefix: '<deploymentPrefix>'
-    dnsServers: '<dnsServers>'
-    domainFqdn: '<domainFqdn>'
-    domainOUPath: '<domainOUPath>'
-    endingIPAddress: '<endingIPAddress>'
-    keyVaultName: '<keyVaultName>'
-    name: '<name>'
-    networkIntents: '<networkIntents>'
-    startingIPAddress: '<startingIPAddress>'
-    storageConnectivitySwitchless: false
-    storageNetworks: '<storageNetworks>'
-    subnetMask: '<subnetMask>'
-    // Non-required parameters
-    enableStorageAutoIp: '<enableStorageAutoIp>'
-  }
-}
-```
-
-</details>
-<p>
-
-<details>
-
-<summary>via JSON Parameter file</summary>
-
-```json
-{
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    // Required parameters
-    "clusterNodeNames": {
-      "value": "<clusterNodeNames>"
-    },
-    "clusterWitnessStorageAccountName": {
-      "value": "<clusterWitnessStorageAccountName>"
-    },
-    "customLocationName": {
-      "value": "<customLocationName>"
-    },
-    "defaultGateway": {
-      "value": "<defaultGateway>"
-    },
-    "deploymentMode": {
-      "value": "Deploy"
-    },
-    "deploymentPrefix": {
-      "value": "<deploymentPrefix>"
-    },
-    "dnsServers": {
-      "value": "<dnsServers>"
-    },
-    "domainFqdn": {
-      "value": "<domainFqdn>"
-    },
-    "domainOUPath": {
-      "value": "<domainOUPath>"
-    },
-    "endingIPAddress": {
-      "value": "<endingIPAddress>"
-    },
-    "keyVaultName": {
-      "value": "<keyVaultName>"
-    },
-    "name": {
-      "value": "<name>"
-    },
-    "networkIntents": {
-      "value": "<networkIntents>"
-    },
-    "startingIPAddress": {
-      "value": "<startingIPAddress>"
-    },
-    "storageConnectivitySwitchless": {
-      "value": false
-    },
-    "storageNetworks": {
-      "value": "<storageNetworks>"
-    },
-    "subnetMask": {
-      "value": "<subnetMask>"
-    },
-    // Non-required parameters
-    "enableStorageAutoIp": {
-      "value": "<enableStorageAutoIp>"
-    }
-  }
-}
-```
-
-</details>
-<p>
-
-### Example 2: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
+### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
 
 This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
 
@@ -255,7 +142,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 3: _Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration_
+### Example 2: _Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration_
 
 This test deploys an Azure VM to host a 3 node switchless Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
 
@@ -375,7 +262,7 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 4: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned_
+### Example 3: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned_
 
 This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster. WAF aligned.
 
