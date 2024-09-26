@@ -118,11 +118,11 @@ var storageNetworkList = [
   }
 ]
 
-resource cluster 'Microsoft.AzureStackHCI/clusters@2024-02-15-preview' existing = {
+resource cluster 'Microsoft.AzureStackHCI/clusters@2024-04-01' existing = {
   name: clusterName
 }
 
-resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings@2024-02-15-preview' = if (deploymentMode != 'LocksOnly') {
+resource deploymentSettings 'Microsoft.AzureStackHCI/clusters/deploymentSettings@2024-04-01' = {
   name: 'default'
   parent: cluster
   properties: {

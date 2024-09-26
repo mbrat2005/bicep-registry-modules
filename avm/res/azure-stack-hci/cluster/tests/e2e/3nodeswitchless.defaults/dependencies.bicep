@@ -46,6 +46,7 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
     deploymentUsername: deploymentUsername
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
+    hostVMSize: 'Standard_E32bds_v5'
     hciVHDXDownloadURL: hciVHDXDownloadURL
     localAdminPassword: localAdminPassword
     location: location

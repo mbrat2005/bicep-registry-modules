@@ -17,6 +17,8 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl localnet src fe80::/10              # RFC 4291 link-local (directly plugged) machines
 
   acl SSL_ports port 443
+  acl SSL_ports port 6443
+  acl SSL_ports port 8084
 
   acl Safe_ports port 80          # http
   acl Safe_ports port 21          # ftp
@@ -32,9 +34,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
 
   acl HCI_ResourceBridgeIPs src 172.20.0.3-172.20.0.5
 
-  acl HCI_Dest_URLs dstdomain   mcr.microsoft.com
-  acl HCI_Dest_URLs dstdomain   northeurope.data.mcr.microsoft.com
-  acl HCI_Dest_URLs dstdomain   westeurope.data.mcr.microsoft.com
+  acl HCI_Dest_URLs dstdomain   .mcr.microsoft.com
   acl HCI_Dest_URLs dstdomain   azurearcfork8s.azurecr.io
   acl HCI_Dest_URLs dstdomain   linuxgeneva-microsoft.azurecr.io
   acl HCI_Dest_URLs dstdomain   pipelineagent.azurecr.io
@@ -45,8 +45,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
  # acl HCI_Dest_URLs dstdomain  .dl.delivery.mp.microsoft.com
   acl HCI_Dest_URLs dstdomain   .do.dsp.mp.microsoft.com
   acl HCI_Dest_URLs dstdomain   .prod.do.dsp.mp.microsoft.com
-  acl HCI_Dest_URLs dstdomain   eastus.dp.kubernetesconfiguration.azure.com
-  acl HCI_Dest_URLs dstdomain   southeastasia.dp.kubernetesconfiguration.azure.com
+  acl HCI_Dest_URLs dstdomain   .dp.kubernetesconfiguration.azure.com
   acl HCI_Dest_URLs dstdomain   sts.windows.net
   acl HCI_Dest_URLs dstdomain   ecpacr.azurecr.io
   acl HCI_Dest_URLs dstdomain   pypi.org
@@ -59,15 +58,12 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   packages.microsoft.com
   acl HCI_Dest_URLs dstdomain   k8sconnectcsp.azureedge.net
   acl HCI_Dest_URLs dstdomain   .prod.hot.ingest.monitor.core.windows.net
-  acl HCI_Dest_URLs dstdomain   southeastasia.dp.prod.appliances.azure.com
+  acl HCI_Dest_URLs dstdomain   .dp.prod.appliances.azure.com
   acl HCI_Dest_URLs dstdomain   download.microsoft.com
   acl HCI_Dest_URLs dstdomain   pas.windows.net
   acl HCI_Dest_URLs dstdomain   guestnotificationservice.azure.com
-  acl HCI_Dest_URLs dstdomain   gbl.his.arc.azure.com
-  acl HCI_Dest_URLs dstdomain   eus.his.arc.azure.com
-  acl HCI_Dest_URLs dstdomain   eastus-gas.guestconfiguration.azure.com
-  acl HCI_Dest_URLs dstdomain   sea.his.arc.azure.com
-  acl HCI_Dest_URLs dstdomain   southeastasua-gas.guestconfiguration.azure.com
+  acl HCI_Dest_URLs dstdomain   .his.arc.azure.com
+  acl HCI_Dest_URLs dstdomain   .guestconfiguration.azure.com
   acl HCI_Dest_URLs dstdomain   agentserviceapi.guestconfiguration.azure.com
   acl HCI_Dest_URLs dstdomain   .servicebus.windows.net
   acl HCI_Dest_URLs dstdomain   .waconazure.com
@@ -93,11 +89,10 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   licensing.platform.edge.azure.com
   acl HCI_Dest_URLs dstdomain   billing.platform.edge.azure.com
   acl HCI_Dest_URLs dstdomain   azurestackhci.azurefd.net
-  acl HCI_Dest_URLs dstdomain   global.prod.microsoftmetrics.com
+  acl HCI_Dest_URLs dstdomain   .prod.microsoftmetrics.com
   acl HCI_Dest_URLs dstdomain   dc.services.visualstudio.com
-  acl HCI_Dest_URLs dstdomain   qos.prod.warm.ingest.monitor.core.windows.net
-  acl HCI_Dest_URLs dstdomain   eastus-shared.prod.warm.ingest.monitor.core.windows.net
-  acl HCI_Dest_URLs dstdomain   southeastasia-shared.prod.warm.ingest.monitor.core.windows.net
+#  acl HCI_Dest_URLs dstdomain  qos.prod.warm.ingest.monitor.core.windows.net
+  acl HCI_Dest_URLs dstdomain   .prod.warm.ingest.monitor.core.windows.net
   acl HCI_Dest_URLs dstdomain   gcs.prod.monitoring.core.windows.net
   acl HCI_Dest_URLs dstdomain   adhs.events.data.microsoft.com
   acl HCI_Dest_URLs dstdomain   v20.events.data.microsoft.com
@@ -128,7 +123,12 @@ sudo cat <<EOF > /etc/squid/squid.conf
   acl HCI_Dest_URLs dstdomain   ocsp2.globalsign.com
   acl HCI_Dest_URLs dstdomain   hciarcvmsstorage.z13.web.core.windows.net
   acl HCI_Dest_URLs dstdomain   management.azure.com
+  acl HCI_Dest_URLs dstdomain   developer.microsoft.com
   acl HCI_Dest_URLs dstdomain   .vault.azure.net
+  acl HCI_Dest_URLs dstdomain   .prod.hot.ingestion.msftcloudes.com         # optional metrics and telemetry
+  acl HCI_Dest_URLs dstdomain   edgesupprd.trafficmanager.net               # optional support
+  acl HCI_Dest_URLs dstdomain   .obo.arc.azure.com                          # optional arc - port 8084
+  acl HCI_Dest_URLs dstdomain   azurewatsonanalysis-prod.core.windows.net   # optional observability
 
   acl HCI_Dest_URLs_regex dstdom_regex azgn[a-zA-Z0-9]+?\.servicebus\.windows\.net
 
@@ -140,7 +140,7 @@ sudo cat <<EOF > /etc/squid/squid.conf
   #acl HCI_ArcGW_Redirected_URLs dstdomain      .guestnotificationservice.azure.com #   Notification service for extension and connectivity scenarios      Always
   acl HCI_ArcGW_Redirected_URLs dstdomain       .servicesbus.windows.net #      Multiple HCI services require access to this endpoint   Always
   acl HCI_ArcGW_Redirected_URLs dstdomain       .waconazure.com #       For Windows Admin Center connectivity   If using Windows Admin Center
-  # REMOVED TO ALLOW CLUSTER WITNESS acl HCI_ArcGW_Redirected_URLs dstdomain       .blob.core.windows.net #        Multiple HCI services require access to this endpoint   Always
+  acl HCI_ArcGW_Redirected_URLs dstdomain       .blob.core.windows.net #        Multipsleeple HCI services require access to this endpoint   Always
   acl HCI_ArcGW_Redirected_URLs dstdomain       dc.services.visualstudio.com #  Multiple HCI services require access to this endpoint   Always
 
   acl ArcGateway dstdomain .gw.arc.azure.com

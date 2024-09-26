@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "13534388380783658406"
+      "templateHash": "11454104095198977177"
     },
     "name": "Arc Gateway",
     "description": "This module deploys an Arc Gateway.",
@@ -94,6 +94,13 @@
         "description": "The location of the arcGateway."
       },
       "value": "[reference('arcGateway', '2024-05-20-preview', 'full').location]"
+    },
+    "arcGWURI": {
+      "type": "string",
+      "metadata": {
+        "description": "The endpoint of the Arc Gateway."
+      },
+      "value": "[reference('arcGateway').gatewayEndpoint]"
     }
   }
 }

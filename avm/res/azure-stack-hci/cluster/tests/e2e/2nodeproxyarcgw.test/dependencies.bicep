@@ -35,7 +35,7 @@ param keyVaultName string
 param hciResourceProviderObjectId string = ''
 param domainOUPath string?
 param deployArcGateway bool = false
-param hciHostAssignPublicIp bool
+param hciHostAssignPublicIp bool = false
 
 var arcNodeResourceIds = [
   for (nodeName, index) in clusterNodeNames: resourceId('Microsoft.HybridCompute/machines', nodeName)
@@ -44,7 +44,7 @@ var arcNodeResourceIds = [
 var tenantId = subscription().tenantId
 
 module arcGateway '../../../arc-gateway/main.bicep' = if (deployArcGateway) {
-  name: 'arcGateway-${location}-${deploymentPrefix}'
+  name: '${uniqueString(deployment().name, location)}-test-arcgw-${location}-${deploymentPrefix}'
   params: {
     location: location
     name: 'arcg-${location}-${deploymentPrefix}'
@@ -57,10 +57,12 @@ module hciHostDeployment '../../../../../../utilities/e2e-template-assets/templa
   name: '${uniqueString(deployment().name, location)}-test-hcihostdeploy-${location}-${deploymentPrefix}'
   params: {
     arcGatewayId: deployArcGateway ? arcGateway.outputs.resourceId : null
+    hciHostAssignPublicIp: hciHostAssignPublicIp
     domainOUPath: domainOUPath
-    deployProxy: true
+    deployProxy: false
     hciISODownloadURL: hciISODownloadURL
     hciNodeCount: hciNodeCount
+    hostVMSize: 'Standard_E16bds_v5'
     hciVHDXDownloadURL: hciVHDXDownloadURL
     hciHostAssignPublicIp: hciHostAssignPublicIp
     localAdminPassword: localAdminPassword

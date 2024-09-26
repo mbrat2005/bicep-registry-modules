@@ -84,6 +84,7 @@ Tags of the resource.
 
 | Output | Type | Description |
 | :-- | :-- | :-- |
+| `arcGWURI` | string | The endpoint of the Arc Gateway. |
 | `location` | string | The location of the arcGateway. |
 | `name` | string | The name of the Arc Gateway. |
 | `resourceGroupName` | string | The resource group of the Arc Gateway. |

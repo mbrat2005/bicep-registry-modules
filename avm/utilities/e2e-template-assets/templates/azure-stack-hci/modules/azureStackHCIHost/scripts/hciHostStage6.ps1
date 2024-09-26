@@ -207,12 +207,14 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
 
     If ($proxyBypassString -eq 'GENERATE_PROXY_BYPASS_DYNAMICALLY') {
         log 'Generating proxy bypass string dynamically...'
-        $proxyBypassString = '127.0.0.1;localhost;172.20.0.*;*.hci.local;hcicluster'
+        $proxyBypassString = '127.0.0.1;localhost;172.20.0.*;*.hci.local;hcicluster;172.20.0.2;172.20.0.3;172.20.0.4;172.20.0.5;*.svc'
         For ($i = 1; $i -le (Get-VM).count; $i++) {
             $proxyBypassString += ";hcinode$i"
+            $proxyBypassString += ';172.20.0.{0}' -f (9 + $i)
         }
     }
 
+    log 'Configuring proxy settings on HCI nodes...'
     $proxyConfigLogs = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
         $ErrorActionPreference = 'Stop'
 
@@ -220,10 +222,10 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
         $proxyBypassString = $args[1]
 
         ## install winInetProxy module
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+        If (!(Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) { Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force }
         If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default }
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        Install-Module WinInetProxy -Force
+        If (!(Get-InstalledModule -Name WinInetProxy -ErrorAction SilentlyContinue)) { Install-Module WinInetProxy -Force }
         Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
 
         ## set WinInet proxy settings
@@ -242,7 +244,10 @@ if (![string]::IsNullOrEmpty($proxyServerEndpoint) -and ![string]::IsNullOrEmpty
 
         Write-Output "[$($env:COMPUTERNAME)] WinInetProxy Settings: $(Get-WinhttpProxy -Advanced)"
         Write-Output "[$($env:COMPUTERNAME)] WinhttpProxy Settings: $(Get-WinhttpProxy -Default)"
-        Write-Output "[$($env:COMPUTERNAME)] Environment Variables: $(Get-ChildItem -Path env:*PROXY* | ConvertTo-Json -Compress)"
+
+        Write-Output ("[{0}] Environment Variables {1}: '{2}'" -f $env:COMPUTERNAME, 'HTTPS_PROXY', [Environment]::GetEnvironmentVariable('HTTPS_PROXY', 'Machine'))
+        Write-Output ("[{0}] Environment Variables {1}: '{2}'" -f $env:COMPUTERNAME, 'HTTP_PROXY', [Environment]::GetEnvironmentVariable('HTTP_PROXY', 'Machine'))
+        Write-Output ("[{0}] Environment Variables {1}: '{2}'" -f $env:COMPUTERNAME, 'NO_PROXY', [Environment]::GetEnvironmentVariable('NO_PROXY', 'Machine'))
 
     } -ArgumentList $proxyServerEndpoint, $proxyBypassString
 
@@ -269,7 +274,7 @@ If (!$testNodeInternetConnection) {
 }
 
 ## create jobs for each node to initialize Azure Arc
-log "Creating Azure Arc initialization jobs for HCI nodes [$((Get-VM).Name -join ',')]..."
+log "Creating Azure Arc initialization jobs for HCI nodes [$((Get-VM).Name -join ',')]. ArcGatewayId: '$arcGatewayId', ProxyServerEndpoint: '$proxyServerEndpoint'..."
 $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $adminCred {
     $ErrorActionPreference = 'Stop'
 
@@ -281,6 +286,7 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     $accountName = $args[5]
     $arcGatewayId = $args[6]
     $proxyServerEndpoint = $args[7]
+    $proxyBypassString = $args[8]
 
     $optionalParameters = @{}
 
@@ -291,22 +297,34 @@ $arcInitializationJobs = Invoke-Command -VMName (Get-VM).Name -Credential $admin
     }
     If ($proxyServerEndpoint) {
         $optionalParameters += @{
-            'proxy' = $proxyServerEndpoint
+            'proxy'       = $proxyServerEndpoint
+            'proxyBypass' = $proxyBypassString
         }
     }
 
     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
     If (!(Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) { Register-PSRepository -Default }
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-    Install-Module Az.Resources, AzsHCI.ARCinstaller
+    Install-Module Az.Resources
+    Install-Module -Name AzsHCI.ARCinstaller # -RequiredVersion '0.2.2690.99' # hardcode for 2408 testing
     Set-PSRepository -Name PSGallery -InstallationPolicy Untrusted
+
+    #wait for bootstrap service to be reachable
+    $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+    While (!(Test-NetConnection -ComputerName '127.0.0.1' -Port 9098 -InformationLevel Quiet) -and $stopwatch.Elapsed.TotalMinutes -lt 30) {
+        Write-Host 'Waiting for bootstrap service at 127.0.0.1:9098 to be reachable...'
+        Start-Sleep -Seconds 30
+    }
+    If ($stopwatch.Elapsed.TotalMinutes -ge 30) {
+        Write-Error 'Bootstrap service at 127.0.0.1:9098 did not become reachable within 30 minutes. Exiting...' -ErrorAction Stop
+    }
 
     try {
         Invoke-AzStackHciArcInitialization -SubscriptionID $subscriptionId -ResourceGroup $resourceGroupName -TenantID $tenantId -Cloud AzureCloud -AccountID $accountName -ArmAccessToken $t -Region $location -ErrorAction Stop @optionalParameters
     } catch {
         Write-Error $_ -ErrorAction Stop
     }
-} -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName, $arcGatewayId, $proxyServerEndpoint
+} -AsJob -ArgumentList $t, $subscriptionId, $resourceGroupName, $tenantId, $location, $accountName, $arcGatewayId, $proxyServerEndpoint, $proxyBypassString
 
 log 'Waiting up to 30 minutes for Azure Arc initialization to complete on nodes...'
 
