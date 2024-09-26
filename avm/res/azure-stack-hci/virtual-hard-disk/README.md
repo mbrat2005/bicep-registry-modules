@@ -268,6 +268,13 @@ Array of role assignments to create.
 
 - Required: No
 - Type: array
+- Roles configurable by name:
+  - `'Contributor'`
+  - `'Owner'`
+  - `'Reader'`
+  - `'Azure Stack HCI VM Contributor'`
+  - `'Azure Stack HCI VM Reader'`
+  - `'Azure Stack HCI Administrator'`
 
 **Required parameters**
 
