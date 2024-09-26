@@ -19,7 +19,7 @@ param namePrefix string = '#_namePrefix_#'
 @minLength(4)
 @maxLength(8)
 @description('Optional. The prefix for the resource for the deployment. This value is used in key vault and storage account names in this template, as well as for the deploymentSettings.properties.deploymentConfiguration.scaleUnits.deploymentData.namingPrefix property which requires regex pattern: ^[a-zA-Z0-9-]{1,8}$.')
-param deploymentPrefix string = namePrefix
+param deploymentPrefix string = take('${take(namePrefix, 8)}${uniqueString(utcNow())}', 8)
 @description('Optional. The username of the LCM deployment user created in Active Directory.')
 param deploymentUsername string = 'deployUser'
 @description('Optional. The password of the LCM deployment user and local administrator accounts.')
@@ -28,10 +28,12 @@ param localAdminAndDeploymentUserPass string = newGuid()
 @description('Optional. The username of the local administrator account created on the host VM and each node in the cluster.')
 param localAdminUsername string = 'admin-hci'
 @description('Required. The app ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
-param arbDeploymentAppId string = '#_AZURESTACKHCI_AZURESTACKHCIAPPID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param arbDeploymentAppId string = ''
 @description('Required. The service principal ID of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
-#disable-next-line secure-param
+#disable-next-line secure-parameter-default
 param arbDeploymentSPObjectId string = ''
 @description('Required. The secret of the service principal used for the Azure Stack HCI Resource Bridge deployment. If omitted, the deploying user must have permissions to create service principals and role assignments in Entra ID.')
 @secure()
@@ -56,9 +58,9 @@ param vnetSubnetId string = ''
 @description('Optional. The name of the location for the custom location.')
 param customLocationName string = '${serviceShort}-location'
 @description('Conditional. The URL to download the Azure Stack HCI ISO. Required if hciVHDXDownloadURL is not supplied.')
-param hciISODownloadURL string = ''
+param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2408.0.3061/AZURESTACKHci23H2.25398.469.LCM.10.2408.0.3061.x64.en-us.iso'
 @description('Conditional. The URL to download the Azure Stack HCI VHDX. Required if hciISODownloadURL is not supplied.')
-param hciVHDXDownloadURL string = 'https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
+param hciVHDXDownloadURL string = '' //https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/25398.469.amd64fre.zn_release_svc_refresh.231004-1141_server_serverazurestackhcicor_en-us.vhdx'
 @description('Optional. The network intents for the cluster.')
 param networkIntents networkIntent[] = [
   {
@@ -182,19 +184,24 @@ param storageNetworks storageNetworksArrayType = [
   }
 ]
 @description('Optional. The service principal ID of the Azure Stack HCI Resource Provider. If this is not provided, the module attemps to determine this value by querying the Microsoft Graph.')
-param hciResourceProviderObjectId string = '#_AZURESTACKHCI_AZURESTACKHCIRPSPID_#'
+@secure()
+#disable-next-line secure-parameter-default
+param hciResourceProviderObjectId string = ''
 
-var clusterWitnessStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}wit'
-var keyVaultDiagnosticStorageAccountName = '${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}kvd'
+#disable-next-line no-hardcoded-location // Due to quotas and capacity challenges, this region must be used in the AVM testing subscription
+var enforcedLocation = 'southeastasia'
+
+var clusterWitnessStorageAccountName = '${take('${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}',21)}wit'
+var keyVaultDiagnosticStorageAccountName = '${take('${deploymentPrefix}${serviceShort}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}',21)}kvd'
 var keyVaultName = 'kvhci-${deploymentPrefix}${take(uniqueString(resourceGroup.id,resourceGroup.location),6)}'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
-  location: location
+  location: enforcedLocation
 }
 
 module hciDependencies 'dependencies.bicep' = {
-  name: '${uniqueString(deployment().name, location)}-test-hcidependencies-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-hcidependencies-${serviceShort}'
   scope: resourceGroup
   params: {
     clusterNodeNames: ['hcinode1', 'hcinode2', 'hcinode3']
@@ -207,7 +214,7 @@ module hciDependencies 'dependencies.bicep' = {
     keyVaultDiagnosticStorageAccountName: keyVaultDiagnosticStorageAccountName
     localAdminPassword: localAdminAndDeploymentUserPass
     localAdminUsername: localAdminUsername
-    location: location
+    location: enforcedLocation
     arbDeploymentAppId: arbDeploymentAppId
     arbDeploymentSPObjectId: arbDeploymentSPObjectId
     arbDeploymentServicePrincipalSecret: arbDeploymentServicePrincipalSecret
@@ -223,7 +230,7 @@ module cluster_validate '../../../main.bicep' = {
   dependsOn: [
     hciDependencies
   ]
-  name: '${uniqueString(deployment().name, location)}-test-clustervalidate-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-clustervalidate-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name
@@ -252,7 +259,7 @@ module testDeployment '../../../main.bicep' = {
     hciDependencies
     cluster_validate
   ]
-  name: '${uniqueString(deployment().name, location)}-test-clusterdeploy-${serviceShort}'
+  name: '${uniqueString(deployment().name, enforcedLocation)}-test-clusterdeploy-${serviceShort}'
   scope: resourceGroup
   params: {
     name: name

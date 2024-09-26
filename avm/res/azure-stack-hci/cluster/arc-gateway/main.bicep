@@ -36,3 +36,5 @@ output resourceId string = arcGateway.id
 output resourceGroupName string = resourceGroup().name
 @description('The location of the arcGateway.')
 output location string = arcGateway.location
+@description('The endpoint of the Arc Gateway.')
+output arcGWURI string = arcGateway.properties.gatewayEndpoint

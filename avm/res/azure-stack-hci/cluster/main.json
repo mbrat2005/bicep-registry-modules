@@ -6,10 +6,10 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "18223698734857681674"
+      "templateHash": "2756767529893421666"
     },
     "name": "Azure Stack HCI Cluster",
-    "description": "This module deploys an Azure Stack HCI Cluster.",
+    "description": "This module deploys an Azure Stack HCI Cluster on the provided Arc Machines.",
     "owner": "Azure/module-maintainers"
   },
   "definitions": {
@@ -258,6 +258,13 @@
       "items": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "metadata": {
+              "description": "Optional. The name (as GUID) of the role assignment. If not provided, a GUID will be generated."
+            }
+          },
           "roleDefinitionIdOrName": {
             "type": "string",
             "metadata": {
@@ -521,6 +528,13 @@
     }
   },
   "variables": {
+    "copy": [
+      {
+        "name": "formattedRoleAssignments",
+        "count": "[length(coalesce(parameters('roleAssignments'), createArray()))]",
+        "input": "[union(coalesce(parameters('roleAssignments'), createArray())[copyIndex('formattedRoleAssignments')], createObject('roleDefinitionId', coalesce(tryGet(variables('builtInRoleNames'), coalesce(parameters('roleAssignments'), createArray())[copyIndex('formattedRoleAssignments')].roleDefinitionIdOrName), if(contains(coalesce(parameters('roleAssignments'), createArray())[copyIndex('formattedRoleAssignments')].roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/'), coalesce(parameters('roleAssignments'), createArray())[copyIndex('formattedRoleAssignments')].roleDefinitionIdOrName, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', coalesce(parameters('roleAssignments'), createArray())[copyIndex('formattedRoleAssignments')].roleDefinitionIdOrName)))))]"
+      }
+    ],
     "builtInRoleNames": {
       "Contributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
       "Owner": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
@@ -555,7 +569,7 @@
     "cluster": {
       "condition": "[equals(parameters('deploymentMode'), 'Validate')]",
       "type": "Microsoft.AzureStackHCI/clusters",
-      "apiVersion": "2024-02-15-preview",
+      "apiVersion": "2024-04-01",
       "name": "[parameters('name')]",
       "identity": {
         "type": "SystemAssigned"
@@ -568,26 +582,26 @@
       "condition": "[equals(parameters('deploymentMode'), 'Deploy')]",
       "existing": true,
       "type": "Microsoft.AzureStackHCI/clusters",
-      "apiVersion": "2024-02-15-preview",
+      "apiVersion": "2024-04-01",
       "name": "[parameters('name')]"
     },
     "cluster_roleAssignments": {
       "copy": {
         "name": "cluster_roleAssignments",
-        "count": "[length(coalesce(parameters('roleAssignments'), createArray()))]"
+        "count": "[length(coalesce(variables('formattedRoleAssignments'), createArray()))]"
       },
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
       "scope": "[format('Microsoft.AzureStackHCI/clusters/{0}', parameters('name'))]",
-      "name": "[guid(resourceId('Microsoft.AzureStackHCI/clusters', parameters('name')), coalesce(parameters('roleAssignments'), createArray())[copyIndex()].principalId, coalesce(parameters('roleAssignments'), createArray())[copyIndex()].roleDefinitionIdOrName)]",
+      "name": "[coalesce(tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'name'), guid(resourceId('Microsoft.AzureStackHCI/clusters', parameters('name')), coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()].principalId, coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()].roleDefinitionId))]",
       "properties": {
-        "roleDefinitionId": "[if(contains(variables('builtInRoleNames'), coalesce(parameters('roleAssignments'), createArray())[copyIndex()].roleDefinitionIdOrName), variables('builtInRoleNames')[coalesce(parameters('roleAssignments'), createArray())[copyIndex()].roleDefinitionIdOrName], if(contains(coalesce(parameters('roleAssignments'), createArray())[copyIndex()].roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/'), coalesce(parameters('roleAssignments'), createArray())[copyIndex()].roleDefinitionIdOrName, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', coalesce(parameters('roleAssignments'), createArray())[copyIndex()].roleDefinitionIdOrName)))]",
-        "principalId": "[coalesce(parameters('roleAssignments'), createArray())[copyIndex()].principalId]",
-        "description": "[tryGet(coalesce(parameters('roleAssignments'), createArray())[copyIndex()], 'description')]",
-        "principalType": "[tryGet(coalesce(parameters('roleAssignments'), createArray())[copyIndex()], 'principalType')]",
-        "condition": "[tryGet(coalesce(parameters('roleAssignments'), createArray())[copyIndex()], 'condition')]",
-        "conditionVersion": "[if(not(empty(tryGet(coalesce(parameters('roleAssignments'), createArray())[copyIndex()], 'condition'))), coalesce(tryGet(coalesce(parameters('roleAssignments'), createArray())[copyIndex()], 'conditionVersion'), '2.0'), null())]",
-        "delegatedManagedIdentityResourceId": "[tryGet(coalesce(parameters('roleAssignments'), createArray())[copyIndex()], 'delegatedManagedIdentityResourceId')]"
+        "roleDefinitionId": "[coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()].roleDefinitionId]",
+        "principalId": "[coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()].principalId]",
+        "description": "[tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'description')]",
+        "principalType": "[tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'principalType')]",
+        "condition": "[tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'condition')]",
+        "conditionVersion": "[if(not(empty(tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'condition'))), coalesce(tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'conditionVersion'), '2.0'), null())]",
+        "delegatedManagedIdentityResourceId": "[tryGet(coalesce(variables('formattedRoleAssignments'), createArray())[copyIndex()], 'delegatedManagedIdentityResourceId')]"
       },
       "dependsOn": [
         "cluster"
@@ -681,7 +695,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.29.47.4906",
-              "templateHash": "3129562996701250573"
+              "templateHash": "14432220259159867333"
             },
             "name": "Azure Stack HCI Cluster Deployment Settings",
             "description": "This module deploys an Azure Stack HCI Cluster Deployment Settings resource.",
@@ -894,13 +908,12 @@
             "cluster": {
               "existing": true,
               "type": "Microsoft.AzureStackHCI/clusters",
-              "apiVersion": "2024-02-15-preview",
+              "apiVersion": "2024-04-01",
               "name": "[parameters('clusterName')]"
             },
             "deploymentSettings": {
-              "condition": "[not(equals(parameters('deploymentMode'), 'LocksOnly'))]",
               "type": "Microsoft.AzureStackHCI/clusters/deploymentSettings",
-              "apiVersion": "2024-02-15-preview",
+              "apiVersion": "2024-04-01",
               "name": "[format('{0}/{1}', parameters('clusterName'), 'default')]",
               "properties": {
                 "arcNodeResourceIds": "[variables('arcNodeResourceIds')]",
@@ -1040,14 +1053,14 @@
       "metadata": {
         "description": "The managed identity of the cluster."
       },
-      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-02-15-preview', 'full').identity.principalId, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-02-15-preview', 'full').identity.principalId, ''))]"
+      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-04-01', 'full').identity.principalId, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-04-01', 'full').identity.principalId, ''))]"
     },
     "location": {
       "type": "string",
       "metadata": {
         "description": "The location of the cluster."
       },
-      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-02-15-preview', 'full').location, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-02-15-preview', 'full').location, ''))]"
+      "value": "[if(equals(parameters('deploymentMode'), 'Validate'), reference('cluster', '2024-04-01', 'full').location, if(equals(parameters('deploymentMode'), 'Deploy'), reference('clusterExisting', '2024-04-01', 'full').location, ''))]"
     }
   }
 }

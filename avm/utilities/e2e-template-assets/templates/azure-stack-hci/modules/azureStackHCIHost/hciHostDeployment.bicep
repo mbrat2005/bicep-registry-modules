@@ -6,7 +6,7 @@ param hciNodeCount int = 2 // number of Azure Stack HCI nodes to deploy
 param switchlessStorageConfig bool = false // set to true to configure switchless storage
 // specify either a VHDX or ISO download URL; if both are specified, the VHDX download URL will be used
 param hciVHDXDownloadURL string = ''
-param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2405.0.3018/AZURESTACKHCI.25398.469.LCM_2405.0.3018.x64.en-us.iso'
+param hciISODownloadURL string = 'https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureStackHCI/OS-Composition/10.2408.0.3061/AZURESTACKHci23H2.25398.469.LCM.10.2408.0.3061.x64.en-us.iso'
 param localAdminUsername string = 'admin-hci'
 @secure()
 param localAdminPassword string
@@ -158,9 +158,9 @@ resource proxyServer 'Microsoft.Compute/virtualMachines@2024-03-01' = if (deploy
       computerName: 'proxyServer'
       adminUsername: localAdminUsername
       adminPassword: localAdminPassword
-      customData: arcGatewayId == null
-        ? (loadTextContent('./scripts/proxyConfig.sh'))
-        : (loadTextContent('./scripts/proxyConfigArcGW.sh'))
+      customData: (arcGatewayId == null || arcGatewayId == '')
+        ? base64(loadTextContent('./scripts/proxyConfig.sh'))
+        : base64(loadTextContent('./scripts/proxyConfigArcGW.sh'))
       linuxConfiguration: {
         disablePasswordAuthentication: false
         patchSettings: {
@@ -457,7 +457,10 @@ resource wait2 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
     scriptContent: 'Start-Sleep -Seconds 300 #enough time for AD start-up'
     retentionInterval: 'PT6H'
   }
-  dependsOn: [runCommand4]
+  dependsOn: [
+    proxyServer
+    runCommand4
+  ]
 }
 
 // ===========================//

@@ -23,6 +23,7 @@ param arbDeploymentSPObjectId string
 param arbDeploymentServicePrincipalSecret string
 param vnetSubnetId string?
 param allowIPtoStorageAndKeyVault string?
+param usingArcGW bool = false
 
 // secret names for the Azure Key Vault - these cannot be changed
 var localAdminSecretName = 'LocalAdminCredential'
@@ -108,7 +109,7 @@ resource witnessStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = 
     minimumTlsVersion: 'TLS1_2'
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Deny'
+      defaultAction: usingArcGW ? 'Allow' : 'Deny' // we don't know the source IP when traffic is redirected through the Arc GW
       ipRules: (allowIPtoStorageAndKeyVault != null)
         ? [
             {
@@ -201,7 +202,7 @@ resource keyVaultName_Microsoft_Insights_service 'microsoft.insights/diagnosticS
 }
 
 resource SPConnectedMachineResourceManagerRolePermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid('ConnectedMachineResourceManagerRolePermissions', resourceGroup().id)
+  name: guid('ConnectedMachineResourceManagerRolePermissions', resourceGroup().id, hciResourceProviderObjectId)
   scope: resourceGroup()
   properties: {
     roleDefinitionId: azureConnectedMachineResourceManagerRoleID
@@ -248,7 +249,7 @@ resource NodereaderRoleIDPermissions 'Microsoft.Authorization/roleAssignments@20
 
 resource KeyVaultSecretsUserPermissions 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for hciNode in arcNodeResourceIds: {
-    name: guid(resourceGroup().id, hciNode, keyVaultSecretUserRoleID)
+    name: guid(keyVault.id, hciNode, keyVaultSecretUserRoleID)
     scope: keyVault
     properties: {
       roleDefinitionId: keyVaultSecretUserRoleID

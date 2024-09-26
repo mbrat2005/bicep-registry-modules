@@ -1,6 +1,6 @@
 # Azure Stack HCI Cluster `[Microsoft.AzureStackHCI/clusters]`
 
-This module deploys an Azure Stack HCI Cluster.
+This module deploys an Azure Stack HCI Cluster on the provided Arc Machines.
 
 ## Navigation
 
@@ -15,8 +15,8 @@ This module deploys an Azure Stack HCI Cluster.
 | Resource Type | API Version |
 | :-- | :-- |
 | `Microsoft.Authorization/roleAssignments` | [2022-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Authorization/2022-04-01/roleAssignments) |
-| `Microsoft.AzureStackHCI/clusters` | [2024-02-15-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters) |
-| `Microsoft.AzureStackHCI/clusters/deploymentSettings` | [2024-02-15-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters/deploymentSettings) |
+| `Microsoft.AzureStackHCI/clusters` | [2024-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters) |
+| `Microsoft.AzureStackHCI/clusters/deploymentSettings` | [2024-04-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.AzureStackHCI/clusters/deploymentSettings) |
 
 ## Usage examples
 
@@ -26,9 +26,14 @@ The following section provides usage examples for the module, which were used to
 
 >**Note**: To reference the module, please use the following syntax `br/public:avm/res/azure-stack-hci/cluster:<version>`.
 
-- [2Nodeswitched.Defaults](#example-1-2nodeswitcheddefaults)
-- [3Nodeswitchless.Defaults](#example-2-3nodeswitchlessdefaults)
-- [Waf-Aligned](#example-3-waf-aligned)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-1-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration](#example-2-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration](#example-3-deploy-azure-stack-hci-cluster-in-azure-with-a-3-node-switchless-configuration)
+- [Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned](#example-4-deploy-azure-stack-hci-cluster-in-azure-with-a-2-node-switched-configuration-waf-aligned)
+
+### Example 1: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
+
+This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
 
 ### Example 1: _2Nodeswitched.Defaults_
 
@@ -139,7 +144,122 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 2: _3Nodeswitchless.Defaults_
+### Example 2: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration_
+
+This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
+
+
+<details>
+
+<summary>via Bicep module</summary>
+
+```bicep
+module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
+  name: 'clusterDeployment'
+  params: {
+    // Required parameters
+    clusterNodeNames: '<clusterNodeNames>'
+    clusterWitnessStorageAccountName: '<clusterWitnessStorageAccountName>'
+    customLocationName: '<customLocationName>'
+    defaultGateway: '<defaultGateway>'
+    deploymentMode: 'Deploy'
+    deploymentPrefix: '<deploymentPrefix>'
+    dnsServers: '<dnsServers>'
+    domainFqdn: '<domainFqdn>'
+    domainOUPath: '<domainOUPath>'
+    endingIPAddress: '<endingIPAddress>'
+    keyVaultName: '<keyVaultName>'
+    name: '<name>'
+    networkIntents: '<networkIntents>'
+    startingIPAddress: '<startingIPAddress>'
+    storageConnectivitySwitchless: false
+    storageNetworks: '<storageNetworks>'
+    subnetMask: '<subnetMask>'
+    // Non-required parameters
+    enableStorageAutoIp: '<enableStorageAutoIp>'
+  }
+}
+```
+
+</details>
+<p>
+
+<details>
+
+<summary>via JSON Parameter file</summary>
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // Required parameters
+    "clusterNodeNames": {
+      "value": "<clusterNodeNames>"
+    },
+    "clusterWitnessStorageAccountName": {
+      "value": "<clusterWitnessStorageAccountName>"
+    },
+    "customLocationName": {
+      "value": "<customLocationName>"
+    },
+    "defaultGateway": {
+      "value": "<defaultGateway>"
+    },
+    "deploymentMode": {
+      "value": "Deploy"
+    },
+    "deploymentPrefix": {
+      "value": "<deploymentPrefix>"
+    },
+    "dnsServers": {
+      "value": "<dnsServers>"
+    },
+    "domainFqdn": {
+      "value": "<domainFqdn>"
+    },
+    "domainOUPath": {
+      "value": "<domainOUPath>"
+    },
+    "endingIPAddress": {
+      "value": "<endingIPAddress>"
+    },
+    "keyVaultName": {
+      "value": "<keyVaultName>"
+    },
+    "name": {
+      "value": "<name>"
+    },
+    "networkIntents": {
+      "value": "<networkIntents>"
+    },
+    "startingIPAddress": {
+      "value": "<startingIPAddress>"
+    },
+    "storageConnectivitySwitchless": {
+      "value": false
+    },
+    "storageNetworks": {
+      "value": "<storageNetworks>"
+    },
+    "subnetMask": {
+      "value": "<subnetMask>"
+    },
+    // Non-required parameters
+    "enableStorageAutoIp": {
+      "value": "<enableStorageAutoIp>"
+    }
+  }
+}
+```
+
+</details>
+<p>
+
+### Example 3: _Deploy Azure Stack HCI Cluster in Azure with a 3 node switchless configuration_
+
+This test deploys an Azure VM to host a 3 node switchless Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster.
+
 
 <details>
 
@@ -256,7 +376,10 @@ module cluster 'br/public:avm/res/azure-stack-hci/cluster:<version>' = {
 </details>
 <p>
 
-### Example 3: _Waf-Aligned_
+### Example 4: _Deploy Azure Stack HCI Cluster in Azure with a 2 node switched configuration WAF aligned_
+
+This test deploys an Azure VM to host a 2 node switched Azure Stack HCI cluster, validates the cluster configuration, and then deploys the cluster. WAF aligned.
+
 
 <details>
 
@@ -748,6 +871,7 @@ Array of role assignments to create.
 | [`conditionVersion`](#parameter-roleassignmentsconditionversion) | string | Version of the condition. |
 | [`delegatedManagedIdentityResourceId`](#parameter-roleassignmentsdelegatedmanagedidentityresourceid) | string | The Resource Id of the delegated managed identity resource. |
 | [`description`](#parameter-roleassignmentsdescription) | string | The description of the role assignment. |
+| [`name`](#parameter-roleassignmentsname) | string | The name (as GUID) of the role assignment. If not provided, a GUID will be generated. |
 | [`principalType`](#parameter-roleassignmentsprincipaltype) | string | The principal type of the assigned principal ID. |
 
 ### Parameter: `roleAssignments.principalId`
@@ -794,6 +918,13 @@ The Resource Id of the delegated managed identity resource.
 ### Parameter: `roleAssignments.description`
 
 The description of the role assignment.
+
+- Required: No
+- Type: string
+
+### Parameter: `roleAssignments.name`
+
+The name (as GUID) of the role assignment. If not provided, a GUID will be generated.
 
 - Required: No
 - Type: string
