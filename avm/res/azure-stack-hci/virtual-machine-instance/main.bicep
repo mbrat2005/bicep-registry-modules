@@ -8,6 +8,15 @@ param name string
 @description('Optional. Location for all Resources.')
 param location string = resourceGroup().location
 
+@description('Optional. Tags of the resource.')
+param tags object?
+
+@description('Required. Resource ID of the associated custom location.')
+param customLocation string
+
+@description('Required. Arc Machine resource id.')
+param arcMachineResourceId string
+
 @description('Optional. Enable/Disable usage telemetry for module.')
 param enableTelemetry bool = true
 
@@ -38,9 +47,18 @@ resource avmTelemetry 'Microsoft.Resources/deployments@2024-03-01' = if (enableT
   }
 }
 
-//
-// Add your resources here
-//
+resource virtualMachineInstance 'Microsoft.AzureStackHCI/virtualMachineInstances@2024-01-01' = {
+  name: name
+  tags: tags
+  extendedLocation: {
+    type: 'CustomLocation'
+    name: customLocation
+  }
+  properties: {
+    // Add your properties here
+  }
+  scope: arcMachineResourceId
+}
 
 // ============ //
 // Outputs      //
