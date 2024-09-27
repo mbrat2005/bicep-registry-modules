@@ -194,6 +194,7 @@ resource maintenanceAssignment_proxyServer 'Microsoft.Maintenance/configurationA
 resource publicIP_HCIHost 'Microsoft.Network/publicIPAddresses@2024-01-01' = if (hciHostAssignPublicIp) {
   name: 'pip-hcihost01'
   location: location
+  zones: ['1']
   sku: {
     name: 'Standard'
   }
