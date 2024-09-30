@@ -85,5 +85,8 @@ module testDeployment '../../../main.bicep' = [
       customLocation: nestedDependencies.outputs.customLocationId
       diskSizeGB: diskSizeInGB
     }
+    dependsOn: [
+      nestedDependencies
+    ]
   }
 ]
