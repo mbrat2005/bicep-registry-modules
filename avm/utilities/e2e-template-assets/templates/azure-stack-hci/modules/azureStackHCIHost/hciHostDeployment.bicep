@@ -30,7 +30,7 @@ resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
 
 // grant identity owner permissions on the resource group
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().subscriptionId, userAssignedIdentity.name, 'Owner', resourceGroup().id)
+  name: guid(subscription().subscriptionId, userAssignedIdentity.id, 'Owner')
   properties: {
     principalId: userAssignedIdentity.properties.principalId
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')
@@ -41,7 +41,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 
 // grant identity contributor permissions on the subscription - needed to register resource providers
 module roleAssignment_subscriptionContributor 'modules/subscriptionRoleAssignment.bicep' = {
-  name: '${uniqueString(deployment().name, location)}-hcihostmi-roleAssignment_subscriptionContributor'
+  name: '${uniqueString(deployment().name, location,userAssignedIdentity.id)}-hcihostmi-roleAssignment_subscriptionContributor'
   scope: subscription()
   params: {
     principalId: userAssignedIdentity.properties.principalId
