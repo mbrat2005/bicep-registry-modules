@@ -321,7 +321,7 @@ resource logicalNetwork 'Microsoft.AzureStackHCI/logicalNetworks@2023-09-01-prev
                   name: 'default'
                   properties: {
                     addressPrefix: '0.0.0.0/0'
-                    nextHopIpAddress: '10.20.0.1'
+                    nextHopIpAddress: '10.20.0.129'
                   }
                 }
               ]
