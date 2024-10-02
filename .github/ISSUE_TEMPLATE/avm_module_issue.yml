@@ -112,6 +112,7 @@ body:
         - "avm/res/health-bot/health-bot"
         - "avm/res/healthcare-apis/workspace"
         - "avm/res/hybrid-compute/machine"
+        - "avm/res/hybrid-compute/private-link-scope"
         - "avm/res/insights/action-group"
         - "avm/res/insights/activity-log-alert"
         - "avm/res/insights/component"
