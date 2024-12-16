@@ -196,7 +196,6 @@ output domainFqdn string = domainFqdn
 output domainOUPath string = domainOUPath
 output enableStorageAutoIp bool = enableStorageAutoIp
 output endingIPAddress string = endingIPAddress
-output hciClusterPreqs object = hciClusterPreqs
 output keyVaultName string = keyVaultName
 output networkIntents array = networkIntents
 output startingIPAddress string = startingIPAddress
